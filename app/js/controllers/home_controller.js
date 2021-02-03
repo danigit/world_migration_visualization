@@ -11,6 +11,9 @@
     homeController.$inject = ['$scope']
 
     function homeController($scope) {
-        console.log('Home Controller')
+        d3.csv("app/data/fifa-world-cup.csv", data => {
+            console.log(data);
+        })
+        .catch(error => alert("Couldn't load fifa dataset: " + error));
     }
 })();
