@@ -1,0 +1,50 @@
+
+#change-floor-container md-input-container{
+    width: 100%;
+}
+
+#change-grid-container .md-subheader-inner{
+    padding: 0!important;
+}
+
+#change-grid-container .md-track-ticks{
+    background-color: lightgray!important;
+}
+
+#change-grid-container .md-sign{
+    background-color: #0093c4!important;
+}
+
+#change-grid-container .md-sign:after{
+    border-top-color: #0093c4!important;
+}
+
+#change-grid-container .md-thumb:after{
+    background-color: #0093c4!important;
+    border: 1px solid #0093c4;
+}
+
+#menu-container .md-button:not([disabled]):hover{
+    background-color: #8bf6ff30;
+}
+
+#menu-container .md-button:not([disabled]):hover .menu-icon{
+    transform: scale(2.0)
+}
+
+#menu-container .md-select-value{
+    color: #0093c4;
+    border-bottom: 1px solid #0093c4;
+}
+
+.menu-list-icon{
+    width: 15px;
+    height: 15px;
+}
+
+.search-input{
+    width: 100%;
+    font-size: large;
+    border: none;
+    outline: none;
+}

@@ -1,0 +1,156 @@
+/******************************************************************
+DISPLAY
+*******************************************************************/
+
+.hide {
+    display: none;
+    !important;
+}
+
+.displaynone {
+    display: none;
+    -webkit-animation: slide-down .5s ease-out;
+    -moz-animation: slide-down .5s ease-out;
+}
+
+.display-flex {
+    display: flex;
+}
+
+.position-absolute {
+    position: absolute;
+}
+
+.parent-size{
+    width: 100%;
+    height: 100%;
+}
+
+.width-100{
+    width: 100%;
+}
+/******************************************************************
+FONTS
+*******************************************************************/
+
+.text-center {
+    text-align: center!important;
+}
+
+.text-bold{
+    font-weight: bold;
+}
+
+
+/******************************************************************
+MARGINS
+*******************************************************************/
+
+.margin-top-15-px {
+    margin-top: 15px;
+}
+
+.margin-top-20-px {
+    margin-top: 20px!important;
+}
+
+.margin-right-10-px {
+    margin-right: 10px;
+}
+
+.margin-left--8-px {
+    margin-left: -8px;
+}
+
+.margin-lr-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/******************************************************************
+COLOR
+*******************************************************************/
+
+.color-white {
+    color: #FFFFFF!important;
+}
+
+.color-black {
+    color: #000000;
+}
+
+.color-darkcyan {
+    color: #0093c4!important;
+}
+
+/******************************************************************
+OTHER
+*******************************************************************/
+
+.overflow-x-none {
+    overflow-x: unset !important;
+}
+
+.overflow-auto {
+    overflow: auto !important;
+}
+
+.overflow-y-scroll {
+    overflow-y: scroll;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.outline-none {
+    outline: none;
+}
+
+.zindex-0 {
+    z-index: 0!important;
+}
+
+.zindex-100 {
+    z-index: 100!important;
+}
+
+.position-fixed {
+    position: fixed!important;
+}
+
+/******************************************************************
+BACKGROUND
+*******************************************************************/
+
+.background-transparent {
+    background-color: transparent!important;
+}
+
+.background-transparent-white {
+    background-color: #ffffff5c!important;
+}
+
+.background-transparent-gray {
+    background-color: #0000002e!important;
+}
+
+.background-darkcyan {
+    background-color: #0093c4!important;
+}
+
+.background-darkcyan-50-opacity {
+    background-color: #0093c49c!important
+}
+
+.background-white {
+    background-color: #FFFFFF!important;
+}
+
+/******************************************************************
+POSITION
+*******************************************************************/
+
+.clear-float {
+    clear: both;
+}

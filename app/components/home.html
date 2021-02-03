@@ -1,0 +1,66 @@
+<div ng-controller="homeController">
+  <!-- map container-->
+  <div id="map-container" layout="row" layout-align="center start" class="parent-size">
+  </div>
+  <!-- end map container-->
+
+  <!--menu container-->
+  <div ng-controller="menuController">
+    <div id="open-menu-button" ng-click="toggleLeft()" class="margin-left--8-px cursor-pointer outline-none">
+      <img id="open-menu-icon" src="app/img/menu-arrow.png" alt="Open Menu" title="Open Menu">
+    </div>
+    <section layout="row">
+      <md-sidenav id="menu-panel" class="md-sidenav-left" md-component-id="left" md-whiteframe="4">
+        <md-toolbar class="background-darkcyan" layout="row" layout-align="center center">
+          <h1 class="md-toolbar-tools color-black text-bold">MENU</h1>
+          <div ng-click="toggleLeft()" class="margin-right-10-px cursor-pointer outline-none">
+              <img src="app/img/close-menu.png" alt="Close Menu" title="Close Menu">
+          </div>
+        </md-toolbar>
+
+        <md-content layout-margin>
+          <div layout="column" id="menu-container">
+            <md-list>
+              <md-list-item ng-click="">Example Selection Element</p><img
+                      src="app/img/anagrafica-icon.ico" class="menu-list-icon menu-icon" alt="">
+              </md-list-item>
+              <md-list-item ng-click=""><p>Category</p><img alt="" class="menu-list-icon menu-icon"
+                      src="app/img/anagrafica-icon.ico">
+              </md-list-item>
+            </md-list>
+            <div layout="column" layout-align="center center">
+              <md-input-container class="width-100">
+                <label>Select Destination</label>
+                <md-select ng-model="model" md-on-open="">
+                  <md-option ng-repeat="destination in destinations" ng-value="destination.name">
+                      {{destination.name}}
+                  </md-option>
+                </md-select>
+              </md-input-container>
+            </div>
+
+            <div layout="column" layout-align="center center">
+              <md-input-container class="width-100">
+                <label>Select Source</label>
+                <md-select ng-model="model" md-on-open="">
+                  <md-option ng-repeat="source in source" ng-value="source.name">
+                      {{source.name}}
+                  </md-option>
+                </md-select>
+              </md-input-container>
+            </div>
+
+            <div layout="column">
+              <md-slider-container flex="100">
+                <md-slider md-discrete ng-model="model" min="1" max="50" step="1" aria-label=""
+                            title="" class="md-primary">
+                </md-slider>
+              </md-slider-container>
+            </div>
+          </div>
+        </md-content>
+      </md-sidenav>
+    </section>
+  </div>
+  <!--end menu container-->
+</div>
