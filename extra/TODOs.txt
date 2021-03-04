@@ -1,0 +1,3 @@
+- Ensure pan-and-zoom actions do NOT cut information out of the dynamic map
+
+- Clarify whether plots/info/data are inward or outward material
