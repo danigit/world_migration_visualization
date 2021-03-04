@@ -1,0 +1,79 @@
+% := Important things to remember
+# := Doubts yet to solve
+* := TODOs
+
+Countries' income levels are based on  June 2018 GNI per capita from World Bank. But since GNI are not available for all countries or areas, their sum does not add up to the world's total.
+
+Population estimates are not available for some small countries. Consequently, aggregates may not add up.
+
+B := Estimates derived from foreign-born populations
+C := Estimates derived from data or foreign citizens
+R := Number of refugees or people in refugee-like situations
+I := Estimates were just imputed, as no data on international migrants were available for said regions.
+
+% TopoJSON's countries availability will determine which countries make the cut. %
+
+Table 1 : Migrant hot-spots from 1990 - 2019. Tailored for static idioms. Can be filtered for males, females or total, on:
+    - Individual countries
+    - Aggregated geographic regions (i.e., continents)
+    - (Un)development groups
+    - World Bank income groups.
+
+#
+# Better to visualize the data with:
+#     - Heatmaps superposed on the network
+#     - Per-country time-series with barcharts below the timeline
+#
+
+* Capital/country table with latlon information *
+
+===========================================================================================
+
+Table 1 --> visualized with area chart
+
+
+
+Table2 --> total population -->
+same visualizations as table1, static
+
+
+
+Table3 --> same as Table2, useful to visualize the percentage of
+migrants arrived in a country with respect to the total
+populatio
+
+
+
+Table 4 --> as a Table2, useful to visualize the percentage of
+females with respect to the total number of migrants
+
+
+
+Table 5 --> annual rate of change of the migrant stock, may be plotted
+by modifying (with a button, on the left with respect
+to the map) the x-axis of the same idiom used for
+Table 2, 3, 4
+
+
+
+Table 6 --> same visualization as before (2, 3, 4),
+but for refugees, which are
+a subset of the total number of migrants. The table
+includes also the rate of change, as in Table 5.
+
+
+
+Visualizations: area chart with years on the
+x-axis, migrant stocks on
+the y-axis, with the possibility of selecting
+one or more countries to which migrants have moved
+We may also include the possibility of comparing
+the time series' or the bar charts of two different
+countries at the same time
+
+
+
+In the end, we keep table 1, 2, 3, 6. We may decide to include also
+the rate of change in the same area chart used to visualize the
+aforementioned tables. In that case, the rate of change may be
+inserted in the idiom as a simple number.
