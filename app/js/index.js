@@ -34,6 +34,12 @@
                 templateUrl: components_folder + "statistics.html",
                 controller: "statisticsController as statCtrl",
                 resolve: {},
+            })
+            .state("compare", {
+                url: "/compare",
+                templateUrl: components_folder + "compare.html",
+                controller: "compareController as compCtrl",
+                resolve: {},
             });
     }
 })();

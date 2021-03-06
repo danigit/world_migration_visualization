@@ -1,0 +1,28 @@
+.vertical-line {
+    height: 100%;
+    width: 3px;
+    background-color: #63b3d4;
+}
+
+.compare-search-container {
+    width: 25%;
+    margin-top: 60px;
+}
+
+.compare-search-container .md-select-value span {
+    font-size: x-large !important;
+}
+
+#compare-selector-left .md-select-icon {
+    background: #000000 url("../img/search.png") no-repeat 90% 50%;
+    color: #000000;
+    text-align: left;
+    margin: 0 0 0 0;
+}
+
+#compare-selector-right .md-select-icon {
+    background: #000000 url("../img/search.png") no-repeat 90% 50%;
+    color: #000000;
+    text-align: left;
+    margin: 0 0 0 0;
+}

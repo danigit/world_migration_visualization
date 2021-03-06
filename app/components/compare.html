@@ -1,0 +1,162 @@
+<div ng-controller="compareController" layout="column" class="parent-size">
+    <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
+        <div layout="row" layout-align="start center">
+            <img src="app/img/home/logo.png" class="margin-auto" widht="79" height="56" />
+            <h2 class="padding-left-20px color-darkcyan">
+                International Migrant Stock
+            </h2>
+            <md-button ng-click="loadMap()" class="margin-left-20px font-size-medium text-bold">Home</md-button>
+            <md-button class="font-size-medium text-bold">Statistics</md-button>
+        </div>
+    </md-toolbar>
+
+    <div layout="column" class="parent-size background-dark">
+        <div class="width-20 margin-auto margin-top-20-px">
+            <radio-button-group ng-model="value" buttons="statisticsButtons" radio-buttons-class="'md-button border-1'">
+        </div>
+        <div layout="row" class="parent-size">
+            <div layout="column" class="width-50">
+                <div class="width-100">
+                    <div class="compare-search-container margin-right-20-px float-right">
+                        <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
+                            <label>Select country...</label>
+                            <md-select ng-model="selectedDestinationCountries" md-on-close="clearSearch()" multiple>
+                                <md-optgroup label="Europe">
+                                    <md-option ng-value="country.name"
+                                        ng-repeat="country in countries | filter: {continent: 'europe'}">
+                                        {{country.name}}</md-option>
+                                </md-optgroup>
+                                <md-optgroup label="Africa">
+                                    <md-option ng-value="country.name"
+                                        ng-repeat="country in countries | filter: {continent: 'africa'}">
+                                        {{country.name}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <civ class="float-left margin-top-20-px margin-left-50-px">
+                        <img src="../../sketch/pngwingcom_2.png">
+                    </civ>
+                </div>
+                <div class="color-white margin-lr-40-px font-size-x-large margin-top-20-px">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
+                    quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo? Sint
+                    expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod, sapiente
+                    tenetur itaque similique quos possimus aliquid ullam mollitia ipsam amet voluptatem facilis ipsa.
+                    Cupiditate maxime vero fugiat molestiae excepturi cum libero autem assumenda nisi recusandae rem
+                    repellendus, ipsa delectus iste repudiandae, vel nobis iusto pariatur! Debitis, eligendi autem
+                    delectus ducimus deserunt vitae neque aut quibusdam voluptate nemo corrupti adipisci exercitationem
+                    quae sequi repellat eos necessitatibus placeat veritatis nihil! Deserunt, suscipit quod deleniti sed
+                    fuga molestiae asperiores iure rem culpa nulla a ex maxime voluptates est obcaecati ab accusantium
+                    nemo illo ullam odit inventore.<br><br> Ducimus alias quas numquam voluptatum tenetur dicta eos ab,
+                    pariatur
+                    deserunt vitae aliquid exercitationem nostrum perferendis aspernatur mollitia ad nesciunt. Eaque
+                    sint in porro voluptatem corporis qui ratione labore est obcaecati asperiores corrupti impedit vero
+                    ducimus, fuga, possimus quibusdam distinctio odit delectus adipisci nostrum cum magnam eos nesciunt!
+                    Sint aperiam et cupiditate, ipsam itaque minima tempore corporis, amet temporibus eligendi voluptas
+                    nam a illo, ab fugit quis iure dicta pariatur expedita recusandae. Nesciunt fugiat, sunt, corporis
+                    amet id ipsam impedit excepturi tempore, nostrum qui non officia tempora voluptas. Eius quo, illo
+                    voluptatem blanditiis, quia praesentium inventore libero qui doloremque iste modi.
+                </div>
+                <div layout="row" class="margin-auto">
+                    <div class="margin-top-20-px margin-right-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                    <div class="margin-top-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                </div>
+                <div layout="row" class="margin-auto">
+                    <hr class="menu-divider width-100" />
+                    <div class="margin-top-20-px margin-right-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                    <div class="margin-top-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                </div>
+                <div layout="row" class="margin-auto">
+                    <hr class="menu-divider width-100" />
+                    <div class="margin-top-20-px margin-right-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                    <div class="margin-top-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                </div>
+            </div>
+            <div class="vertical-line margin-top-20-px"></div>
+            <div layout="column" class="width-50">
+                <div class="width-100">
+                    <div class="compare-search-container margin-left-20px float-left">
+                        <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
+                            <label>Select country...</label>
+                            <md-select ng-model="selectedDestinationCountries" md-on-close="clearSearch()" multiple>
+                                <md-optgroup label="Europe">
+                                    <md-option ng-value="country.name"
+                                        ng-repeat="country in countries | filter: {continent: 'europe'}">
+                                        {{country.name}}</md-option>
+                                </md-optgroup>
+                                <md-optgroup label="Africa">
+                                    <md-option ng-value="country.name"
+                                        ng-repeat="country in countries | filter: {continent: 'africa'}">
+                                        {{country.name}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <civ class="float-right margin-top-20-px margin-right-50-px">
+                        <img src="../../sketch/pngwingcom.png">
+                    </civ>
+                </div>
+                <div class="color-white margin-lr-40-px font-size-x-large margin-top-20-px">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
+                    quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo? Sint
+                    expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod, sapiente
+                    tenetur itaque similique quos possimus aliquid ullam mollitia ipsam amet voluptatem facilis ipsa.
+                    Cupiditate maxime vero fugiat molestiae excepturi cum libero autem assumenda nisi recusandae rem
+                    repellendus, ipsa delectus iste repudiandae, vel nobis iusto pariatur! Debitis, eligendi autem
+                    delectus ducimus deserunt vitae neque aut quibusdam voluptate nemo corrupti adipisci exercitationem
+                    quae sequi repellat eos necessitatibus placeat veritatis nihil! Deserunt, suscipit quod deleniti sed
+                    fuga molestiae asperiores iure rem culpa nulla a ex maxime voluptates est obcaecati ab accusantium
+                    nemo illo ullam odit inventore.<br><br> Ducimus alias quas numquam voluptatum tenetur dicta eos ab,
+                    pariatur
+                    deserunt vitae aliquid exercitationem nostrum perferendis aspernatur mollitia ad nesciunt. Eaque
+                    sint in porro voluptatem corporis qui ratione labore est obcaecati asperiores corrupti impedit vero
+                    ducimus, fuga, possimus quibusdam distinctio odit delectus adipisci nostrum cum magnam eos nesciunt!
+                    Sint aperiam et cupiditate, ipsam itaque minima tempore corporis, amet temporibus eligendi voluptas
+                    nam a illo, ab fugit quis iure dicta pariatur expedita recusandae. Nesciunt fugiat, sunt, corporis
+                    amet id ipsam impedit excepturi tempore, nostrum qui non officia tempora voluptas. Eius quo, illo
+                    voluptatem blanditiis, quia praesentium inventore libero qui doloremque iste modi.
+                </div>
+                <div layout="row" class="margin-auto">
+                    <div class="margin-top-20-px margin-right-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                    <div class="margin-top-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                </div>
+                <div layout="row" class="margin-auto">
+                    <hr class="menu-divider width-100" />
+                    <div class="margin-top-20-px margin-right-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                    <div class="margin-top-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                </div>
+                <div layout="row" class="margin-auto">
+                    <hr class="menu-divider width-100" />
+                    <div class="margin-top-20-px margin-right-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                    <div class="margin-top-20-px">
+                        <img src="../../sketch/Mask_Group_2.png">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end map container-->
+</div>
