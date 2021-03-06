@@ -3,63 +3,109 @@ DISPLAY
 *******************************************************************/
 
 .hide {
-    display: none;
-    !important;
+    display: none !important;
 }
 
-.displaynone {
+.display-none {
     display: none;
-    -webkit-animation: slide-down .5s ease-out;
-    -moz-animation: slide-down .5s ease-out;
+    -webkit-animation: slide-down 0.5s ease-out;
+    -moz-animation: slide-down 0.5s ease-out;
 }
 
 .display-flex {
     display: flex;
 }
 
+.display-block {
+    display: block;
+}
+
 .position-absolute {
     position: absolute;
 }
 
-.parent-size{
+.parent-size {
     width: 100%;
     height: 100%;
 }
 
-.width-100{
+.width-100 {
     width: 100%;
+}
+
+.width-90 {
+    width: 90%;
+}
+
+.width-80 {
+    width: 80%;
+}
+
+.width-20 {
+    width: 20%;
+}
+
+.height-100 {
+    height: 100%;
+}
+
+.height-80 {
+    height: 80%;
+}
+
+.height-20 {
+    height: 20%;
 }
 /******************************************************************
 FONTS
 *******************************************************************/
 
 .text-center {
-    text-align: center!important;
+    text-align: center !important;
 }
 
-.text-bold{
+.text-bold {
     font-weight: bold;
 }
 
+.font-size-medium {
+    font-size: medium !important;
+}
+
+.font-size-small {
+    font-size: small !important;
+}
 
 /******************************************************************
 MARGINS
 *******************************************************************/
+
+.margin-auto {
+    margin: auto !important;
+}
+
+.margin-none {
+    margin: 0 !important;
+}
 
 .margin-top-15-px {
     margin-top: 15px;
 }
 
 .margin-top-20-px {
-    margin-top: 20px!important;
+    margin-top: 20px !important;
+}
+
+.margin-top-10-px {
+    margin-top: 10px !important;
 }
 
 .margin-right-10-px {
     margin-right: 10px;
 }
 
-.margin-left--8-px {
-    margin-left: -8px;
+.margin-left-20px {
+    margin-left: 20px !important;
 }
 
 .margin-lr-auto {
@@ -68,11 +114,27 @@ MARGINS
 }
 
 /******************************************************************
+MARGINS
+*******************************************************************/
+
+.padding-left-20px {
+    padding-left: 20px;
+}
+
+.padding-top-bottom-5px {
+    padding: 0 5px 0 5px !important;
+}
+
+/******************************************************************
 COLOR
 *******************************************************************/
 
 .color-white {
-    color: #FFFFFF!important;
+    color: #ffffff !important;
+}
+
+.color-lightgray {
+    color: #b0b0b0 !important;
 }
 
 .color-black {
@@ -80,9 +142,12 @@ COLOR
 }
 
 .color-darkcyan {
-    color: #0093c4!important;
+    color: #63b3d4 !important;
 }
 
+.color-darkgray {
+    color: #1d1f1f;
+}
 /******************************************************************
 OTHER
 *******************************************************************/
@@ -108,43 +173,46 @@ OTHER
 }
 
 .zindex-0 {
-    z-index: 0!important;
+    z-index: 0 !important;
 }
 
 .zindex-100 {
-    z-index: 100!important;
+    z-index: 100 !important;
 }
 
 .position-fixed {
-    position: fixed!important;
+    position: fixed !important;
 }
 
+.border-radius-10px {
+    border-radius: 10px !important;
+}
+
+.vertical-align-middle {
+    vertical-align: middle;
+}
 /******************************************************************
 BACKGROUND
 *******************************************************************/
 
-.background-transparent {
-    background-color: transparent!important;
+.background-gray {
+    background-color: #2d2e2e !important;
 }
 
-.background-transparent-white {
-    background-color: #ffffff5c!important;
-}
-
-.background-transparent-gray {
-    background-color: #0000002e!important;
+.background-darkteal {
+    background-color: #191f24 !important;
 }
 
 .background-darkcyan {
-    background-color: #0093c4!important;
+    background-color: #0093c4 !important;
 }
 
-.background-darkcyan-50-opacity {
-    background-color: #0093c49c!important
+.background-dark {
+    background-color: #000000;
 }
 
 .background-white {
-    background-color: #FFFFFF!important;
+    background-color: #ffffff !important;
 }
 
 /******************************************************************
@@ -152,5 +220,13 @@ POSITION
 *******************************************************************/
 
 .clear-float {
-    clear: both;
+    float: none !important;
+}
+
+.float-right {
+    float: right;
+}
+
+.float-left {
+    float: left;
 }

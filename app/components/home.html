@@ -1,66 +1,131 @@
-<div ng-controller="homeController">
-  <!-- map container-->
-  <div id="map-container" layout="row" layout-align="center start" class="parent-size">
-  </div>
-  <!-- end map container-->
+<div ng-controller="homeController" layout="column" class="parent-size">
+    <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
+        <div layout="row" layout-align="start center">
+            <img src="app/img/home/logo.png" class="margin-auto" widht="79" height="56" />
+            <h2 class="padding-left-20px color-darkcyan">
+                International Migrant Stock
+            </h2>
+            <md-button class="margin-left-20px font-size-medium text-bold">Home</md-button>
+            <md-button class="font-size-medium text-bold">Statistics</md-button>
+        </div>
+    </md-toolbar>
 
-  <!--menu container-->
-  <div ng-controller="menuController">
-    <div id="open-menu-button" ng-click="toggleLeft()" class="margin-left--8-px cursor-pointer outline-none">
-      <img id="open-menu-icon" src="app/img/menu-arrow.png" alt="Open Menu" title="Open Menu">
+    <div layout="row" class="parent-size">
+        <!--menu container-->
+        <div ng-controller="menuController">
+            <div id="open-menu-button" ng-click="toggleMenu()" class="margin-left--8-px cursor-pointer outline-none">
+                <img id="open-menu-icon" src="app/img/menu-arrow.png" alt="Open Menu" title="Open Menu" />
+            </div>
+            <section layout="row" class="parent-size">
+                <md-sidenav id="menu-panel" class="md-sidenav-left background-darkteal" ng-if="isSideMenuOpened"
+                    md-is-locked-open="$mdMedia('gt-md')" md-component-id="left" md-whiteframe="4">
+                    <md-toolbar class="background-darkteal" layout="row" layout-align="center center">
+                        <h1 class="md-toolbar-tools color-white text-bold">
+                            Visualization settings
+                        </h1>
+                        <div ng-click="toggleMenu()" class="margin-right-10-px cursor-pointer outline-none">
+                            <img src="app/img/close-menu.png" alt="Close Menu" title="Close Menu" />
+                        </div>
+                    </md-toolbar>
+                    <div layout="column">
+                        <civ class="width-100">
+                            <md-button class="color-white font-size-small float-right">Clear all</md-button>
+                        </civ>
+                        <div class="filters-container margin-lr-auto color-lightgray clear-float border-radius-10px">
+                            No active filters. Please select a filter from the
+                            list below.
+                        </div>
+                    </div>
+                    <hr class="menu-divider width-100" />
+                    <md-content layout-margin class="background-darkteal width-100 height-100 margin-none">
+                        <radio-button-group ng-model="value" buttons="genreButtons" radio-buttons-class="'md-button'">
+                        </radio-button-group>
+                        <hr class="menu-divider width-100" />
+                        <radio-button-group ng-model="value" buttons="sectionButtons" radio-buttons-class="'md-button'">
+                        </radio-button-group>
+                        <hr class="menu-divider width-100" />
+
+                        <md-input-container id="source-selector" class="width-90 display-block margin-auto">
+                            <label>Select sources...</label>
+                            <md-select ng-model="selectedSourceCountries" md-on-close="clearSearch()" multiple>
+                                <md-select-header class="select-header-search-box">
+                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                        placeholder="Search a country..." class="header-search-box md-text"
+                                        ng-keydown="updateSearch($event)" />
+                                </md-select-header>
+                                <md-optgroup label="Europe">
+                                    <md-option ng-value="country.name"
+                                        ng-repeat="country in countries | filter: searchSource">
+                                        {{country.name}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </md-input-container>
+                        <hr class="menu-divider width-100" />
+                        <md-input-container id="destination-selector" class="width-90 display-block margin-auto">
+                            <label>Select destinations...</label>
+                            <md-select ng-model="selectedDestinationCountries" md-on-close="clearSearch()" multiple>
+                                <md-select-header class="select-header-search-box">
+                                    <input ng-model="searchDestination" aria-label="Destination filter" type="search"
+                                        placeholder="Search a country..." class="header-search-box md-text"
+                                        ng-keydown="updateSearch($event)" />
+                                </md-select-header>
+                                <md-optgroup label="Europe">
+                                    <md-option ng-value="country.name"
+                                        ng-repeat="country in countries | filter: searchSource">
+                                        {{country.name}}</md-option>
+                                </md-optgroup>
+                            </md-select>
+                        </md-input-container>
+                        <hr class="menu-divider width-100" />
+                        <div layout="row">
+                            <svg width="100%" height="50px">
+                                <g width="100%">
+                                    <ellipse id="5m_label" fill="#FF3333" rx="12" ry="12" cx="10%" cy="15" />
+                                    <text x="6%" y="50" stroke="#ffffff" font-size="14">
+                                        5M
+                                    </text>
+                                    <ellipse id="1m_label" fill="#F1860C" rx="9" ry="9" cx="30%" cy="15" />
+                                    <text x="26%" y="50" stroke="#ffffff" font-size="14">
+                                        1M
+                                    </text>
+                                    <ellipse id="100k_label" fill="#C5B409" rx="6" ry="6" cx="50%" cy="15" />
+                                    <text x="45%" y="50" stroke="#ffffff" font-size="14">
+                                        100k
+                                    </text>
+                                    <ellipse id="1k_label" fill="#F8FF42" rx="4" ry="4" cx="70%" cy="15" />
+                                    <text x="67%" y="50" stroke="#ffffff" font-size="14">
+                                        1k
+                                    </text>
+                                    <ellipse id="all_label" fill="#F6F990" rx="2" ry="2" cx="90%" cy="15" />
+                                    <text x="88%" y="50" stroke="#ffffff" font-size="14">
+                                        All
+                                    </text>
+                                </g>
+                            </svg>
+                        </div>
+                        <hr class="menu-divider width-100" />
+                        <div class="width-80 margin-auto color-white"><label>Restrict time span</label></div>
+                        <div class="width-80 margin-auto">
+                            <rzslider rz-slider-model="slider.min" rz-slider-high="slider.max"
+                                rz-slider-options="slider.options"></rzslider>
+                        </div>
+                    </md-content>
+                </md-sidenav>
+            </section>
+        </div>
+        <!--end menu container-->
+        <!-- map container-->
+        <div layout="column" class="parent-size">
+            <div id="map-container" class="height-80 width-100 background-dark">
+                <img src="app/img/map.png" class="parent-size">
+            </div>
+            <div layout="column" id="footer" class="height-20 width-100 background-gray">
+                <div id="feeds" layout="row" class="margin-top-10-px">
+                    <feed-chip ng-repeat="feedObject in feeds" ng-model="feedModel" feed="feedObject"></feed-chip>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <section layout="row">
-      <md-sidenav id="menu-panel" class="md-sidenav-left" md-component-id="left" md-whiteframe="4">
-        <md-toolbar class="background-darkcyan" layout="row" layout-align="center center">
-          <h1 class="md-toolbar-tools color-black text-bold">MENU</h1>
-          <div ng-click="toggleLeft()" class="margin-right-10-px cursor-pointer outline-none">
-              <img src="app/img/close-menu.png" alt="Close Menu" title="Close Menu">
-          </div>
-        </md-toolbar>
-
-        <md-content layout-margin>
-          <div layout="column" id="menu-container">
-            <md-list>
-              <md-list-item ng-click="">Example Selection Element</p><img
-                      src="app/img/anagrafica-icon.ico" class="menu-list-icon menu-icon" alt="">
-              </md-list-item>
-              <md-list-item ng-click=""><p>Category</p><img alt="" class="menu-list-icon menu-icon"
-                      src="app/img/anagrafica-icon.ico">
-              </md-list-item>
-            </md-list>
-            <div layout="column" layout-align="center center">
-              <md-input-container class="width-100">
-                <label>Select Destination</label>
-                <md-select ng-model="model" md-on-open="">
-                  <md-option ng-repeat="destination in destinations" ng-value="destination.name">
-                      {{destination.name}}
-                  </md-option>
-                </md-select>
-              </md-input-container>
-            </div>
-
-            <div layout="column" layout-align="center center">
-              <md-input-container class="width-100">
-                <label>Select Source</label>
-                <md-select ng-model="model" md-on-open="">
-                  <md-option ng-repeat="source in source" ng-value="source.name">
-                      {{source.name}}
-                  </md-option>
-                </md-select>
-              </md-input-container>
-            </div>
-
-            <div layout="column">
-              <md-slider-container flex="100">
-                <md-slider md-discrete ng-model="model" min="1" max="50" step="1" aria-label=""
-                            title="" class="md-primary">
-                </md-slider>
-              </md-slider-container>
-            </div>
-          </div>
-        </md-content>
-      </md-sidenav>
-    </section>
-  </div>
-  <!--end menu container-->
+    <!-- end map container-->
 </div>

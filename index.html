@@ -1,44 +1,49 @@
 <!DOCTYPE html>
 <html lang="it">
+
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="shortcut icon" href="app/img/main/browser_logo.ico" />
         <title>EarthQuake</title>
 
         <!--LOCAL CSS-->
-        <link rel="stylesheet" href="app/css/home.css">
-        <link rel="stylesheet" href="app/css/custom.css">
-        <link rel="stylesheet" href="app/css/menu.css">
-        <link rel="stylesheet" href="app/css/vendor/angular-material.min.css">
+        <link rel="stylesheet" href="app/css/home.css" />
+        <link rel="stylesheet" href="app/css/custom.css" />
+        <link rel="stylesheet" href="app/css/menu.css" />
+        <link rel="stylesheet" href="app/css/vendor/angular-material.min.css" />
 
         <!--CDN'S CSS-->
-        <link href="https://fonts.googleapis.com/css?family=Iceberg|Kodchasan|Nova+Cut|Oswald" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Iceberg|Kodchasan|Nova+Cut|Oswald" rel="stylesheet" />
 
         <!-- D3 -->
         <script src="app/js/vendor/d3.js"></script>
         <script src="app/js/vendor/d3-selection-multi.js"></script>
         <script src="app/js/vendor/topojson.js"></script>
+
+        <!-- OTHER -->
+        <link rel="stylesheet" type="text/css" href="node_modules/angularjs-slider/dist/rzslider.css" />
     </head>
 
     <body ng-app="main">
-        <div ng-view id="mainContent"></div>
-
         <ui-view></ui-view>
-
 
         <!--DEFAULT JS-->
         <script src="app/js/vendor/angular.min.js"></script>
-        <script src="app/js/vendor/angular-ui-router.min.js"></script>  
-        <script src="app/js/vendor/angular-material.min.js"></script>  
-        <script src="app/js/vendor/angular-aria.js"></script>  
-        <script src="app/js/vendor/angular-animate.js"></script>  
+        <script src="app/js/vendor/angular-ui-router.min.js"></script>
+        <script src="app/js/vendor/angular-material.min.js"></script>
+        <script src="app/js/vendor/angular-aria.js"></script>
+        <script src="app/js/vendor/angular-animate.js"></script>
 
         <!--CUSTOM JS-->
         <script src="app/js/configurations.js"></script>
         <script src="app/js/index.js"></script>
+        <script src="app/js/directives/radio_buttons.js"></script>
+        <script src="app/js/directives/feed.js"></script>
         <script src="app/js/controllers/home_controller.js"></script>
         <script src="app/js/controllers/menu_controller.js"></script>
         <script src="app/resources/lang.js"></script>
+        <script src="node_modules/angularjs-slider/dist/rzslider.min.js"></script>
     </body>
+
 </html>
