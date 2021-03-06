@@ -44,7 +44,7 @@
 
 .radio-button-class {
     margin: auto !important;
-    width: 30% !important;
+    width: 33% !important;
     border-right: 1px solid black !important;
     color: #000000 !important;
     background-color: #ffffff !important;
@@ -66,7 +66,7 @@
     border-bottom-right-radius: 10px !important;
 }
 
-#source-selector md-select-value {
+md-select-value {
     color: #0093c4 !important;
     border-bottom: 1px solid #0093c4;
 }
@@ -78,9 +78,21 @@
     margin: 0 0 0 0;
 }
 
-#destination-selector md-select-value {
+md-select-value {
     color: #0093c4 !important;
-    border-bottom: 1px solid #0093c4;
+    border-bottom: 1px solid #0093c4 !important;
+}
+
+md-select ._md-select-placeholder {
+    color: red !important;
+}
+
+md-input-container label {
+    color: #0093c4 !important;
+}
+
+md-select:not([disabled]):focus .md-select-value {
+    border-bottom-color: #000;
 }
 
 #destination-selector .md-select-icon {

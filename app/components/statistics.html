@@ -1,0 +1,87 @@
+<div ng-controller="statisticsController" layout="column" class="parent-size">
+    <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
+        <div layout="row" layout-align="start center">
+            <img src="app/img/home/logo.png" class="margin-auto" widht="79" height="56" />
+            <h2 class="padding-left-20px color-darkcyan">
+                International Migrant Stock
+            </h2>
+            <md-button ng-click="loadMap()" class="margin-left-20px font-size-medium text-bold">Home</md-button>
+            <md-button class="font-size-medium text-bold">Statistics</md-button>
+        </div>
+    </md-toolbar>
+
+    <div layout="row" class="parent-size background-dark">
+        <div class="width-20">
+            <div layout="column" class="color-white margin-top-20">
+                <div class="font-size-x-large text-bold padding-left-20px">
+                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iusto aliquid excepturi unde veritatis
+                    nulla, dolore voluptate minus, libero natus architecto illo enim aliquam. Accusamus odit
+                    voluptatibus velit modi at neque placeat similique recusandae voluptate ut.
+                </div>
+                <div class="margin-top-20">
+                    <img src="../../sketch/Mask_Group_2.png">
+                </div>
+                <div class="margin-top-20">
+                    <img src="../../sketch/Mask_Group_2.png">
+                </div>
+                <div class="margin-top-20">
+                    <img src="../../sketch/Mask_Group_2.png">
+                </div>
+            </div>
+        </div>
+        <div layout="column" class="width-80">
+            <div class="height-80 position-relative">
+                <div layout="row">
+                    <div class="color-white margin-top-15-px margin-left-20px">
+                        <div class="font-size-xxx-large text-bold">2001 - 2010</div>
+                        <div class="font-size-x-large margin-top-10-px text-center color-darkcyan">Total Immigration
+                        </div>
+                    </div>
+                    <div class="width-50 margin-auto margin-top-20-px">
+                        <radio-button-group ng-model="value" buttons="statisticsButtons"
+                            radio-buttons-class="'md-button border-1'">
+                    </div>
+                </div>
+
+                <div class="position-absolute bottom-0 margin-left-20px">
+                    <md-input-container id="visualization-type-container">
+                        <label>Visualization type</label>
+                        <md-select ng-model="visualizationType">
+                            <md-option ng-repeat="type in visualizationTypes" ng-value="type.value">
+                                {{type.text}}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+                </div>
+            </div>
+            <div layout="row" class="height-20">
+                <div class="width-70 height-100">
+                    <div layout="row" class="color-white margin-top-20-px margin-left-20px font-size-x-large">
+                        <div class="padding-lr-20-px text-justify">
+                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Esse, a accusamus? Voluptates
+                            recusandae at modi nemo voluptatibus obcaecati minus asperiores. Quia voluptate suscipit
+                            nostrum reprehenderit nihil provident qui consequuntur, doloremque modi necessitatibus
+                            numquam laborum at minus vero, corporis facere iure.
+                        </div>
+                        <div class="padding-lr-20-px margin-right-20-px text-justify">
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Blanditiis repudiandae quidem esse
+                            ea illo labore assumenda laborum iste temporibus quasi, quos amet tempora veritatis ex culpa
+                            cum voluptatibus accusamus, commodi quaerat? Voluptatibus quibusdam nihil nulla, consequatur
+                            quod velit quia reiciendis?
+                        </div>
+                    </div>
+                </div>
+                <div class="width-30 height-100">
+                    <div layout="column">
+                        <top-countries ng-model="country" countries="topFlags"
+                            top-countries-icon-path="'app/img/home/up.png'"></top-countries>
+                        <hr class="menu-divider width-90" />
+                        <top-countries ng-model="country" countries="topFlags"
+                            top-countries-icon-path="'app/img/home/down.png'"></top-countries>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end map container-->
+</div>

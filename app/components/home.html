@@ -6,19 +6,19 @@
                 International Migrant Stock
             </h2>
             <md-button class="margin-left-20px font-size-medium text-bold">Home</md-button>
-            <md-button class="font-size-medium text-bold">Statistics</md-button>
+            <md-button ng-click="loadStatistics()" class="font-size-medium text-bold">Statistics</md-button>
         </div>
     </md-toolbar>
 
     <div layout="row" class="parent-size">
         <!--menu container-->
-        <div ng-controller="menuController">
+        <div ng-controller="menuController" class="width-25">
             <div id="open-menu-button" ng-click="toggleMenu()" class="margin-left--8-px cursor-pointer outline-none">
                 <img id="open-menu-icon" src="app/img/menu-arrow.png" alt="Open Menu" title="Open Menu" />
             </div>
             <section layout="row" class="parent-size">
                 <md-sidenav id="menu-panel" class="md-sidenav-left background-darkteal" ng-if="isSideMenuOpened"
-                    md-is-locked-open="$mdMedia('gt-md')" md-component-id="left" md-whiteframe="4">
+                    md-is-locked-open="$mdMedia('gt-md')" md-component-id="left" md-whiteframe="10">
                     <md-toolbar class="background-darkteal" layout="row" layout-align="center center">
                         <h1 class="md-toolbar-tools color-white text-bold">
                             Visualization settings
@@ -38,11 +38,19 @@
                     </div>
                     <hr class="menu-divider width-100" />
                     <md-content layout-margin class="background-darkteal width-100 height-100 margin-none">
-                        <radio-button-group ng-model="value" buttons="genreButtons" radio-buttons-class="'md-button'">
-                        </radio-button-group>
+                        <div class="width-90 margin-auto">
+                            <radio-button-group ng-model="value" buttons="genreButtons"
+                                radio-buttons-class="'md-button'">
+                            </radio-button-group>
+                        </div>
                         <hr class="menu-divider width-100" />
-                        <radio-button-group ng-model="value" buttons="sectionButtons" radio-buttons-class="'md-button'">
-                        </radio-button-group>
+                        <div class="width-90 margin-auto">
+                            <radio-button-group ng-model="value" buttons="sectionButtons"
+                                radio-buttons-class="'md-button'">
+                            </radio-button-group>
+                        </div>
+
+
                         <hr class="menu-divider width-100" />
 
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
@@ -123,9 +131,11 @@
                 <div id="feeds" layout="row" class="margin-top-10-px">
                     <feed-chip ng-repeat="feedObject in feeds" ng-model="feedModel" feed="feedObject"></feed-chip>
                 </div>
+                <div>
+                    <img src="app/img/home/play.png" class="float-right margin-top-10-px margin-right-20-px">
+                </div>
             </div>
         </div>
-
     </div>
     <!-- end map container-->
 </div>

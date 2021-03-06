@@ -43,3 +43,8 @@
     font-size: x-large;
     margin-right: 10px;
 }
+
+md-sidenav {
+    max-width: 600px !important;
+    width: 100% !important;
+}

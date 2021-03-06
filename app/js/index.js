@@ -8,6 +8,7 @@
         "radio-button",
         "rzSlider",
         "feed-chip",
+        "top-countries",
     ]);
 
     // configurating the routing
@@ -17,15 +18,21 @@
 
     function RoutesConfiguration($stateProvider, $urlRouterProvider) {
         // setting the default page for the routing
-        $urlRouterProvider.otherwise("/home");
+        $urlRouterProvider.otherwise("/map");
 
         // setting the routing pages
         $stateProvider
             // defining routing to the login page
-            .state("home", {
-                url: "/home",
+            .state("map", {
+                url: "/map",
                 templateUrl: components_folder + "home.html",
                 controller: "homeController as homeCtrl",
+                resolve: {},
+            })
+            .state("statistics", {
+                url: "/statistics",
+                templateUrl: components_folder + "statistics.html",
+                controller: "statisticsController as statCtrl",
                 resolve: {},
             });
     }
