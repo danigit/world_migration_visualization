@@ -12,9 +12,5 @@
 
     function compareController($scope, $state, statisticsService) {
         $scope.statisticsButtons = statisticsService.statisticsButtons;
-
-        $scope.loadMap = () => {
-            $state.go("map");
-        };
     }
 })();

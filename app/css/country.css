@@ -1,0 +1,12 @@
+.country-search-container .md-select-value span {
+    font-size: x-large !important;
+}
+
+#country-slider .rz-tick-value {
+    color: #000000;
+}
+
+#country-slider .rz-tick-legend {
+    color: #0093c4;
+    transform: rotate(45deg) !important;
+}

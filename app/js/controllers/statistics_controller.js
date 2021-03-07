@@ -16,9 +16,5 @@
         $scope.statisticsButtons = statisticsService.statisticsButtons;
         $scope.visualizationTypes = statisticsService.visualizationTypes;
         $scope.topFlags = statisticsService.topFlags;
-
-        $scope.loadMap = () => {
-            $state.go("map");
-        };
     }
 })();

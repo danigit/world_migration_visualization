@@ -55,6 +55,11 @@
             { value: "compare", text: "Compare" },
         ];
 
+        statistics_service.countryButtons = [
+            { value: "global_rank", text: "Global rank" },
+            { value: "value", text: "Value" },
+        ];
+
         statistics_service.visualizationTypes = [
             { value: "total_immigrations", text: "Total immigrations" },
             { value: "total_population", text: "Total population" },

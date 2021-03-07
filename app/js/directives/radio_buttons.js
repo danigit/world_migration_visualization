@@ -24,7 +24,10 @@ angular.module("radio-button", []).directive("radioButtonGroup", function () {
                         $state.go("compare");
                     } else if (value === "world") {
                         $state.go("statistics");
+                    } else if (value === "country") {
+                        $state.go("country");
                     }
+
                     $scope.value = value;
                 };
 

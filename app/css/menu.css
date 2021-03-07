@@ -126,11 +126,11 @@ md-select:not([disabled]):focus .md-select-value {
     height: 50px;
 }
 
-.rz-tick-value {
+#home-slider .rz-tick-value {
     color: #191f24;
 }
 
-.rz-tick-legend {
+#home-slider .rz-tick-legend {
     color: #0093c4;
     transform: rotate(45deg) !important;
 }

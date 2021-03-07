@@ -40,6 +40,12 @@
                 templateUrl: components_folder + "compare.html",
                 controller: "compareController as compCtrl",
                 resolve: {},
+            })
+            .state("country", {
+                url: "/country",
+                templateUrl: components_folder + "country.html",
+                controller: "countryController as countCtrl",
+                resolve: {},
             });
     }
 })();

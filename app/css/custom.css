@@ -17,7 +17,7 @@ DISPLAY
 }
 
 .display-block {
-    display: block;
+    display: block !important;
 }
 
 .position-absolute {
@@ -43,6 +43,14 @@ DISPLAY
 
 .width-80 {
     width: 80%;
+}
+
+.width-60 {
+    width: 60%;
+}
+
+.width-15 {
+    width: 15%;
 }
 
 .width-20 {
@@ -132,6 +140,14 @@ MARGINS
     margin-top: 20px !important;
 }
 
+.margin-top-40-px {
+    margin-top: 40px !important;
+}
+
+.margin-top-60-px {
+    margin-top: 60px !important;
+}
+
 .margin-top-10-px {
     margin-top: 10px !important;
 }
@@ -142,6 +158,14 @@ MARGINS
 
 .margin-right-20-px {
     margin-right: 20px;
+}
+
+.margin-right-40-px {
+    margin-right: 40px;
+}
+
+.margin-right-5 {
+    margin-right: 5%;
 }
 
 .margin-left-20px {
@@ -157,8 +181,8 @@ MARGINS
 }
 
 .margin-lr-auto {
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .margin-lr-40-px {
