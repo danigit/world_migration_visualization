@@ -35,6 +35,9 @@ In order to do that, we will have to consider different parts of said paths in a
 #### 1. First week
 
 -   data preprocessing -> result two tables one for the dynamic part and one for the static part
+    -   convert in csv tables 1, 2, 3 (origin and destination)
+    -   convert in csv table 6 (total migration - refugees)
+    -   convert in csv all tables but 5 (by age and sex)
 -   GUI refinement
 -   develop the country module
 
