@@ -12,45 +12,27 @@
     // creating the service
     main.service("countryService", countryService);
 
-    countryService.$inject = [$state, "dataService"];
+    // dependencies of country service
+    countryService.$inject = ["$state", "dataService"];
 
     /** Function that handle the requests */
-    function countryService() {
+    function countryService($state, dataService) {
 
         let countryService = this;
-        let defaultCountry = "Italy";
+        let selectedCountry = "Italy";
 
-        var origDestData;
-        var totalPopulationData;
-
-        d3.csv(total_migrants_by_origin_and_destination).then(function (data) {
-            origDestData = data;
-
-            var countryInwardMigrData = origDestData.filter(destCountryData => destCountryData["Destination"]==defaultCountry);
-            var countryPopulationData = origDestData.filter(destCountryData => destCountryData["Destination"]==defaultCountry);
-    
-    
-            countryInwardMigrData["Total"]
-            countryPopulationData["Total_(mf)"]
+        dataService.totMigrByOriginDest.then(function (data) {
+            countryService.selectedCountryInwardMigrData = data.filter(countryData => 
+                countryData["Destination"]==selectedCountry);
+            console.log("data ", countryService.selectedCountryInwardMigrData)
         }).catch(handleError);
+
         
-        d3.csv(total_population_by_age_and_sex).then(function (data) {
-            origDestData = data;
-            countryInwardMigrData["Total"]
-            countryPopulationData["Total_(mf)"]
-           /*  countryService.selectedCountry = defaultCountry;
-            countryService.origDestData = data; */
-            
+        dataService.totPopulationByAgeSex.then(function (data) {
+            countryService.selectedCountryTotPopulationData = data.filter(countryData => 
+                countryData["Destination"]==selectedCountry);
+            console.log("data 2 ", countryService.selectedCountryTotPopulationData)
         }).catch(handleError);
 
-
-        d3.csv(total_migrants_by_age_and_sex).then(function (data) {
-            origDestData = data;
-            countryInwardMigrData["Total"]
-            countryPopulationData["Total_(mf)"]
-           /*  countryService.selectedCountry = defaultCountry;
-            countryService.origDestData = data; */
-            
-        }).catch(handleError);
     }
 })();

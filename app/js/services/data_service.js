@@ -26,6 +26,8 @@
 
         
         data_service.secondaryMenuSelectedValue = "";
+
+        // load data from all csv files
         data_service.countriesClassByRegion = data_service.loadCsv(
             countries_classes_by_region
         );
@@ -58,12 +60,12 @@
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
             { value: 1, legend: "1990" },
-            { value: 3, legend: "1995" },
-            { value: 5, legend: "2000" },
-            { value: 7, legend: "2005" },
-            { value: 9, legend: "2010" },
-            { value: 9, legend: "2015" },
-            { value: 9, legend: "2017" },
+            { value: 2, legend: "1995" },
+            { value: 3, legend: "2000" },
+            { value: 4, legend: "2005" },
+            { value: 5, legend: "2010" },
+            { value: 6, legend: "2015" },
+            { value: 7, legend: "2019" },
         ];
 
         // Variable that defines the genre buttons in the filter menu
