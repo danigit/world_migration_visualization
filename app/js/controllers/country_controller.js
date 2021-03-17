@@ -12,7 +12,7 @@
         "$scope",
         "$state",
         "statisticsService",
-        "countryService",
+        "countryService"
     ];
 
     function countryController(
@@ -24,6 +24,8 @@
         $scope.statisticsButtons = statisticsService.statisticsButtons;
         $scope.countryButtons = statisticsService.countryButtons;
         $scope.topFlags = statisticsService.topFlags;
+
+        console.log(countryService.origDestData);
 
         $scope.sliderCountry = {
             min: 0,
