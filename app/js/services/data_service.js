@@ -8,11 +8,16 @@
     main.service("dataService", dataService);
 
     /** Function that handle the requests */
-    function dataService() {
+
+    dataService.$inject = ["$state"];
+    function dataService($state) {
         // getting the service instance
         let data_service = this;
 
-        data_service.slider_years = [
+        data_service.secondaryMenuSelectedValue = "";
+
+        // variable that defines the ticks of the slider
+        data_service.sliderYears = [
             { value: 1, legend: "1990" },
             { value: 3, legend: "1995" },
             { value: 5, legend: "2000" },
@@ -22,6 +27,66 @@
             { value: 9, legend: "2017" },
         ];
 
+        // Variable that defines the genre buttons in the filter menu
+        data_service.genreButtons = [
+            { value: "menu-male", text: "Male" },
+            { value: "menu-female", text: "Female" },
+            { value: "menu-all", text: "All" },
+        ];
+
+        // Variable that defines the region buttons in the filter menu
+        data_service.regionButtons = [
+            { value: "menu-continent", text: "Continent" },
+            { value: "menu-region", text: "Region" },
+            { value: "menu-country", text: "Country" },
+        ];
+
+        // variable that defines the menu buttons
+        data_service.menuButtons = [
+            { value: "world", text: "World" },
+            { value: "country", text: "Country" },
+            { value: "compare", text: "Compare" },
+        ];
+
+        // variable that holds the top five countries with income and outcome migrants
+        data_service.topFlags = [
+            {
+                name: "Italy",
+                path: "../../../sketch/MicrosoftTeams-image_1.png",
+            },
+            {
+                name: "France",
+                path: "../../../sketch/MicrosoftTeams-image_2.png",
+            },
+            {
+                name: "Greece",
+                path: "../../../sketch/MicrosoftTeams-image_3.png",
+            },
+            {
+                name: "Spain",
+                path: "../../../sketch/MicrosoftTeams-image_4.png",
+            },
+            {
+                name: "Germany",
+                path: "../../../sketch/MicrosoftTeams-image_5.png",
+            },
+        ];
+
+        // variable that holds the types of visualization in the statistics page
+        data_service.visualizationTypes = [
+            { value: "total_immigrations", text: "Total immigrations" },
+            { value: "total_population", text: "Total population" },
+            {
+                value: "immigration_vs_population",
+                text: "Immigration vs. Population",
+            },
+            { value: "immigration_avg_age", text: "Immigration average age" },
+            {
+                value: "refugees_vs_immigration",
+                text: "Refugees vs. Immigrates",
+            },
+        ];
+        // variable that hold the countries
         data_service.countries = [
             // here we have to recover the countries
             { continent: "europe", name: "France" },
@@ -35,5 +100,30 @@
             { continent: "africa", name: "marocco" },
             { continent: "africa", name: "Uganda" },
         ];
+
+        // variable that defines the country info types buttons
+        data_service.countryInfoTypeButtons = [
+            { value: "global_rank", text: "Global rank" },
+            { value: "value", text: "Value" },
+        ];
+
+        /**
+         * Function that handles the routing for the secondary menu
+         */
+        data_service.changePage = () => {
+            switch (data_service.secondaryMenuSelectedValue) {
+                case "world":
+                    $state.go("statistics");
+                    break;
+                case "country":
+                    $state.go("country");
+                    break;
+                case "compare":
+                    $state.go("compare");
+                    break;
+                default:
+                    $state.go("home");
+            }
+        };
     }
 })();

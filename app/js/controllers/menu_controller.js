@@ -14,25 +14,27 @@
     menuController.$inject = ["$scope", "$mdSidenav", "dataService"];
 
     function menuController($scope, $mdSidenav, dataService) {
+        $scope.isSideMenuOpened = true;
         $scope.searchSource = "";
         $scope.searchDestination = "";
         $scope.genreFilterValue = "menu-male";
         $scope.regionFilterValue = "menu-continent";
         $scope.countries = dataService.countries;
+        $scope.genreButtons = dataService.genreButtons;
+        $scope.regionButtons = dataService.regionButtons;
         $scope.selectedCountries = {
             source: [],
             destination: [],
         };
-        $scope.isSideMenuOpened = true;
-
+        // variable that holds the values for the slider
         $scope.slider = {
-            min: 1,
-            max: 7,
+            minValue: 1,
+            maxValue: 7,
             options: {
                 floor: 0,
                 ceil: 6,
                 showTicksValues: true,
-                stepsArray: dataService.slider_years,
+                stepsArray: dataService.sliderYears,
             },
         };
 
@@ -72,23 +74,5 @@
         $scope.updateSearch = (event) => {
             event.stopPropagation();
         };
-
-        /**
-         * Variable that defines the genre buttons in the filter menu
-         */
-        $scope.genreButtons = [
-            { value: "menu-male", text: "Male" },
-            { value: "menu-female", text: "Female" },
-            { value: "menu-all", text: "All" },
-        ];
-
-        /**
-         * Variable that defines the region buttons in the filter menu
-         */
-        $scope.sectionButtons = [
-            { value: "menu-continent", text: "Continent" },
-            { value: "menu-region", text: "Region" },
-            { value: "menu-country", text: "Country" },
-        ];
     }
 })();

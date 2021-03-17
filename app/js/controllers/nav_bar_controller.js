@@ -8,13 +8,13 @@
      * Function that handle the user login
      */
 
-    navbarController.$inject = ["$scope", "$state", "statisticsService"];
+    navbarController.$inject = ["$scope", "$state", "dataService"];
 
-    function navbarController($scope, $state, statisticsService) {
-        $scope.statisticsButtons = statisticsService.statisticsButtons;
-
+    function navbarController($scope, $state, dataService) {
         $scope.loadStatistics = () => {
             $state.go("statistics");
+            dataService.secondaryMenuSelectedValue = "world";
+            dataService.changePage();
         };
 
         $scope.loadMap = () => {

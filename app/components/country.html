@@ -11,15 +11,17 @@
     </md-toolbar>
 
     <div layout="column" class="parent-size background-dark">
-        <div class="width-30 margin-auto margin-top-20-px">
-            <radio-button-group ng-model="value" buttons="statisticsButtons" radio-buttons-class="'md-button border-1'">
+        <div class="width-30 margin-auto margin-top-20-px height-5">
+            <radio-button-group selected-button="secondaryMenuSelectedValue"
+                handle-button="handleSecondaryMenuClick(buttonValue) " ng-model="secondaryMenuSelectedValue"
+                buttons="secondaryMenuButtons" radio-buttons-class="'md-button border-1'">
         </div>
-        <div layout="row" class="parent-size">
+        <div layout="row" class="height-95">
             <div layout="column" class="margin-left-50-px width-15">
                 <div class="country-search-container width-100 margin-top-40-px">
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
-                        <md-select ng-model="selectedDestinationCountries" md-on-close="clearSearch()" multiple>
+                        <md-select ng-model="selectedCountry" md-on-close="clearSearch()" multiple>
                             <md-optgroup label="Europe">
                                 <md-option ng-value="country.name"
                                     ng-repeat="country in countries | filter: {continent: 'europe'}">
@@ -35,14 +37,15 @@
                 </div>
 
                 <div class="margin-top-60-px">
-                    <radio-button-group ng-model="value" buttons="statisticsButtons"
-                        radio-buttons-class="'md-button border-1'"></radio-button-group>
+                    <radio-button-group selected-button="genreFilterValue" handle-button="handleGenreClick(buttonValue)"
+                        ng-model="genreFilterValue" buttons="genreButtons" radio-buttons-class="'md-button border-1'">
+                    </radio-button-group>
                 </div>
 
                 <div class="width-100 margin-top-40-px color-white"><label class="font-size-x-large">Restrict time
                         span</label></div>
                 <div id="country-slider" class="width-100">
-                    <rzslider rz-slider-model="sliderCountry.min" rz-slider-high="sliderCountry.max"
+                    <rzslider rz-slider-model="sliderCountry.minValue" rz-slider-high="sliderCountry.maxValue"
                         rz-slider-options="sliderCountry.options"></rzslider>
                 </div>
             </div>
@@ -55,8 +58,10 @@
                 </div>
                 <h1 class="color-white margin-lr-auto">Italy</h1>
                 <div class="margin-top-60-px">
-                    <radio-button-group ng-model="value" buttons="countryButtons"
-                        radio-buttons-class="'md-button border-1'"></radio-button-group>
+                    <radio-button-group selected-button="countryInfoValue"
+                        handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
+                        buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
+                    </radio-button-group>
                     <div layout="column" class="color-white margin-top-40-px  width-100">
                         <div class="width-100"><span class="float-left font-size-x-large">Total immigrations</span><span
                                 class="float-right font-size-x-large">10 k</span></div>

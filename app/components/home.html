@@ -49,7 +49,7 @@
                         <div class="width-90 margin-auto">
                             <radio-button-group selected-button="regionFilterValue"
                                 handle-button="handleRegionClick(buttonValue)" ng-model="regionFilterValue"
-                                buttons="sectionButtons" radio-buttons-class="'md-button'">
+                                buttons="regionButtons" radio-buttons-class="'md-button'">
                             </radio-button-group>
                         </div>
 
@@ -117,7 +117,7 @@
                         <hr class="menu-divider width-100" />
                         <div class="width-80 margin-auto color-white"><label>Restrict time span</label></div>
                         <div id="home-slider" class="width-80 margin-auto">
-                            <rzslider rz-slider-model="slider.min" rz-slider-high="slider.max"
+                            <rzslider rz-slider-model="slider.minValue" rz-slider-high="slider.maxValue"
                                 rz-slider-options="slider.options"></rzslider>
                         </div>
                     </md-content>
