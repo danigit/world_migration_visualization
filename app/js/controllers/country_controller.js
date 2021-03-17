@@ -8,9 +8,19 @@
      * Function that handle the user login
      */
 
-    countryController.$inject = ["$scope", "$state", "statisticsService"];
+    countryController.$inject = [
+        "$scope",
+        "$state",
+        "statisticsService",
+        "countryService",
+    ];
 
-    function countryController($scope, $state, statisticsService) {
+    function countryController(
+        $scope,
+        $state,
+        statisticsService,
+        countryService
+    ) {
         $scope.statisticsButtons = statisticsService.statisticsButtons;
         $scope.countryButtons = statisticsService.countryButtons;
         $scope.topFlags = statisticsService.topFlags;
