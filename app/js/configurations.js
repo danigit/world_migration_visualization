@@ -8,7 +8,7 @@ const controllers_folder = "app/controllers/";
 const data_csv_folder = "app/data/csv/";
 const image_folder = "app/img/";
 
-// paths for origin and destination tables
+// names of origin and destination tables
 const total_migrants_by_origin_and_destination = 'app/data/csv/migrants_by_origin_and_destination_total.csv' 
 const male_migrants_by_origin_and_destination = 'app/data/csv/migrants_by_origin_and_destination_male.csv'
 const female_migrants_by_origin_and_destination = 'app/data/csv/migrants_by_origin_and_destination_female.csv' 

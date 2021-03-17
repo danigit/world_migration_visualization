@@ -12,6 +12,8 @@
     // creating the service
     main.service("countryService", countryService);
 
+    countryService.$inject = [$state, "dataService"];
+
     /** Function that handle the requests */
     function countryService() {
 
