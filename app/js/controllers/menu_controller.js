@@ -11,76 +11,84 @@
      * Function that handle the menu interaction
      * @type {string[]}
      */
-    menuController.$inject = ["$scope", "$mdSidenav"];
+    menuController.$inject = ["$scope", "$mdSidenav", "dataService"];
 
-    function menuController($scope, $mdSidenav) {
-        $scope.isSideMenuOpened = true;
+    function menuController($scope, $mdSidenav, dataService) {
         $scope.searchSource = "";
         $scope.searchDestination = "";
-        $scope.selectedSourceCountries = [];
-        $scope.selectedDestinationCountries = [];
+        $scope.genreFilterValue = "menu-male";
+        $scope.regionFilterValue = "menu-continent";
+        $scope.countries = dataService.countries;
+        $scope.selectedCountries = {
+            source: [],
+            destination: [],
+        };
+        $scope.isSideMenuOpened = true;
+
         $scope.slider = {
             min: 1,
-            max: 9,
+            max: 7,
             options: {
                 floor: 0,
                 ceil: 6,
                 showTicksValues: true,
-                stepsArray: [
-                    { value: 1, legend: "1990" },
-                    { value: 3, legend: "1995" },
-                    { value: 5, legend: "2000" },
-                    { value: 7, legend: "2005" },
-                    { value: 9, legend: "2010" },
-                    { value: 9, legend: "2015" },
-                    { value: 9, legend: "2017" },
-                ],
+                stepsArray: dataService.slider_years,
             },
         };
 
-       
+        /**
+         * Function that handles the click on the genre radio group filter in the menu
+         * @param {string} value
+         */
+        $scope.handleGenreClick = function (value) {
+            $scope.genreFilterValue = value;
+        };
+
+        /**
+         * Function that handles the click on the region radio group filter in the menu
+         * @param {string} value
+         */
+        $scope.handleRegionClick = function (value) {
+            $scope.regionFilterValue = value;
+            console.log($scope.selectedCountries);
+        };
+
         /**
          * Function that open and close the menu
          */
         $scope.toggleMenu = () => {
             $scope.isSideMenuOpened = $scope.isSideMenuOpened ? false : true;
+            resizeMenuPanel($scope.isSideMenuOpened);
         };
 
+        /**
+         * Function that clears the search box in the source select filter
+         */
         $scope.clearSearch = () => {
             $scope.searchSource = "";
+            $scope.searchDestination = "";
         };
 
         $scope.updateSearch = (event) => {
             event.stopPropagation();
         };
 
-        $scope.genreButtons = [
-            { value: "male", text: "Male" },
-            { value: "female", text: "Female" },
-            { value: "all", text: "All" },
-        ];
-
-        $scope.sectionButtons = [
-            { value: "continent", text: "Continent" },
-            { value: "region", text: "Region" },
-            { value: "country", text: "Country" },
-        ];
-
-        $scope.countries = [
-            { continent: "europe", name: "France" },
-            { continent: "europe", name: "Italy" },
-            { continent: "europe", name: "Spain" },
-            { continent: "europe", name: "Finland" },
-            { continent: "europe", name: "Portugal" },
-            { continent: "africa", name: "Nigeria" },
-            { continent: "africa", name: "Kenya" },
-            { continent: "africa", name: "Etiopia" },
-            { continent: "africa", name: "marocco" },
-            { continent: "africa", name: "Uganda" },
-        ];
         /**
-         * Function that shows the location table
+         * Variable that defines the genre buttons in the filter menu
          */
-        $scope.testItem = () => {};
+        $scope.genreButtons = [
+            { value: "menu-male", text: "Male" },
+            { value: "menu-female", text: "Female" },
+            { value: "menu-all", text: "All" },
+        ];
+
+        /**
+         * Variable that defines the region buttons in the filter menu
+         */
+        $scope.sectionButtons = [
+            { value: "menu-continent", text: "Continent" },
+            { value: "menu-region", text: "Region" },
+            { value: "menu-country", text: "Country" },
+        ];
     }
 })();

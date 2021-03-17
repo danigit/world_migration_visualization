@@ -5,96 +5,35 @@
     let main = angular.module("main");
 
     // creating the service
-    main.service("feedService", feedService);
-    main.service("statisticsService", statisticsService);
+    main.service("dataService", dataService);
 
     /** Function that handle the requests */
-    function feedService() {
+    function dataService() {
         // getting the service instance
-        let feed_service = this;
-        feed_service.feeds = [
-            {
-                title: "Burundi",
-                image: "app/img/home/down.png",
-                value: "4.232 M",
-            },
-            {
-                title: "Italy",
-                image: "app/img/home/up.png",
-                value: "4.232 M",
-            },
-            {
-                title: "Kenya",
-                image: "app/img/home/down.png",
-                value: "4.232 M",
-            },
-            {
-                title: "France",
-                image: "app/img/home/down.png",
-                value: "4.232 M",
-            },
-            {
-                title: "Germany",
-                image: "app/img/home/up.png",
-                value: "432 M",
-            },
-            {
-                title: "Marocco",
-                image: "app/img/home/up.png",
-                value: "432 M",
-            },
-        ];
-    }
+        let data_service = this;
 
-    function statisticsService() {
-        let statistics_service = this;
-
-        statistics_service.statisticsButtons = [
-            { value: "world", text: "World" },
-            { value: "country", text: "Country" },
-            { value: "compare", text: "Compare" },
+        data_service.slider_years = [
+            { value: 1, legend: "1990" },
+            { value: 3, legend: "1995" },
+            { value: 5, legend: "2000" },
+            { value: 7, legend: "2005" },
+            { value: 9, legend: "2010" },
+            { value: 9, legend: "2015" },
+            { value: 9, legend: "2017" },
         ];
 
-        statistics_service.countryButtons = [
-            { value: "global_rank", text: "Global rank" },
-            { value: "value", text: "Value" },
-        ];
-
-        statistics_service.visualizationTypes = [
-            { value: "total_immigrations", text: "Total immigrations" },
-            { value: "total_population", text: "Total population" },
-            {
-                value: "immigration_vs_population",
-                text: "Immigration vs. Population",
-            },
-            { value: "immigration_avg_age", text: "Immigration average age" },
-            {
-                value: "refugees_vs_immigration",
-                text: "Refugees vs. Immigrates",
-            },
-        ];
-
-        statistics_service.topFlags = [
-            {
-                name: "Italy",
-                path: "../../../sketch/MicrosoftTeams-image_1.png",
-            },
-            {
-                name: "France",
-                path: "../../../sketch/MicrosoftTeams-image_2.png",
-            },
-            {
-                name: "Greece",
-                path: "../../../sketch/MicrosoftTeams-image_3.png",
-            },
-            {
-                name: "Spain",
-                path: "../../../sketch/MicrosoftTeams-image_4.png",
-            },
-            {
-                name: "Germany",
-                path: "../../../sketch/MicrosoftTeams-image_5.png",
-            },
+        data_service.countries = [
+            // here we have to recover the countries
+            { continent: "europe", name: "France" },
+            { continent: "europe", name: "Italy" },
+            { continent: "europe", name: "Spain" },
+            { continent: "europe", name: "Finland" },
+            { continent: "europe", name: "Portugal" },
+            { continent: "africa", name: "Nigeria" },
+            { continent: "africa", name: "Kenya" },
+            { continent: "africa", name: "Etiopia" },
+            { continent: "africa", name: "marocco" },
+            { continent: "africa", name: "Uganda" },
         ];
     }
 })();

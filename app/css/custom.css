@@ -33,6 +33,18 @@ DISPLAY
     height: 100%;
 }
 
+.min-width-350-px {
+    min-width: 350px !important;
+}
+
+.max-width-500-px {
+    max-width: 500px;
+}
+
+.width-0 {
+    width: 0;
+}
+
 .width-100 {
     width: 100%;
 }

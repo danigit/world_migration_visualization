@@ -24,6 +24,7 @@
         $scope.statisticsButtons = statisticsService.statisticsButtons;
         $scope.countryButtons = statisticsService.countryButtons;
         $scope.topFlags = statisticsService.topFlags;
+        console.log(countryService.name);
 
         $scope.sliderCountry = {
             min: 0,

@@ -10,7 +10,6 @@
     /** Function that handle the requests */
     function countryService() {
         let countryService = this;
-
-        countryService.americanCountries = [];
+        countryService.name = "Daniel";
     }
-});
+})();
