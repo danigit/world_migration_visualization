@@ -2,35 +2,25 @@ angular.module("radio-button", []).directive("radioButtonGroup", function () {
     return {
         restrict: "E",
         require: "ngModel",
+        replace: false,
         scope: {
             model: "=ngModel",
             buttons: "=",
             radioButtonsClass: "=",
+            handleButton: "&",
+            buttonValue: "=",
+            value: "=selectedButton",
         },
         template:
             '<a class="radio-button-class {{radioButtonsClass}}" ' +
             '   ng-repeat="button in buttons" ' +
-            "   ng-class=\"{'button-clicked': isActive(button.value), 'first-radius': $first, 'last-radius': $last }\" " +
-            '   ng-click="handleButtonClicked(button.value)"> ' +
+            '   ng-click="handleButton({buttonValue: button.value})" ' +
+            "   ng-class=\"{'button-clicked': isActive(button.value), 'first-radius': $first, 'last-radius': $last }\"> " +
             "       {{button.text}} " +
             "</a>",
         controller: [
             "$scope",
-            "$state",
-            function ($scope, $state) {
-                $scope.handleButtonClicked = function (value) {
-                    console.log(value);
-                    if (value === "compare") {
-                        $state.go("compare");
-                    } else if (value === "world") {
-                        $state.go("statistics");
-                    } else if (value === "country") {
-                        $state.go("country");
-                    }
-
-                    $scope.value = value;
-                };
-
+            function ($scope) {
                 $scope.isActive = function (value) {
                     return $scope.value === value;
                 };

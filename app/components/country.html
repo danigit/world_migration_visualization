@@ -1,4 +1,4 @@
-<div ng-controller="countryController" layout="column" class="parent-size">
+<div layout="column" class="parent-size">
     <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
         <div layout="row" layout-align="start center" ng-controller="navbarController">
             <img src="app/img/home/logo.png" class="margin-auto" widht="79" height="56" />
@@ -11,15 +11,17 @@
     </md-toolbar>
 
     <div layout="column" class="parent-size background-dark">
-        <div class="width-30 margin-auto margin-top-20-px">
-            <radio-button-group ng-model="value" buttons="statisticsButtons" radio-buttons-class="'md-button border-1'">
+        <div class="width-30 margin-auto margin-top-20-px height-5">
+            <radio-button-group selected-button="secondaryMenuSelectedValue"
+                handle-button="handleSecondaryMenuClick(buttonValue) " ng-model="secondaryMenuSelectedValue"
+                buttons="secondaryMenuButtons" radio-buttons-class="'md-button border-1'">
         </div>
-        <div layout="row" class="parent-size">
-            <div layout="column" class="margin-left-50-px width-15">
+        <div layout="row" class="height-95">
+            <div layout="column" class="margin-left-50-px width-15 min-width-350-px max-width-500-px">
                 <div class="country-search-container width-100 margin-top-40-px">
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
-                        <md-select ng-model="selectedDestinationCountries" md-on-close="clearSearch()" multiple>
+                        <md-select ng-model="selectedCountry" md-on-close="clearSearch()">
                             <md-optgroup label="Europe">
                                 <md-option ng-value="country.name"
                                     ng-repeat="country in countries | filter: {continent: 'europe'}">
@@ -35,46 +37,55 @@
                 </div>
 
                 <div class="margin-top-60-px">
-                    <radio-button-group ng-model="value" buttons="statisticsButtons"
-                        radio-buttons-class="'md-button border-1'"></radio-button-group>
+                    <radio-button-group selected-button="genreFilterValue" handle-button="handleGenreClick(buttonValue)"
+                        ng-model="genreFilterValue" buttons="genreButtons" radio-buttons-class="'md-button border-1'">
+                    </radio-button-group>
                 </div>
 
                 <div class="width-100 margin-top-40-px color-white"><label class="font-size-x-large">Restrict time
                         span</label></div>
                 <div id="country-slider" class="width-100">
-                    <rzslider rz-slider-model="sliderCountry.min" rz-slider-high="sliderCountry.max"
+                    <rzslider rz-slider-model="sliderCountry.minValue" rz-slider-high="sliderCountry.maxValue"
                         rz-slider-options="sliderCountry.options"></rzslider>
                 </div>
             </div>
             <div class="width-60">
 
             </div>
-            <div layout="column" class="width-20">
+            <div layout="column" class="width-25 padding-right-30px">
                 <div class="margin-top-60-px width-100">
-                    <img class="display-block margin-lr-auto" src="../../sketch/pngwingcom_2.png" </div>
+                    <img class="display-block height-300-px margin-lr-auto"
+                        src="../../app/img/countries/outlines/{{selectedCountry}}.svg" />
                 </div>
-                <h1 class="color-white margin-lr-auto">Italy</h1>
-                <div class="margin-top-60-px">
-                    <radio-button-group ng-model="value" buttons="countryButtons"
-                        radio-buttons-class="'md-button border-1'"></radio-button-group>
+                <h1 class="color-white margin-lr-auto">{{selectedCountry}}</h1>
+                <div class="margin-auto margin-top-200-px min-width-350-px max-width-500-px">
+                    <radio-button-group selected-button="countryInfoValue"
+                        handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
+                        buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
+                    </radio-button-group>
                     <div layout="column" class="color-white margin-top-40-px  width-100">
-                        <div class="width-100"><span class="float-left font-size-x-large">Total immigrations</span><span
-                                class="float-right font-size-x-large">10 k</span></div>
-                        <div class="width-100"><span class="float-left font-size-x-large">Total population</span><span
-                                class="float-right font-size-x-large">5 k</span></div>
-                        <div class=" width-100"><span class="float-left font-size-x-large">Immigration vs
+                        <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-x-large">Total
+                                immigrations</span><span class="float-right font-size-x-large">10 k</span></div>
+                        <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-x-large">Total
+                                population</span><span class="float-right font-size-x-large">5 k</span></div>
+                        <div class="width-100 padding-top-bottom-10px"><span
+                                class="float-left font-size-x-large">Immigration vs
                                 Population</span><span class="float-right font-size-x-large">22 k</span></div>
-                        <div class=" width-100"><span class="float-left font-size-x-large">Immigration average
+                        <div class="width-100 padding-top-bottom-10px"><span
+                                class="float-left font-size-x-large">Immigration average
                                 age</span><span class="float-right font-size-x-large">10 k</span></div>
-                        <div class=" width-100"><span class="float-left font-size-x-large">Refugee vs.
+                        <div class="width-100 padding-top-bottom-10px"><span
+                                class="float-left font-size-x-large">Refugee vs.
                                 Immigration</span><span class="float-right font-size-x-large">9 k</span></div>
                     </div>
                 </div>
-                <div layout="column" class="margin-top-40-px">
-                    <top-countries ng-model="country" countries="topFlags"
+                <div layout="column" class="margin-auto margin-top-100-px min-width-350-px max-width-500-px">
+                    <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
+                        ng-model="selectedTopCountryValue" countries="topFlags"
                         top-countries-icon-path="'app/img/home/up.png'"></top-countries>
                     <hr class="menu-divider" />
-                    <top-countries ng-model="country" countries="topFlags"
+                    <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
+                        ng-model="selectedTopCountryValue" countries="topFlags"
                         top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                 </div>
             </div>

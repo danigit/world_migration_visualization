@@ -1,3 +1,7 @@
 - Ensure pan-and-zoom actions do NOT cut information out of the dynamic map
 
 - Clarify whether plots/info/data are inward or outward material
+
+
+- add visname in coutry object (to show the flag and the name of the country)
+- add dictionary for future infos for every country

@@ -1,4 +1,4 @@
-<div ng-controller="homeController" layout="column" class="parent-size">
+<div layout="column" class="parent-size">
     <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
         <div layout="row" layout-align="start center" ng-controller="navbarController">
             <img src="app/img/home/logo.png" class="margin-auto" widht="79" height="56" />
@@ -12,13 +12,14 @@
 
     <div layout="row" class="parent-size">
         <!--menu container-->
-        <div ng-controller="menuController" class="width-25">
+        <div id="menu-container" ng-controller="menuController as menuCtrl"
+            class="width-25 max-width-500-px background-dark">
             <div id="open-menu-button" ng-click="toggleMenu()" class="margin-left--8-px cursor-pointer outline-none">
                 <img id="open-menu-icon" src="app/img/menu-arrow.png" alt="Open Menu" title="Open Menu" />
             </div>
-            <section layout="row" class="parent-size">
+            <section id="menu-section" layout="row" class="parent-size min-width-350-px max-width-500-px">
                 <md-sidenav id="menu-panel" class="md-sidenav-left background-darkteal" ng-if="isSideMenuOpened"
-                    md-is-locked-open="$mdMedia('gt-md')" md-component-id="left" md-whiteframe="10">
+                    md-is-locked-open="isSideMenuOpened" md-component-id="left" md-whiteframe="10">
                     <md-toolbar class="background-darkteal" layout="row" layout-align="center center">
                         <h1 class="md-toolbar-tools color-white text-bold">
                             Visualization settings
@@ -39,14 +40,16 @@
                     <hr class="menu-divider width-100" />
                     <md-content layout-margin class="background-darkteal width-100 height-100 margin-none">
                         <div class="width-90 margin-auto">
-                            <radio-button-group ng-model="value" buttons="genreButtons"
-                                radio-buttons-class="'md-button'">
+                            <radio-button-group selected-button="genreFilterValue"
+                                handle-button="handleGenreClick(buttonValue)" ng-model="genreFilterValue"
+                                buttons="genreButtons" radio-buttons-class="'md-button'">
                             </radio-button-group>
                         </div>
                         <hr class="menu-divider width-100" />
                         <div class="width-90 margin-auto">
-                            <radio-button-group ng-model="value" buttons="sectionButtons"
-                                radio-buttons-class="'md-button'">
+                            <radio-button-group selected-button="regionFilterValue"
+                                handle-button="handleRegionClick(buttonValue)" ng-model="regionFilterValue"
+                                buttons="regionButtons" radio-buttons-class="'md-button'">
                             </radio-button-group>
                         </div>
 
@@ -55,7 +58,7 @@
 
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
                             <label>Select sources...</label>
-                            <md-select ng-model="selectedSourceCountries" md-on-close="clearSearch()" multiple>
+                            <md-select ng-model="selectedCountries.source" md-on-close="clearSearch()" multiple>
                                 <md-select-header class="select-header-search-box">
                                     <input ng-model="searchSource" aria-label="Source filter" type="search"
                                         placeholder="Search a country..." class="header-search-box md-text"
@@ -71,7 +74,7 @@
                         <hr class="menu-divider width-100" />
                         <md-input-container id="destination-selector" class="width-90 display-block margin-auto">
                             <label>Select destinations...</label>
-                            <md-select ng-model="selectedDestinationCountries" md-on-close="clearSearch()" multiple>
+                            <md-select ng-model="selectedCountries.destination" md-on-close="clearSearch()" multiple>
                                 <md-select-header class="select-header-search-box">
                                     <input ng-model="searchDestination" aria-label="Destination filter" type="search"
                                         placeholder="Search a country..." class="header-search-box md-text"
@@ -114,7 +117,7 @@
                         <hr class="menu-divider width-100" />
                         <div class="width-80 margin-auto color-white"><label>Restrict time span</label></div>
                         <div id="home-slider" class="width-80 margin-auto">
-                            <rzslider rz-slider-model="slider.min" rz-slider-high="slider.max"
+                            <rzslider rz-slider-model="slider.minValue" rz-slider-high="slider.maxValue"
                                 rz-slider-options="slider.options"></rzslider>
                         </div>
                     </md-content>

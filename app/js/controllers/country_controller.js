@@ -5,43 +5,78 @@
     angular.module("main").controller("countryController", countryController);
 
     /**
-     * Function that handle the user login
+     * Function that handle the country page logic
      */
 
-    countryController.$inject = [
-        "$scope",
-        "$state",
-        "statisticsService",
-        "countryService",
-    ];
+    countryController.$inject = ["$scope", "$state", "dataService"];
 
-    function countryController(
-        $scope,
-        $state,
-        statisticsService,
-        countryService
-    ) {
-        $scope.statisticsButtons = statisticsService.statisticsButtons;
-        $scope.countryButtons = statisticsService.countryButtons;
-        $scope.topFlags = statisticsService.topFlags;
+    function countryController($scope, $state, dataService) {
+        $scope.genreFilterValue = "menu-male";
+        $scope.countryInfoValue = "global_rank";
+        $scope.selectedTopCountry = "";
+        $scope.countries = dataService.countries;
+        $scope.selectedCountry = $scope.countries[0].name;
+        $scope.secondaryMenuSelectedValue =
+            dataService.secondaryMenuSelectedValue != ""
+                ? dataService.secondaryMenuSelectedValue
+                : "country";
+        $scope.secondaryMenuButtons = dataService.menuButtons;
+        $scope.genreButtons = dataService.genreButtons;
+        $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
+        $scope.topFlags = dataService.topFlags;
 
+        // getting the countries class by region data
+        dataService.countriesClassByRegion.then((data) => {
+            $scope.countriesClassByRegion = data;
+            console.log(data);
+        });
+
+        // variable that holds the slider values
         $scope.sliderCountry = {
-            min: 0,
-            max: 7,
+            minValue: 0,
+            maxValue: 7,
             options: {
                 floor: 4,
                 ceil: 9,
                 showTicksValues: true,
-                stepsArray: [
-                    { value: 1, legend: "1990" },
-                    { value: 3, legend: "1995" },
-                    { value: 5, legend: "2000" },
-                    { value: 7, legend: "2005" },
-                    { value: 9, legend: "2010" },
-                    { value: 9, legend: "2015" },
-                    { value: 9, legend: "2017" },
-                ],
+                stepsArray: dataService.sliderYears,
             },
+        };
+
+        /**
+         * Function that handles the click on the genre radio group filter in the menu
+         * @param {string} value
+         */
+        $scope.handleGenreClick = function (value) {
+            $scope.genreFilterValue = value;
+        };
+
+        /**
+         * Function that handles the click on the secondary menu buttons
+         * @param {string} value
+         */
+        $scope.handleSecondaryMenuClick = function (value) {
+            $scope.secondaryMenuSelectedValue = value;
+            dataService.secondaryMenuSelectedValue = value;
+            dataService.changePage();
+        };
+
+        /**
+         * Function that handles the click on the secondary menu buttons
+         * @param {string} value
+         */
+        $scope.handleCountryInfoClick = function (value) {
+            $scope.countryInfoValue = value;
+        };
+
+        /**
+         * Function that handles the click on the top countries flags
+         * @param {string} value
+         */
+        $scope.handleTopCountryClick = function (value, type) {
+            $scope.selectedTopCountry = value;
+            console.log(value);
+            console.log(type);
         };
     }
 })();

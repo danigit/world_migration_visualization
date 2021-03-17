@@ -7,14 +7,40 @@
         .controller("statisticsController", statisticsController);
 
     /**
-     * Function that handlle the user login
+     * Function that handles the statistics page functionalities
      */
+    statisticsController.$inject = ["$scope", "$state", "dataService"];
 
-    statisticsController.$inject = ["$scope", "$state", "statisticsService"];
+    function statisticsController($scope, $state, dataService) {
+        $scope.visualizationType = "";
+        $scope.selectedTopCountryValue = "";
+        console.log("|" + dataService.secondaryMenuSelectedValue + "|");
+        $scope.secondaryMenuSelectedValue =
+            dataService.secondaryMenuSelectedValue != ""
+                ? dataService.secondaryMenuSelectedValue
+                : "world";
+        $scope.statisticsButtons = dataService.menuButtons;
+        $scope.visualizationTypes = dataService.visualizationTypes;
+        $scope.topFlags = dataService.topFlags;
 
-    function statisticsController($scope, $state, statisticsService) {
-        $scope.statisticsButtons = statisticsService.statisticsButtons;
-        $scope.visualizationTypes = statisticsService.visualizationTypes;
-        $scope.topFlags = statisticsService.topFlags;
+        /**
+         * Function that handles the click on the secondary menu buttons
+         * @param {string} value
+         */
+        $scope.handleSecondaryMenuClick = function (value) {
+            $scope.secondaryMenuSelectedValue = value;
+            dataService.secondaryMenuSelectedValue = value;
+            dataService.changePage();
+        };
+
+        /**
+         * Function that handles the click on the top countries flags
+         * @param {string} value
+         */
+        $scope.handleTopCountryClick = function (value, type) {
+            $scope.selectedTopCountry = value;
+            console.log(value);
+            console.log(type);
+        };
     }
 })();

@@ -5,12 +5,31 @@
     angular.module("main").controller("compareController", compareController);
 
     /**
-     * Function that handle the user login
+     * Function that handle the compare page logic
      */
 
-    compareController.$inject = ["$scope", "$state", "statisticsService"];
+    compareController.$inject = ["$scope", "$state", "dataService"];
 
-    function compareController($scope, $state, statisticsService) {
-        $scope.statisticsButtons = statisticsService.statisticsButtons;
+    function compareController($scope, $state, dataService) {
+        $scope.secondaryMenuSelectedValue =
+            dataService.secondaryMenuSelectedValue != ""
+                ? dataService.secondaryMenuSelectedValue
+                : "compare";
+        $scope.secondaryMenuButtons = dataService.menuButtons;
+        $scope.countries = dataService.countries;
+        $scope.selectedCountry = {
+            left: $scope.countries[0].name,
+            right: $scope.countries[1].name,
+        };
+
+        /**
+         * Function that handles the click on the secondary menu buttons
+         * @param {string} value
+         */
+        $scope.handleSecondaryMenuClick = function (value) {
+            $scope.secondaryMenuSelectedValue = value;
+            dataService.secondaryMenuSelectedValue = value;
+            dataService.changePage();
+        };
     }
 })();
