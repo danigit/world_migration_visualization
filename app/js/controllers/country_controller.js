@@ -13,7 +13,9 @@
     function countryController($scope, $state, dataService) {
         $scope.genreFilterValue = "menu-male";
         $scope.countryInfoValue = "global_rank";
-        $scope.selectedCountry = "";
+        $scope.selectedTopCountry = "";
+        $scope.countries = dataService.countries;
+        $scope.selectedCountry = $scope.countries[0].name;
         $scope.secondaryMenuSelectedValue =
             dataService.secondaryMenuSelectedValue != ""
                 ? dataService.secondaryMenuSelectedValue
@@ -65,6 +67,16 @@
          */
         $scope.handleCountryInfoClick = function (value) {
             $scope.countryInfoValue = value;
+        };
+
+        /**
+         * Function that handles the click on the top countries flags
+         * @param {string} value
+         */
+        $scope.handleTopCountryClick = function (value, type) {
+            $scope.selectedTopCountry = value;
+            console.log(value);
+            console.log(type);
         };
     }
 })();
