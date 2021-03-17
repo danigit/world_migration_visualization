@@ -20,9 +20,7 @@
                     console.log("loading the data");
                     return data;
                 })
-                .catch((error) =>
-                    alert("Couldn't load fifa dataset: " + error)
-                );
+                .catch((error) => alert("Couldn't load dataset: " + error));
         };
 
         data_service.secondaryMenuSelectedValue = "";
