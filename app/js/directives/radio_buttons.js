@@ -20,8 +20,7 @@ angular.module("radio-button", []).directive("radioButtonGroup", function () {
             "</a>",
         controller: [
             "$scope",
-            "$state",
-            function ($scope, $state) {
+            function ($scope) {
                 $scope.isActive = function (value) {
                     return $scope.value === value;
                 };

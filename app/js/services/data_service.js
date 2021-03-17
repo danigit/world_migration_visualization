@@ -91,22 +91,27 @@
         data_service.topFlags = [
             {
                 name: "Italy",
+                value: "italy",
                 path: "../../../sketch/MicrosoftTeams-image_1.png",
             },
             {
                 name: "France",
+                value: "france",
                 path: "../../../sketch/MicrosoftTeams-image_2.png",
             },
             {
                 name: "Greece",
+                value: "greece",
                 path: "../../../sketch/MicrosoftTeams-image_3.png",
             },
             {
                 name: "Spain",
+                value: "spain",
                 path: "../../../sketch/MicrosoftTeams-image_4.png",
             },
             {
                 name: "Germany",
+                value: "germany",
                 path: "../../../sketch/MicrosoftTeams-image_5.png",
             },
         ];

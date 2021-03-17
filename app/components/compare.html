@@ -22,7 +22,7 @@
                     <div class="compare-search-container margin-right-20-px float-right">
                         <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
-                            <md-select ng-model="selectedCountry.left" md-on-close="clearSearch()" multiple>
+                            <md-select ng-model="selectedCountry.left" md-on-close="clearSearch()">
                                 <md-optgroup label="Europe">
                                     <md-option ng-value="country.name"
                                         ng-repeat="country in countries | filter: {continent: 'europe'}">
@@ -37,10 +37,10 @@
                         </md-input-container>
                     </div>
                     <civ class="float-left margin-top-20-px margin-left-50-px">
-                        <img src="../../sketch/pngwingcom_2.png">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.left}}.svg" class="height-300-px">
                     </civ>
                 </div>
-                <div class="color-white margin-lr-40-px font-size-x-large margin-top-20-px">
+                <div class="color-white margin-lr-40-px font-size-x-large margin-top-100-px">
                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
                     quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo? Sint
                     expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod, sapiente
@@ -75,7 +75,7 @@
                     <div class="compare-search-container margin-left-20px float-left">
                         <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
-                            <md-select ng-model="selectedCountry.right" md-on-close="clearSearch()" multiple>
+                            <md-select ng-model="selectedCountry.right" md-on-close="clearSearch()">
                                 <md-optgroup label="Europe">
                                     <md-option ng-value="country.name"
                                         ng-repeat="country in countries | filter: {continent: 'europe'}">
@@ -90,10 +90,10 @@
                         </md-input-container>
                     </div>
                     <civ class="float-right margin-top-20-px margin-right-50-px">
-                        <img src="../../sketch/pngwingcom.png">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.right}}.svg" class="height-300-px">
                     </civ>
                 </div>
-                <div class="color-white margin-lr-40-px font-size-x-large margin-top-20-px">
+                <div class="color-white margin-lr-40-px font-size-x-large margin-top-100-px">
                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
                     quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo? Sint
                     expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod, sapiente

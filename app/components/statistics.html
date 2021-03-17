@@ -69,10 +69,12 @@
                 </div>
                 <div class="width-30 height-100">
                     <div layout="column">
-                        <top-countries ng-model="country" countries="topFlags"
+                        <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
+                            ng-model="selectedTopCountryValue" countries="topFlags"
                             top-countries-icon-path="'app/img/home/up.png'"></top-countries>
                         <hr class="menu-divider width-90" />
-                        <top-countries ng-model="country" countries="topFlags"
+                        <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
+                            ng-model="selectedTopCountryValue" countries="topFlags"
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
                 </div>

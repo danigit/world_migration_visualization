@@ -16,9 +16,10 @@
                 ? dataService.secondaryMenuSelectedValue
                 : "compare";
         $scope.secondaryMenuButtons = dataService.menuButtons;
+        $scope.countries = dataService.countries;
         $scope.selectedCountry = {
-            left: "",
-            right: "",
+            left: $scope.countries[0].name,
+            right: $scope.countries[1].name,
         };
 
         /**

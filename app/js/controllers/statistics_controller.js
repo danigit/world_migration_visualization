@@ -13,6 +13,7 @@
 
     function statisticsController($scope, $state, dataService) {
         $scope.visualizationType = "";
+        $scope.selectedTopCountryValue = "";
         console.log("|" + dataService.secondaryMenuSelectedValue + "|");
         $scope.secondaryMenuSelectedValue =
             dataService.secondaryMenuSelectedValue != ""
@@ -30,6 +31,16 @@
             $scope.secondaryMenuSelectedValue = value;
             dataService.secondaryMenuSelectedValue = value;
             dataService.changePage();
+        };
+
+        /**
+         * Function that handles the click on the top countries flags
+         * @param {string} value
+         */
+        $scope.handleTopCountryClick = function (value, type) {
+            $scope.selectedTopCountry = value;
+            console.log(value);
+            console.log(type);
         };
     }
 })();
