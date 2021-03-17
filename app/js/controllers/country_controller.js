@@ -23,6 +23,12 @@
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
         $scope.topFlags = dataService.topFlags;
 
+        // getting the countries class by region data
+        dataService.countriesClassByRegion.then((data) => {
+            $scope.countriesClassByRegion = data;
+            console.log(data);
+        });
+
         // variable that holds the slider values
         $scope.sliderCountry = {
             minValue: 0,
