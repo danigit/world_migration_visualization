@@ -14,7 +14,20 @@
         // getting the service instance
         let data_service = this;
 
+        data_service.loadCsv = (fileName) => {
+            return d3
+                .csv(data_csv_folder + fileName + ".csv", (data) => {
+                    return data;
+                })
+                .catch((error) =>
+                    alert("Couldn't load fifa dataset: " + error)
+                );
+        };
+
         data_service.secondaryMenuSelectedValue = "";
+        data_service.countriesClassByRegion = data_service.loadCsv(
+            "countries_class_by_region"
+        );
 
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
