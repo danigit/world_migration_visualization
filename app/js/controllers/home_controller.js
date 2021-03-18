@@ -15,6 +15,6 @@
         //     console.log(data);
         // }).catch((error) => alert("Couldn't load fifa dataset: " + error));
 
-        $scope.feeds = feedService.feeds;
+        $scope.feeds = feedService.feeds; 
     }
 })();

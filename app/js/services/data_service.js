@@ -14,31 +14,54 @@
         // getting the service instance
         let data_service = this;
 
-        data_service.selectedCountryController = "";
-
-        data_service.loadCsv = (fileName) => {
+        data_service.loadCsv = (filePath) => {
             return d3
-                .csv(data_csv_folder + fileName + ".csv", (data) => {
-                    console.log("loading the data");
+                .csv(filePath, (data) => {
                     return data;
                 })
                 .catch((error) => alert("Couldn't load dataset: " + error));
         };
 
         data_service.secondaryMenuSelectedValue = "";
+
+        // load data from all csv files
         data_service.countriesClassByRegion = data_service.loadCsv(
-            "countries_class_by_region"
+            countries_classes_by_region
+        );
+        data_service.totMigrByOriginDest = data_service.loadCsv(
+            total_migrants_by_origin_and_destination
+        );
+        data_service.maleMigrByOriginDest = data_service.loadCsv(
+            male_migrants_by_origin_and_destination
+        );
+        data_service.femaleMigrByOriginDest = data_service.loadCsv(
+            female_migrants_by_origin_and_destination
+        );
+        data_service.estimatedRefugees = data_service.loadCsv(
+            estimated_refugees
+        );
+        data_service.totMigrByAgeSex = data_service.loadCsv(
+            total_migrants_by_age_and_sex
+        );
+        data_service.totPopulationByAgeSex = data_service.loadCsv(
+            total_population_by_age_and_sex
+        );
+        data_service.migrAsPercOfPopulationAgeSex = data_service.loadCsv(
+            migrants_as_percentage_of_total_population_by_age_and_sex
+        );
+        data_service.migrPercDistributionAgeSex = data_service.loadCsv(
+            migrants_percentage_distribution_by_age_and_sex
         );
 
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
             { value: 1, legend: "1990" },
-            { value: 3, legend: "1995" },
-            { value: 5, legend: "2000" },
-            { value: 7, legend: "2005" },
-            { value: 9, legend: "2010" },
-            { value: 9, legend: "2015" },
-            { value: 9, legend: "2017" },
+            { value: 2, legend: "1995" },
+            { value: 3, legend: "2000" },
+            { value: 4, legend: "2005" },
+            { value: 5, legend: "2010" },
+            { value: 6, legend: "2015" },
+            { value: 7, legend: "2019" },
         ];
 
         // Variable that defines the genre buttons in the filter menu
