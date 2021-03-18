@@ -63,20 +63,30 @@
                         handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
                         buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
                     </radio-button-group>
-                    <div layout="column" class="color-white margin-top-40-px  width-100">
+                    <div layout="column" class="color-white margin-top-40-px width-100">
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-x-large">Total
-                                immigrations</span><span class="float-right font-size-x-large">10 k</span></div>
+                                immigrations</span><span
+                                class="float-right font-size-x-large">{{countryStatisticsValues.totalImmigrations}}</span>
+                        </div>
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-x-large">Total
-                                population</span><span class="float-right font-size-x-large">5 k</span></div>
+                                population</span><span
+                                class="float-right font-size-x-large">{{countryStatisticsValues.totalPopulation}}</span>
+                        </div>
                         <div class="width-100 padding-top-bottom-10px"><span
                                 class="float-left font-size-x-large">Immigration vs
-                                Population</span><span class="float-right font-size-x-large">22 k</span></div>
+                                Population</span><span
+                                class="float-right font-size-x-large">{{countryStatisticsValues.immigrationVsPopulation}}</span>
+                        </div>
                         <div class="width-100 padding-top-bottom-10px"><span
                                 class="float-left font-size-x-large">Immigration average
-                                age</span><span class="float-right font-size-x-large">10 k</span></div>
+                                age</span><span
+                                class="float-right font-size-x-large">{{countryStatisticsValues.immigrationAverageAge}}</span>
+                        </div>
                         <div class="width-100 padding-top-bottom-10px"><span
                                 class="float-left font-size-x-large">Refugee vs.
-                                Immigration</span><span class="float-right font-size-x-large">9 k</span></div>
+                                Immigration</span><span
+                                class="float-right font-size-x-large">{{countryStatisticsValues.refugeeVsImmigration}}</span>
+                        </div>
                     </div>
                 </div>
                 <div layout="column" class="margin-auto margin-top-100-px min-width-350-px max-width-500-px">

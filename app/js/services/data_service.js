@@ -13,6 +13,8 @@
     function dataService($state) {
         // getting the service instance
         let data_service = this;
+        data_service.secondaryMenuSelectedValue = "";
+        data_service.selectedCountryController = "";
 
         data_service.loadCsv = (filePath) => {
             return d3
@@ -22,36 +24,16 @@
                 .catch((error) => alert("Couldn't load dataset: " + error));
         };
 
-        data_service.secondaryMenuSelectedValue = "";
-
         // load data from all csv files
-        data_service.countriesClassByRegion = data_service.loadCsv(
-            countries_classes_by_region
-        );
-        data_service.totMigrByOriginDest = data_service.loadCsv(
-            total_migrants_by_origin_and_destination
-        );
-        data_service.maleMigrByOriginDest = data_service.loadCsv(
-            male_migrants_by_origin_and_destination
-        );
-        data_service.femaleMigrByOriginDest = data_service.loadCsv(
-            female_migrants_by_origin_and_destination
-        );
-        data_service.estimatedRefugees = data_service.loadCsv(
-            estimated_refugees
-        );
-        data_service.totMigrByAgeSex = data_service.loadCsv(
-            total_migrants_by_age_and_sex
-        );
-        data_service.totPopulationByAgeSex = data_service.loadCsv(
-            total_population_by_age_and_sex
-        );
-        data_service.migrAsPercOfPopulationAgeSex = data_service.loadCsv(
-            migrants_as_percentage_of_total_population_by_age_and_sex
-        );
-        data_service.migrPercDistributionAgeSex = data_service.loadCsv(
-            migrants_percentage_distribution_by_age_and_sex
-        );
+        data_service.countriesClassByRegion = data_service.loadCsv(countries_classes_by_region);
+        data_service.totMigrByOriginDest = data_service.loadCsv(total_migrants_by_origin_and_destination);
+        data_service.maleMigrByOriginDest = data_service.loadCsv(male_migrants_by_origin_and_destination);
+        data_service.femaleMigrByOriginDest = data_service.loadCsv(female_migrants_by_origin_and_destination);
+        data_service.estimatedRefugees = data_service.loadCsv(estimated_refugees);
+        data_service.totMigrByAgeSex = data_service.loadCsv(total_migrants_by_age_and_sex);
+        data_service.totPopulationByAgeSex = data_service.loadCsv(total_population_by_age_and_sex);
+        data_service.migrAsPercOfPopulationAgeSex = data_service.loadCsv(migrants_as_percentage_of_total_population_by_age_and_sex);
+        data_service.migrPercDistributionAgeSex = data_service.loadCsv(migrants_percentage_distribution_by_age_and_sex);
 
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
@@ -85,8 +67,13 @@
             { value: "compare", text: "Compare" },
         ];
 
+        data_service.getTopCountries = () => {
+            return [];
+        };
+
         // variable that holds the top five countries with income and outcome migrants
         data_service.topFlags = [
+            //data_service.getTopCountries()
             {
                 name: "Italy",
                 value: "italy",
@@ -166,6 +153,101 @@
                 default:
                     $state.go("home");
             }
+        };
+
+        /**
+         * Function that filter the row of the country passed as parameter
+         * @param {array} data
+         * @param {string} selectedCountry
+         * @returns {promise} - the row of the selectedCountry
+         */
+        let getSelectedCountryData = (data, selectedCountry) => {
+            return data.filter((countryData) => countryData["Destination"] == selectedCountry);
+        };
+
+        /**
+         * Function that returns teh total migrants by origin and destination data
+         * @param {string} selectedCountry
+         * @returns {promise}
+         */
+        data_service.getTotalMigrantsByOriginAndDestination = (selectedCountry) => {
+            return data_service.totMigrByOriginDest.then((data) => {
+                return getSelectedCountryData(data, selectedCountry);
+            });
+        };
+
+        /**
+         * Function that filter the data passed as parameter using the elements passed as parameter also
+         * @param {array} data
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @returns {promise}
+         */
+        let filterData = (data, selectedCountry, yearMin, yearMax) => {
+            return data.filter(
+                (countryData) =>
+                    countryData["Destination"] == selectedCountry && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+            );
+        };
+
+        /**
+         * Function that returns the total number of migrants by origin and destination
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @returns {promise}
+         */
+        data_service.getTotMigrantsByOriginAndDestination = (selectedCountry, yearMin, yearMax) => {
+            return data_service.totMigrByOriginDest.then((data) => {
+                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                return filteredData.reduce((sum, curr) => sum + +curr.Total, 0) / filteredData.length;
+            });
+        };
+
+        /**
+         * Function that returns the total population by age and sex
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @param {string} selectedGender
+         * @returns {promise}
+         */
+        data_service.getTotPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            return data_service.totPopulationByAgeSex.then((data) => {
+                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                return (filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length) * 1000;
+            });
+        };
+
+        /**
+         * Function that return the migrants by age and sex, as a percentage of the total population
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @param {string} selectedGender
+         * @returns {promise}
+         */
+        data_service.getMigrantsAsPercentageOfPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            return data_service.migrAsPercOfPopulationAgeSex.then((data) => {
+                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+
+                return filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length;
+            });
+        };
+
+        /**
+         * Function that returns the estimate refugees
+         * @param {string} selectedCountry
+         * @param {number} yearsColumns
+         * @param {number} selectedGender
+         * @returns {promise}
+         */
+        data_service.getEstimatedRefugees = (selectedCountry, yearsColumns, selectedGender) => {
+            return data_service.estimatedRefugees.then((data) => {
+                let selectedCountryData = getSelectedCountryData(data, selectedCountry);
+                return yearsColumns.reduce((sum, elem) => sum + +selectedCountryData[0]["" + elem + selectedGender]) / yearsColumns.length;
+            });
         };
     }
 })();
