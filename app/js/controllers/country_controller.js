@@ -15,7 +15,10 @@
         $scope.countryInfoValue = "global_rank";
         $scope.selectedTopCountry = "";
         $scope.countries = dataService.countries;
-        $scope.selectedCountry = $scope.countries[0].name;
+        $scope.selectedCountryController =
+            dataService.selectedCountryController == ""
+                ? $scope.countries[0].name
+                : dataService.selectedCountryController;
         $scope.secondaryMenuSelectedValue =
             dataService.secondaryMenuSelectedValue != ""
                 ? dataService.secondaryMenuSelectedValue
@@ -75,8 +78,7 @@
          */
         $scope.handleTopCountryClick = function (value, type) {
             $scope.selectedTopCountry = value;
-            console.log(value);
-            console.log(type);
+            $scope.selectedCountryController = value;
         };
     }
 })();

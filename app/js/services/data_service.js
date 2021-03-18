@@ -14,6 +14,8 @@
         // getting the service instance
         let data_service = this;
 
+        data_service.selectedCountryController = "";
+
         data_service.loadCsv = (fileName) => {
             return d3
                 .csv(data_csv_folder + fileName + ".csv", (data) => {

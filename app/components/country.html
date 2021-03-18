@@ -21,7 +21,7 @@
                 <div class="country-search-container width-100 margin-top-40-px">
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
-                        <md-select ng-model="selectedCountry" md-on-close="clearSearch()">
+                        <md-select ng-model="selectedCountryController" md-on-close="clearSearch()">
                             <md-optgroup label="Europe">
                                 <md-option ng-value="country.name"
                                     ng-repeat="country in countries | filter: {continent: 'europe'}">
@@ -55,9 +55,9 @@
             <div layout="column" class="width-25 padding-right-30px">
                 <div class="margin-top-60-px width-100">
                     <img class="display-block height-300-px margin-lr-auto"
-                        src="../../app/img/countries/outlines/{{selectedCountry}}.svg" />
+                        src="../../app/img/countries/outlines/{{selectedCountryController}}.svg" />
                 </div>
-                <h1 class="color-white margin-lr-auto">{{selectedCountry}}</h1>
+                <h1 class="color-white margin-lr-auto">{{selectedCountryController}}</h1>
                 <div class="margin-auto margin-top-200-px min-width-350-px max-width-500-px">
                     <radio-button-group selected-button="countryInfoValue"
                         handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"

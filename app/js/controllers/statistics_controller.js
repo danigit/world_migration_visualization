@@ -39,8 +39,9 @@
          */
         $scope.handleTopCountryClick = function (value, type) {
             $scope.selectedTopCountry = value;
-            console.log(value);
-            console.log(type);
+            dataService.selectedCountryController = value;
+            dataService.secondaryMenuSelectedValue = "country";
+            dataService.changePage();
         };
     }
 })();
