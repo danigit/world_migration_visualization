@@ -26,10 +26,11 @@
             source: [],
             destination: [],
         };
+
         // variable that holds the values for the slider
         $scope.slider = {
-            minValue: 1,
-            maxValue: 7,
+            minValue: 1990,
+            maxValue: 2019,
             options: {
                 floor: 0,
                 ceil: 6,
@@ -38,12 +39,29 @@
             },
         };
 
+        // getting the min and max year in the slider
+        let sliderMin = 1900;
+        let sliderMax = 2019;
+
+        // watcher that listens for the slider updates
+        $scope.$on("slideEnded", () => {
+            sliderMin = $scope.sliderCountry.minValue;
+            sliderMax = $scope.sliderCountry.maxValue;
+            updateStatistics();
+        });
+
+        /**
+         * Function that updates the statistics
+         */
+        let updateStatistics = () => {};
+
         /**
          * Function that handles the click on the genre radio group filter in the menu
          * @param {string} value
          */
         $scope.handleGenreClick = function (value) {
             $scope.genreFilterValue = value;
+            updateStatistics();
         };
 
         /**
@@ -52,7 +70,7 @@
          */
         $scope.handleRegionClick = function (value) {
             $scope.regionFilterValue = value;
-            console.log($scope.selectedCountries);
+            updateStatistics();
         };
 
         /**

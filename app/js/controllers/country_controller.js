@@ -72,12 +72,16 @@
         // getting the years selected in the slider
         let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
 
+        // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
             updateStatistics();
         });
 
+        /**
+         * Function that updates the statistics
+         */
         let updateStatistics = () => {
             // getting the total migrants by origin and destination
             dataService.getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax).then((data) => {
