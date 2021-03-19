@@ -136,6 +136,8 @@
                 });
         };
 
+        updateStatistics();
+
         /**
          * Function that handles the click on the genre radio group filter in the menu
          * @param {string} value
@@ -170,6 +172,28 @@
         $scope.handleTopCountryClick = function (value, type) {
             $scope.selectedTopCountry = value;
             $scope.selectedCountryController = value;
+        };
+
+        /**
+         * Function that handles the mouse enter on the top countries flags
+         * @param {string} value
+         */
+        $scope.showTopCountryHint = function (value, event, type) {
+            $scope.selectedTopFlag = value.toUpperCase();
+            let tooltip = document.getElementById("top-flags-tooltip");
+            tooltip.classList.remove("hide");
+            tooltip.style.top = event.clientY - 50 + "px";
+            tooltip.style.left = event.clientX + "px";
+            tooltip.style.zIndex = 100;
+        };
+
+        /**
+         * Function that handles the mouse out on the top countries flags
+         * @param {string} value
+         */
+        $scope.hideTopCountryHint = function (type) {
+            let tooltip = document.getElementById("top-flags-tooltip");
+            tooltip.style.zIndex = -100;
         };
     }
 })();
