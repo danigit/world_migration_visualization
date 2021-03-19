@@ -22,15 +22,10 @@
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
                         <md-select ng-model="selectedCountryController" md-on-close="clearSearch()">
-                            <md-optgroup label="Europe">
-                                <md-option ng-value="country.name"
-                                    ng-repeat="country in countries | filter: {continent: 'europe'}">
-                                    {{country.name}}</md-option>
-                            </md-optgroup>
-                            <md-optgroup label="Africa">
-                                <md-option ng-value="country.name"
-                                    ng-repeat="country in countries | filter: {continent: 'africa'}">
-                                    {{country.name}}</md-option>
+                            <md-optgroup label="country.continent">
+                                <md-option ng-value="country.visName"
+                                    ng-repeat="country in countries | filter: {continent: country.continent}">
+                                    {{country.visName}}</md-option>
                             </md-optgroup>
                         </md-select>
                     </md-input-container>

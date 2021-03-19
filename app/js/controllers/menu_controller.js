@@ -19,7 +19,8 @@
         $scope.searchDestination = "";
         $scope.genreFilterValue = "menu-male";
         $scope.regionFilterValue = "menu-continent";
-        $scope.countries = dataService.countries;
+        dataService.countries.then((data) =>
+            $scope.countries = data);
         $scope.genreButtons = dataService.genreButtons;
         $scope.regionButtons = dataService.regionButtons;
         $scope.selectedCountries = {

@@ -21,7 +21,25 @@
                 .csv(filePath, (data) => {
                     return data;
                 })
-                .catch((error) => alert("Couldn't load dataset: " + error));
+                .catch((error) => {
+                    alert('Could not load dataset...'
+                        + '\nCheck the console for more details!');
+
+                    console.log(error);
+                });
+        };
+
+        data_service.loadJson = (filePath) => {
+            return d3
+                .json(filePath, (data) => {
+                    return data;
+                })
+                .catch((error) => {
+                    alert('Could not load file...'
+                        + '\nCheck the console for more details!');
+
+                    console.log(error);
+                });
         };
 
         // load data from all csv files
@@ -103,32 +121,97 @@
 
         // variable that holds the types of visualization in the statistics page
         data_service.visualizationTypes = [
-            { value: "total_immigrations", text: "Total immigrations" },
+            { value: "total_immigration", text: "Total immigration" },
             { value: "total_population", text: "Total population" },
             {
                 value: "immigration_vs_population",
                 text: "Immigration vs. Population",
             },
-            { value: "immigration_avg_age", text: "Immigration average age" },
+            { value: "immigrants_avg_age", text: "Immigrants average age" },
             {
-                value: "refugees_vs_immigration",
-                text: "Refugees vs. Immigrates",
+                value: "refugees_vs_immigrants",
+                text: "Refugees vs. Immigrants",
             },
         ];
-        // variable that hold the countries
-        data_service.countries = [
-            // here we have to recover the countries
-            { continent: "europe", name: "France" },
-            { continent: "europe", name: "Italy" },
-            { continent: "europe", name: "Spain" },
-            { continent: "europe", name: "Finland" },
-            { continent: "europe", name: "Portugal" },
-            { continent: "africa", name: "Nigeria" },
-            { continent: "africa", name: "Kenya" },
-            { continent: "africa", name: "Etiopia" },
-            { continent: "africa", name: "marocco" },
-            { continent: "africa", name: "Uganda" },
-        ];
+
+        let getCountries = (visNames) => {
+            let getVisName = (country) => {
+                if (country in visNames)
+                    return visNames[country];
+                else return country;
+            }
+
+            return data_service
+                    .loadJson(world_countries_hierarchy).then((data) => {
+                        let countries = []
+
+                        const geoRegions = data['WORLD']['Geographic regions'];
+                        console.log(geoRegions);
+                        const geoRegions_lc = geoRegions.map(
+                                region => region.toLowerCase());
+
+                        for (const key in data) {
+                            if (key === 'WORLD')
+                                continue;
+                            
+                            let regionId = geoRegions_lc.indexOf(key.toLowerCase());
+
+                            if (regionId !== -1) {
+                                const continent = geoRegions[regionId];
+
+                                for (const region in data[key]) {
+                                    data[key][region].forEach((country) => {
+                                        countries.push(new Country(country, continent,
+                                                region, getVisName(country)));
+                                    });
+                                }
+                            } else {
+                                if (key.startsWith('EUROPE')) {
+                                    for (const i in data[key]) {
+                                        if (i === 'EUROPE') {
+                                            const continent = 'Europe';
+
+                                            for (const region in data[key][i]) {
+                                                data[key][i][region].forEach((country) =>
+                                                    countries.push(new Country(country, continent,
+                                                            continent, getVisName(country))));
+                                            }
+                                        } else {
+                                            const continent = 'Northern America';
+
+                                            data[key][i].forEach((country) =>
+                                                countries.push(new Country(country, continent,
+                                                        continent, getVisName(country))));
+                                        }
+                                    }
+                                } else {
+                                    for (const region in data[key]) {
+                                        const continent = geoRegions.find(
+                                                v => region.includes(v));
+
+                                        data[key][region].forEach((country) => {
+                                            countries.push(new Country(country, continent,
+                                                    region, getVisName(country)));
+                                        });
+                                    }
+                                }
+                            }
+                        }
+
+                        return countries.sort((a, b) =>
+                                (a.visName > b.visName)? 1 : -1);
+                    });
+        };
+
+        data_service.countries = data_service
+                .loadJson(world_countries_vis_name).then((data) => {
+                    return getCountries(data);
+                }
+        );
+
+        data_service.continents = ['Africa', 'Asia', 'Europe',
+                'Latin America and the Caribbean',
+                'Northern America', 'Oceania'];
 
         // variable that defines the country info types buttons
         data_service.countryInfoTypeButtons = [
@@ -185,9 +268,10 @@
          * @returns {promise}
          */
         let filterData = (data, selectedCountry, yearMin, yearMax) => {
-            return data.filter(
-                (countryData) =>
-                    countryData["Destination"] == selectedCountry && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+            return data.filter((countryData) =>
+                    countryData["Destination"] == selectedCountry 
+                        && countryData["Year"] >= yearMin
+                        && countryData["Year"] <= yearMax
             );
         };
 
