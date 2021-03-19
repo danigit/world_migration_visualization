@@ -131,7 +131,11 @@
                     getSelectedGenderColumn($scope.genreFilterValue, "_est")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
+                    if (isNaN(data)) {
+                        $scope.countryStatisticsValues.refugeeVsImmigration = "Not available";
+                    } else {
+                        $scope.countryStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
+                    }
                     $scope.$apply();
                 });
         };
