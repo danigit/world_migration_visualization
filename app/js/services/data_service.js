@@ -333,48 +333,27 @@
                         "AverageTotalMigrants": d3.mean(groupedByCountry[destination], yearData => yearData.Total)
                     })
                 }
-                let selectedTotalPopulationColumn
+                statisticsArray.sort(destObj => destObj.AverageTotalMigrants);
+                statisticsArray = statisticsArray.map((destObj, destIdx) => ({
+                    "Destination":destObj.Destination,
+                    "AverageTotalMigrants": destObj.AverageTotalMigrants,
+                    "AverageTotalMigrantsGlobalRank":destIdx
+                }));
+
+                /* let columnName = "";
                 switch (selectedGender) {
                     case "menu-all":
-                        selectedCsv = data_service.totMigrByOriginDest;
+                        columnName = data_service.totMigrByOriginDest;
                         break;
                     case "menu-male":
-                        selectedCsv = data_service.maleMigrByOriginDest;
+                        columnName = data_service.maleMigrByOriginDest;
                         break;
                     case "menu-female":
-                        selectedCsv = data_service.femaleMigrByOriginDest;
+                        columnName = data_service.femaleMigrByOriginDest;
                         break;
-                }
+                } */
                 return statisticsArray;
             });
-
-
-            /* switch (selectedGender) {
-                case "menu-all":
-                        data_service.totMigrByOriginDest.then((data) => {
-                        filteredData = data.filter(countryData => 
-                            countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
-                        );
-                    });
-                    break;
-                case "menu-male":
-                        data_service.maleMigrByOriginDest.then((data) => {
-                        filteredData = data.filter(countryData =>
-                            countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
-                        );
-                    });
-                    break;
-                case "menu-female":
-                        data_service.femaleMigrByOriginDest.then((data) => {
-                        filteredData = data.filter(countryData =>
-                            countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
-                        );
-                    });
-                    break;
-            } */
         };
-
-        /* // group by iso
-        countryData = groupBy(countryData, "iso"); */
     }
 })();
