@@ -55,13 +55,13 @@
 
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
-            { value: 1, legend: "1990" },
-            { value: 2, legend: "1995" },
-            { value: 3, legend: "2000" },
-            { value: 4, legend: "2005" },
-            { value: 5, legend: "2010" },
-            { value: 6, legend: "2015" },
-            { value: 7, legend: "2019" },
+            { value: 1990, legend: "1990" },
+            { value: 1995, legend: "1995" },
+            { value: 2000, legend: "2000" },
+            { value: 2005, legend: "2005" },
+            { value: 2010, legend: "2010" },
+            { value: 2015, legend: "2015" },
+            { value: 2019, legend: "2019" },
         ];
 
         // Variable that defines the genre buttons in the filter menu
@@ -315,8 +315,44 @@
         data_service.getMigrantsAsPercentageOfPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.migrAsPercOfPopulationAgeSex.then((data) => {
                 let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
-
                 return filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length;
+            });
+        };
+
+        /**
+         * Function that return the average age of the migrants
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @param {string} selectedGender
+         * @return {promise}
+         */
+        data_service.getImmigrationAverageAge = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            return data_service.totMigrByAgeSex.then((data) => {
+                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                let columns = Object.keys(filteredData[0]).filter((key) => {
+                    if (typeof key === "string" && key !== "Total" + selectedGender) {
+                        return key.includes(selectedGender);
+                    }
+                });
+
+                columns = columns.map((col) => {
+                    let colElem = col.split("_")[0];
+                    let ages = colElem.split("-");
+                    if (col == "75+" + selectedGender) return { key: col, value: 77 };
+                    return { key: col, value: (+ages[0] + +ages[1]) / 2 };
+                });
+
+                let yearsSum = 0;
+                Object.values(filteredData).forEach((row) => {
+                    let yearAverage = 0;
+                    columns.forEach((col) => {
+                        yearAverage += col.value * row[col.key];
+                    });
+                    yearsSum += yearAverage / row["Total" + selectedGender];
+                });
+
+                return yearsSum / filteredData.length;
             });
         };
 

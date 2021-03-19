@@ -1,12 +1,12 @@
 <div layout="column" class="parent-size">
     <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
         <div layout="row" layout-align="start center" ng-controller="navbarController">
-            <img src="app/img/home/logo.png" class="margin-auto" widht="79" height="56" />
-            <h2 class="padding-left-20px color-darkcyan">
+            <img src="app/img/home/logo.png" class="margin-auto" height="40" />
+            <h2 class="padding-left-20px color-darkcyan font-size-larger">
                 International Migrant Stock
             </h2>
-            <md-button ng-click="loadMap()" class="margin-left-20px font-size-medium text-bold">Home</md-button>
-            <md-button ng-click="loadStatistics()" class="font-size-medium text-bold">Statistics</md-button>
+            <md-button ng-click="loadMap()" class="margin-left-20px font-size-small text-bold">Home</md-button>
+            <md-button ng-click="loadStatistics()" class="font-size-small text-bold">Statistics</md-button>
         </div>
     </md-toolbar>
     <div layout="row" class="background-dark height-5">
@@ -19,13 +19,13 @@
     <div layout="row" class="background-dark height-95">
         <div class="width-20">
             <div layout="column" class="color-white margin-top-20">
-                <div class="font-size-x-large text-bold padding-left-20px">
+                <div class="font-size-small text-bold padding-left-20px">
                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iusto aliquid excepturi unde veritatis
                     nulla, dolore voluptate minus, libero natus architecto illo enim aliquam. Accusamus odit
                     voluptatibus velit modi at neque placeat similique recusandae voluptate ut.
                 </div>
                 <div class="margin-top-20">
-                    <img src="../../sketch/Mask_Group_2.png">
+                    <!-- <img src="../../sketch/Mask_Group_2.png"> -->
                 </div>
             </div>
         </div>
@@ -33,8 +33,8 @@
             <div class="height-80 position-relative">
                 <div layout="row">
                     <div class="color-white margin-top-15-px margin-left-20px">
-                        <div class="font-size-xxx-large text-bold">2001 - 2010</div>
-                        <div class="font-size-x-large margin-top-10-px text-center color-darkcyan">Total Immigration
+                        <div class="font-size-xx-large text-bold">2001 - 2010</div>
+                        <div class="font-large margin-top-10-px color-darkcyan">Total Immigration
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
             </div>
             <div layout="row" class="height-20">
                 <div class="width-70 height-100">
-                    <div layout="row" class="color-white margin-top-20-px margin-left-20px font-size-x-large">
+                    <div layout="row" class="color-white margin-top-20-px margin-left-20px font-size-small">
                         <div class="padding-lr-20-px text-justify">
                             Lorem ipsum, dolor sit amet consectetur adipisicing elit. Esse, a accusamus? Voluptates
                             recusandae at modi nemo voluptatibus obcaecati minus asperiores. Quia voluptate suscipit
@@ -71,12 +71,18 @@
                     <div layout="column">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                             ng-model="selectedTopCountryValue" countries="topFlags"
-                            top-countries-icon-path="'app/img/home/up.png'"></top-countries>
+                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
+                            top-countries-icon-path="'app/img/home/up.png'">
+                        </top-countries>
                         <hr class="menu-divider width-90" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
                             ng-model="selectedTopCountryValue" countries="topFlags"
+                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
+                </div>
+                <div layout="column" id="top-flags-tooltip">
+                    <div>{{selectedTopFlag}}</div>
                 </div>
             </div>
         </div>
