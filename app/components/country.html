@@ -92,11 +92,16 @@
                 <div layout="column" class="margin-auto margin-top-100-px min-width-250-px max-width-700-px">
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                         ng-model="selectedTopCountryValue" countries="topFlags"
+                        show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
                         top-countries-icon-path="'app/img/home/up.png'"></top-countries>
                     <hr class="menu-divider" />
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
                         ng-model="selectedTopCountryValue" countries="topFlags"
+                        show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
                         top-countries-icon-path="'app/img/home/down.png'"></top-countries>
+                </div>
+                <div layout="column" id="top-flags-tooltip">
+                    <div>{{selectedTopFlag}}</div>
                 </div>
             </div>
         </div>

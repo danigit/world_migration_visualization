@@ -19,7 +19,6 @@ function resizeMenuPanel(isMenuOpened) {
  * @returns
  */
 function transformNumberFormat(number) {
-    console.log(number);
     let steps = [
         { value: 1, symbol: "" },
         { value: 1e3, symbol: "k" },

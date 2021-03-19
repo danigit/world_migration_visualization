@@ -72,12 +72,16 @@
         // getting the years selected in the slider
         let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
 
+        // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
             updateStatistics();
         });
 
+        /**
+         * Function that updates the statistics
+         */
         let updateStatistics = () => {
             // getting the total migrants by origin and destination
             dataService.getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax).then((data) => {
@@ -145,10 +149,16 @@
                     getSelectedGenderColumn($scope.genreFilterValue, "_est")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
+                    if (isNaN(data)) {
+                        $scope.countryStatisticsValues.refugeeVsImmigration = "Not available";
+                    } else {
+                        $scope.countryStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
+                    }
                     $scope.$apply();
                 });
         };
+
+        updateStatistics();
 
         /**
          * Function that handles the click on the genre radio group filter in the menu
@@ -184,6 +194,28 @@
         $scope.handleTopCountryClick = function (value, type) {
             $scope.selectedTopCountry = value;
             $scope.selectedCountryController = value;
+        };
+
+        /**
+         * Function that handles the mouse enter on the top countries flags
+         * @param {string} value
+         */
+        $scope.showTopCountryHint = function (value, event, type) {
+            $scope.selectedTopFlag = value.toUpperCase();
+            let tooltip = document.getElementById("top-flags-tooltip");
+            tooltip.classList.remove("hide");
+            tooltip.style.top = event.clientY - 50 + "px";
+            tooltip.style.left = event.clientX + "px";
+            tooltip.style.zIndex = 100;
+        };
+
+        /**
+         * Function that handles the mouse out on the top countries flags
+         * @param {string} value
+         */
+        $scope.hideTopCountryHint = function (type) {
+            let tooltip = document.getElementById("top-flags-tooltip");
+            tooltip.style.zIndex = -100;
         };
     }
 })();

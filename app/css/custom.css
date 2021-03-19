@@ -392,3 +392,11 @@ POSITION
 .float-left {
     float: left;
 }
+
+#top-flags-tooltip {
+    position: fixed;
+    padding: 10px;
+    background-color: #2d2e2e;
+    color: #ffffff;
+    z-index: -100;
+}
