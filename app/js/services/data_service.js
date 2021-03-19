@@ -146,7 +146,6 @@
                         let countries = []
 
                         const geoRegions = data['WORLD']['Geographic regions'];
-                        console.log(geoRegions);
                         const geoRegions_lc = geoRegions.map(
                                 region => region.toLowerCase());
 
