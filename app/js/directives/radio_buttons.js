@@ -33,12 +33,12 @@ angular.module("radio-button", []).directive("radioButtonGroup", function () {
                 });
             });
 
-            scope.$watch("model", (newVal) => {
-                element.removeClass("button-clicked");
-                if (newVal === scope.value) {
-                    element.addClass("button-clicked");
-                }
-            });
+            // scope.$watch("model", (newVal) => {
+            //     element.removeClass("button-clicked");
+            //     if (newVal === scope.value) {
+            //         element.addClass("button-clicked");
+            //     }
+            // });
         },
     };
 });

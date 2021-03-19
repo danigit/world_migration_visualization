@@ -1,5 +1,5 @@
 .country-search-container .md-select-value span {
-    font-size: x-large !important;
+    font-size: small !important;
 }
 
 #country-slider .rz-tick-value {
@@ -8,5 +8,6 @@
 
 #country-slider .rz-tick-legend {
     color: #0093c4;
+    font-size: small;
     transform: rotate(45deg) !important;
 }
