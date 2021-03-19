@@ -119,6 +119,21 @@
                 console.log("getEstimatedRefugees: " + data);
             });
 
+            // $scope.selectedCountryController, sliderMin, sliderMax
+        dataService
+            .getGlobalRankStatistics(
+                $scope.selectedCountryController,
+                sliderMin, sliderMax,
+                $scope.genreFilterValue
+            )
+            .then((data) => {
+                /* $scope.countryStatisticsValues.refugeeVsImmigration = "" + data;
+                $scope.$apply(); */
+                console.log("Grouped data: " + data);
+            });
+
+        
+
         /**
          * Function that handles the click on the genre radio group filter in the menu
          * @param {string} value

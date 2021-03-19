@@ -249,5 +249,96 @@
                 return yearsColumns.reduce((sum, elem) => sum + +selectedCountryData[0]["" + elem + selectedGender]) / yearsColumns.length;
             });
         };
+
+
+        // group by function
+        var groupBy = function (objectArray, property) {
+            return objectArray.reduce(function (acc, obj) {
+              var key = obj[property];
+              if (!acc[key]) {
+                acc[key] = [];
+              }
+              acc[key].push(obj);
+              return acc;
+            }, {});
+        };
+    
+
+        /**
+         * Function that returns the total migrants global rank
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @param {string} selectedGender
+         * @returns {promise}
+         */
+         data_service.getGlobalRankStatistics = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            let selectedCsv = [];
+            switch (selectedGender) {
+                case "menu-all":
+                    selectedCsv = data_service.totMigrByOriginDest;
+                    break;
+                case "menu-male":
+                    selectedCsv = data_service.maleMigrByOriginDest;
+                    break;
+                case "menu-female":
+                    selectedCsv = data_service.femaleMigrByOriginDest;
+                    break;
+            }
+            return selectedCsv.then((data) => {
+                let filteredData = data.filter(countryData => 
+                    countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                );
+                let groupedByCountry = groupBy(filteredData, "Destination");
+                let statisticsArray = [];
+                for (let destination in groupedByCountry) {
+                    statisticsArray.push({
+                        "Destination":destination,
+                        "AverageTotalMigrants": d3.mean(groupedByCountry[destination], yearData => yearData.Total)
+                    })
+                }
+                let selectedTotalPopulationColumn
+                switch (selectedGender) {
+                    case "menu-all":
+                        selectedCsv = data_service.totMigrByOriginDest;
+                        break;
+                    case "menu-male":
+                        selectedCsv = data_service.maleMigrByOriginDest;
+                        break;
+                    case "menu-female":
+                        selectedCsv = data_service.femaleMigrByOriginDest;
+                        break;
+                }
+                return statisticsArray;
+            });
+
+
+            /* switch (selectedGender) {
+                case "menu-all":
+                        data_service.totMigrByOriginDest.then((data) => {
+                        filteredData = data.filter(countryData => 
+                            countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                        );
+                    });
+                    break;
+                case "menu-male":
+                        data_service.maleMigrByOriginDest.then((data) => {
+                        filteredData = data.filter(countryData =>
+                            countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                        );
+                    });
+                    break;
+                case "menu-female":
+                        data_service.femaleMigrByOriginDest.then((data) => {
+                        filteredData = data.filter(countryData =>
+                            countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                        );
+                    });
+                    break;
+            } */
+        };
+
+        /* // group by iso
+        countryData = groupBy(countryData, "iso"); */
     }
 })();
