@@ -14,14 +14,18 @@
                         <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
                             <md-select ng-model="selectedCountry.left" md-on-close="clearSearch()">
-                                <md-optgroup label="Europe">
+                                <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
                                     <md-option ng-value="country.name"
+<<<<<<< HEAD
                                         ng-repeat="country in countries | filter: {continent: 'europe'}">
                                         {{country.visName}}</md-option>
                                 </md-optgroup>
                                 <md-optgroup label="Africa">
                                     <md-option ng-value="country.name"
                                         ng-repeat="country in countries | filter: {continent: 'africa'}">
+=======
+                                        ng-repeat="country in countries | filter: {continent: continent}">
+>>>>>>> 6a5db8860eda57cda757c7943d13a9bc3c194f3d
                                         {{country.visName}}</md-option>
                                 </md-optgroup>
                             </md-select>
@@ -67,14 +71,9 @@
                         <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
                             <md-select ng-model="selectedCountry.right" md-on-close="clearSearch()">
-                                <md-optgroup label="Europe">
+                                <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
                                     <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: {continent: 'europe'}">
-                                        {{country.visName}}</md-option>
-                                </md-optgroup>
-                                <md-optgroup label="Africa">
-                                    <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: {continent: 'africa'}">
+                                        ng-repeat="country in countries | filter: {continent: continents}">
                                         {{country.visName}}</md-option>
                                 </md-optgroup>
                             </md-select>
