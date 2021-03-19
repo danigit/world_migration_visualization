@@ -28,7 +28,7 @@
         };
 
         // variable that holds the values for the slider
-        $scope.slider = {
+        $scope.sliderYears = {
             minValue: 1990,
             maxValue: 2019,
             options: {
@@ -45,8 +45,8 @@
 
         // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
-            sliderMin = $scope.sliderCountry.minValue;
-            sliderMax = $scope.sliderCountry.maxValue;
+            sliderMin = $scope.sliderYears.minValue;
+            sliderMax = $scope.sliderYears.maxValue;
             updateStatistics();
         });
 
