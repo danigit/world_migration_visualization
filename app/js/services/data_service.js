@@ -308,8 +308,32 @@
          * @param {string} selectedGender
          * @returns {promise}
          */
-         data_service.getGlobalRankStatistics = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            let selectedCsv = [];
+         data_service.getGlobalRankStatistics = (yearMin, yearMax, selectedGender) => {
+
+            let data = dataService.getTotMigrantsByOriginAndDestination(destination, sliderMin, sliderMax).
+                then((data) => {
+                    return data;
+            });
+/* 
+            let filteredData = data.filter(countryData => 
+                countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+            );
+            let groupedByCountry = groupBy(filteredData, "Destination"); */
+            
+            let statisticsArray = [];
+            for (let destination in groupedByCountry) {
+                statisticsArray.push({
+                    "Destination":destination,
+                    "AverageTotalMigrants": d3.mean(groupedByCountry[destination], yearData => yearData.Total)
+                })
+            }
+            statisticsArray.sort(destObj => destObj.AverageTotalMigrants);
+            statisticsArray = statisticsArray.map((destObj, destIdx) => ({
+                "Destination":destObj.Destination,
+                "AverageTotalMigrants": destObj.AverageTotalMigrants,
+                "AverageTotalMigrantsGlobalRank": destIdx + 1
+            }));
+            /* let selectedCsv = [];
             switch (selectedGender) {
                 case "menu-all":
                     selectedCsv = data_service.totMigrByOriginDest;
@@ -337,23 +361,41 @@
                 statisticsArray = statisticsArray.map((destObj, destIdx) => ({
                     "Destination":destObj.Destination,
                     "AverageTotalMigrants": destObj.AverageTotalMigrants,
-                    "AverageTotalMigrantsGlobalRank":destIdx
+                    "AverageTotalMigrantsGlobalRank": destIdx + 1
                 }));
-
-                /* let columnName = "";
-                switch (selectedGender) {
-                    case "menu-all":
-                        columnName = data_service.totMigrByOriginDest;
-                        break;
-                    case "menu-male":
-                        columnName = data_service.maleMigrByOriginDest;
-                        break;
-                    case "menu-female":
-                        columnName = data_service.femaleMigrByOriginDest;
-                        break;
-                } */
+                data_service.totPopulationByAgeSex.then((data) => {
+                    let columnName = "";
+                    switch (selectedGender) {
+                        case "menu-all":
+                            columnName = "Total_(mf)";
+                            break;
+                        case "menu-male":
+                            columnName = "Total_(m)";
+                            break;
+                        case "menu-female":
+                            columnName = "Total_(f)";
+                            break;
+                    }
+                    let filteredData = data.filter(countryData => 
+                        countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                    );
+                    let groupedByCountry = groupBy(filteredData, "Destination");
+                    let statisticsArray = [];
+                    for (let destination in groupedByCountry) {
+                        statisticsArray.push({
+                            "Destination":destination,
+                            "AverageTotalPopulation": d3.mean(groupedByCountry[destination], yearData => yearData[columnName])
+                        })
+                    }
+                    statisticsArray.sort(destObj => destObj.AverageTotalMigrants);
+                    statisticsArray = statisticsArray.map((destObj, destIdx) => ({
+                        "Destination":destObj.Destination,
+                        "AverageTotalMigrants": destObj.AverageTotalMigrants,
+                        "AverageTotalMigrantsGlobalRank": destIdx + 1
+                    }));   
+                });
                 return statisticsArray;
-            });
+            }); */
         };
     }
 })();

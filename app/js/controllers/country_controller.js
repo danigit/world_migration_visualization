@@ -92,7 +92,6 @@
             // $scope.selectedCountryController, sliderMin, sliderMax
         dataService
             .getGlobalRankStatistics(
-                $scope.selectedCountryController,
                 sliderMin, sliderMax,
                 $scope.genreFilterValue
             )
