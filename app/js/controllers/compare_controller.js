@@ -16,11 +16,13 @@
                 ? dataService.secondaryMenuSelectedValue
                 : "compare";
         $scope.secondaryMenuButtons = dataService.menuButtons;
-        $scope.countries = dataService.countries;
-        $scope.selectedCountry = {
-            left: $scope.countries[0].name,
-            right: $scope.countries[1].name,
-        };
+        dataService.countries.then((data) => {
+            $scope.countries = data;
+            $scope.selectedCountry = {
+                left:  $scope.countries[0].visName,
+                right: $scope.countries[1].visName,
+            };
+        });
 
         /**
          * Function that handles the click on the secondary menu buttons

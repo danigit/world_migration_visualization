@@ -14,9 +14,13 @@
         $scope.genreFilterValue = "menu-all";
         $scope.countryInfoValue = "global_rank";
         $scope.selectedTopCountry = "";
-        $scope.countries = dataService.countries;
-        $scope.selectedCountryController =
-            dataService.selectedCountryController == "" ? $scope.countries[0].name : dataService.selectedCountryController;
+        dataService.countries.then((data) => {
+            $scope.countries = data;
+
+            $scope.selectedCountryController = dataService.selectedCountryController == ""
+                    ? $scope.countries[0].visName : dataService.selectedCountryController;
+        });
+        
         $scope.secondaryMenuSelectedValue =
             dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "country";
         $scope.secondaryMenuButtons = dataService.menuButtons;
