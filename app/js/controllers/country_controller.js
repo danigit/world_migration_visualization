@@ -11,16 +11,19 @@
     countryController.$inject = ["$scope", "$state", "dataService", "countryService"];
 
     function countryController($scope, $state, dataService, countryService) {
-        $scope.genreFilterValue = "menu-all";
         $scope.countryInfoValue = "global_rank";
         $scope.selectedTopCountry = "";
+        $scope.continents = dataService.continents;
         dataService.countries.then((data) => {
             $scope.countries = data;
 
-            $scope.selectedCountryController = dataService.selectedCountryController == ""
-                    ? $scope.countries[0].visName : dataService.selectedCountryController;
+            $scope.selectedCountryController =
+                dataService.selectedCountryController == "" ? $scope.countries[0].visName : dataService.selectedCountryController;
+
+            $scope.genreFilterValue = "menu-all";
+            updateStatistics();
         });
-        
+
         $scope.secondaryMenuSelectedValue =
             dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "country";
         $scope.secondaryMenuButtons = dataService.menuButtons;
@@ -47,28 +50,6 @@
             },
         };
 
-        /**
-         * Function that returns the column postfix given the gender
-         * @param {string} selectedGender
-         * @param {string} columnPrefix
-         * @returns {string}
-         */
-        let getSelectedGenderColumn = (selectedGender, columnPrefix) => {
-            let selectedGenderColumn = "";
-            switch (selectedGender) {
-                case "menu-all":
-                    selectedGenderColumn = columnPrefix + "_(mf)";
-                    break;
-                case "menu-male":
-                    selectedGenderColumn = columnPrefix + "_(m)";
-                    break;
-                case "menu-female":
-                    selectedGenderColumn = columnPrefix + "_(f)";
-                    break;
-            }
-            return selectedGenderColumn;
-        };
-
         // getting the min and max year in the slider
         let sliderMin = 1900;
         let sliderMax = 2019;
@@ -87,11 +68,14 @@
          * Function that updates the statistics
          */
         let updateStatistics = () => {
+            console.log($scope.selectedCountryController);
             // getting the total migrants by origin and destination
-            dataService.getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax).then((data) => {
-                $scope.countryStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
-                $scope.$apply();
-            });
+            dataService
+                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
+                    $scope.countryStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
+                    $scope.$apply();
+                });
 
             // getting the total population by age and sex
             dataService
@@ -99,7 +83,7 @@
                     $scope.selectedCountryController,
                     sliderMin,
                     sliderMax,
-                    getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.totalPopulation = "" + transformNumberFormat(data);
@@ -112,7 +96,7 @@
                     $scope.selectedCountryController,
                     sliderMin,
                     sliderMax,
-                    getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.immigrationVsPopulation = "" + transformNumberFormat(data);
@@ -125,7 +109,7 @@
                     $scope.selectedCountryController,
                     sliderMin,
                     sliderMax,
-                    getSelectedGenderColumn($scope.genreFilterValue, "")
+                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.immigrationAverageAge = "" + transformNumberFormat(data);
@@ -136,7 +120,7 @@
                 .getEstimatedRefugees(
                     $scope.selectedCountryController,
                     consideredYears,
-                    getSelectedGenderColumn($scope.genreFilterValue, "_est")
+                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_est")
                 )
                 .then((data) => {
                     if (isNaN(data)) {
@@ -146,9 +130,9 @@
                     }
                     $scope.$apply();
                 });
-        };
 
-        updateStatistics();
+            dataService.getCountryDevelopmentStatistic($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue);
+        };
 
         /**
          * Function that handles the click on the genre radio group filter in the menu

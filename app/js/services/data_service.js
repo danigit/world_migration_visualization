@@ -22,8 +22,7 @@
                     return data;
                 })
                 .catch((error) => {
-                    alert('Could not load dataset...'
-                        + '\nCheck the console for more details!');
+                    alert("Could not load dataset..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
@@ -35,8 +34,7 @@
                     return data;
                 })
                 .catch((error) => {
-                    alert('Could not load file...'
-                        + '\nCheck the console for more details!');
+                    alert("Could not load file..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
@@ -134,84 +132,94 @@
             },
         ];
 
-        let getCountries = (visNames) => {
-            let getVisName = (country) => {
-                if (country in visNames)
-                    return visNames[country];
-                else return country;
+        /**
+         * Function that returns the column postfix given the gender
+         * @param {string} selectedGender
+         * @param {string} columnPrefix
+         * @returns {string}
+         */
+        data_service.getSelectedGenderColumn = (selectedGender, columnPrefix) => {
+            let selectedGenderColumn = "";
+            switch (selectedGender) {
+                case "menu-all":
+                    selectedGenderColumn = columnPrefix + "_(mf)";
+                    break;
+                case "menu-male":
+                    selectedGenderColumn = columnPrefix + "_(m)";
+                    break;
+                case "menu-female":
+                    selectedGenderColumn = columnPrefix + "_(f)";
+                    break;
             }
-
-            return data_service
-                    .loadJson(world_countries_hierarchy).then((data) => {
-                        let countries = []
-
-                        const geoRegions = data['WORLD']['Geographic regions'];
-                        console.log(geoRegions);
-                        const geoRegions_lc = geoRegions.map(
-                                region => region.toLowerCase());
-
-                        for (const key in data) {
-                            if (key === 'WORLD')
-                                continue;
-                            
-                            let regionId = geoRegions_lc.indexOf(key.toLowerCase());
-
-                            if (regionId !== -1) {
-                                const continent = geoRegions[regionId];
-
-                                for (const region in data[key]) {
-                                    data[key][region].forEach((country) => {
-                                        countries.push(new Country(country, continent,
-                                                region, getVisName(country)));
-                                    });
-                                }
-                            } else {
-                                if (key.startsWith('EUROPE')) {
-                                    for (const i in data[key]) {
-                                        if (i === 'EUROPE') {
-                                            const continent = 'Europe';
-
-                                            for (const region in data[key][i]) {
-                                                data[key][i][region].forEach((country) =>
-                                                    countries.push(new Country(country, continent,
-                                                            continent, getVisName(country))));
-                                            }
-                                        } else {
-                                            const continent = 'Northern America';
-
-                                            data[key][i].forEach((country) =>
-                                                countries.push(new Country(country, continent,
-                                                        continent, getVisName(country))));
-                                        }
-                                    }
-                                } else {
-                                    for (const region in data[key]) {
-                                        const continent = geoRegions.find(
-                                                v => region.includes(v));
-
-                                        data[key][region].forEach((country) => {
-                                            countries.push(new Country(country, continent,
-                                                    region, getVisName(country)));
-                                        });
-                                    }
-                                }
-                            }
-                        }
-
-                        return countries.sort((a, b) =>
-                                (a.visName > b.visName)? 1 : -1);
-                    });
+            return selectedGenderColumn;
         };
 
-        data_service.countries = data_service
-                .loadJson(world_countries_vis_name).then((data) => {
-                    return getCountries(data);
-                }
-        );
+        let getCountries = (visNames) => {
+            let getVisName = (country) => {
+                if (country in visNames) return visNames[country];
+                else return country;
+            };
 
-        data_service.continents = ['Africa', 'Asia', 'Europe',
-                'Latin America and the Caribbean',
-                'Northern America', 'Oceania'];
+            return data_service.loadJson(world_countries_hierarchy).then((data) => {
+                let countries = [];
+
+                const geoRegions = data["WORLD"]["Geographic regions"];
+                console.log(geoRegions);
+                const geoRegions_lc = geoRegions.map((region) => region.toLowerCase());
+
+                for (const key in data) {
+                    if (key === "WORLD") continue;
+
+                    let regionId = geoRegions_lc.indexOf(key.toLowerCase());
+
+                    if (regionId !== -1) {
+                        const continent = geoRegions[regionId];
+
+                        for (const region in data[key]) {
+                            data[key][region].forEach((country) => {
+                                countries.push(new Country(country, continent, region, getVisName(country)));
+                            });
+                        }
+                    } else {
+                        if (key.startsWith("EUROPE")) {
+                            for (const i in data[key]) {
+                                if (i === "EUROPE") {
+                                    const continent = "Europe";
+
+                                    for (const region in data[key][i]) {
+                                        data[key][i][region].forEach((country) =>
+                                            countries.push(new Country(country, continent, continent, getVisName(country)))
+                                        );
+                                    }
+                                } else {
+                                    const continent = "Northern America";
+
+                                    data[key][i].forEach((country) =>
+                                        countries.push(new Country(country, continent, continent, getVisName(country)))
+                                    );
+                                }
+                            }
+                        } else {
+                            for (const region in data[key]) {
+                                const continent = geoRegions.find((v) => region.includes(v));
+
+                                data[key][region].forEach((country) => {
+                                    countries.push(new Country(country, continent, region, getVisName(country)));
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return countries.sort((a, b) => (a.visName > b.visName ? 1 : -1));
+            });
+        };
+
+        data_service.countries = data_service.loadJson(world_countries_vis_name).then((data) => {
+            return getCountries(data);
+        });
+
+        data_service.continents = ["Africa", "Asia", "Europe", "Latin America and the Caribbean", "Northern America", "Oceania"];
 
         // variable that defines the country info types buttons
         data_service.countryInfoTypeButtons = [
@@ -249,7 +257,7 @@
         };
 
         /**
-         * Function that returns teh total migrants by origin and destination data
+         * Function that returns the total migrants by origin and destination data
          * @param {string} selectedCountry
          * @returns {promise}
          */
@@ -268,13 +276,35 @@
          * @returns {promise}
          */
         let filterData = (data, selectedCountry, yearMin, yearMax) => {
-            return data.filter((countryData) =>
-                    countryData["Destination"] == selectedCountry 
-                        && countryData["Year"] >= yearMin
-                        && countryData["Year"] <= yearMax
+            return data.filter(
+                (countryData) =>
+                    countryData["Destination"] == selectedCountry && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
             );
         };
 
+        /**
+         * Function that filter the data passed as parameter using the elements passed as parameter also
+         * @param {array} data
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @returns {promise}
+         */
+        let filterColumn = (data, selectedCountry, yearMin, yearMax) => {
+            console.log(data);
+            return data[selectedCountry];
+        };
+
+        let getOriginAndDestinationByGender = (selectedGender) => {
+            switch (selectedGender) {
+                case "menu-all":
+                    return data_service.totMigrByOriginDest;
+                case "menu-male":
+                    return data_service.maleMigrByOriginDest;
+                case "menu-female":
+                    return data_service.femaleMigrByOriginDest;
+            }
+        };
         /**
          * Function that returns the total number of migrants by origin and destination
          * @param {string} selectedCountry
@@ -282,8 +312,8 @@
          * @param {number} yearMax
          * @returns {promise}
          */
-        data_service.getTotMigrantsByOriginAndDestination = (selectedCountry, yearMin, yearMax) => {
-            return data_service.totMigrByOriginDest.then((data) => {
+        data_service.getTotMigrantsByOriginAndDestination = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            return getOriginAndDestinationByGender(selectedGender).then((data) => {
                 let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
                 return filteredData.reduce((sum, curr) => sum + +curr.Total, 0) / filteredData.length;
             });
@@ -367,6 +397,17 @@
             return data_service.estimatedRefugees.then((data) => {
                 let selectedCountryData = getSelectedCountryData(data, selectedCountry);
                 return yearsColumns.reduce((sum, elem) => sum + +selectedCountryData[0]["" + elem + selectedGender]) / yearsColumns.length;
+            });
+        };
+
+        data_service.getCountryDevelopmentStatistic = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            getOriginAndDestinationByGender(selectedGender).then((data) => {
+                Object.values(data).forEach((elem) => {
+                    console.log(elem[selectedCountry]);
+                });
+                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                console.log(filteredData);
+                console.log(filterColumn(data, selectedCountry, yearMin, yearMax));
             });
         };
     }
