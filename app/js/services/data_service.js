@@ -400,15 +400,58 @@
             });
         };
 
-        data_service.getCountryDevelopmentStatistic = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            getOriginAndDestinationByGender(selectedGender).then((data) => {
+        data_service.getCountryDevelopmentStatistic = (selectedCountry, yearsColumns, selectedGender) => {
+            return getOriginAndDestinationByGender(selectedGender).then((data) => {
+                let development = [
+                    { type: "Less Developed", value: [] },
+                    { type: "More Developed", value: [] },
+                ];
                 Object.values(data).forEach((elem) => {
-                    console.log(elem[selectedCountry]);
+                    if (elem["Destination"] === "More developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        development[0].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Less developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        development[1].value.push(elem[selectedCountry]);
                 });
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
-                console.log(filteredData);
-                console.log(filterColumn(data, selectedCountry, yearMin, yearMax));
+
+                development[0].value = d3.mean(development[0].value).toFixed(2);
+                development[1].value = d3.mean(development[1].value).toFixed(2);
+
+                return development;
             });
         };
+
+        data_service.getCountryIncomeStatistic = (selectedCountry, yearsColumns, selectedGender) => {
+            return getOriginAndDestinationByGender(selectedGender).then((data) => {
+                let income = [
+                    { type: "High Income", value: [] },
+                    { type: "Upper Middle Income", value: [] },
+                    { type: "Lower Middle Income", value: [] },
+                    { type: "Low Income", value: [] },
+                    { type: "Other Income", value: [] },
+                ];
+                Object.values(data).forEach((elem) => {
+                    if (elem["Destination"] === "High-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[0].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Upper-middle-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[1].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Lower-middle-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[2].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Low-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[3].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "No income group available" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[4].value.push(elem[selectedCountry]);
+                });
+
+                Object.values(income).forEach((elem, index) => {
+                    income[index].value = d3.mean(income[index].value).toFixed(2);
+                });
+
+                return income;
+            });
+        };
+
+        data_service.getRateOfChange = () => {
+            
+        }
     }
 })();

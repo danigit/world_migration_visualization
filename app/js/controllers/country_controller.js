@@ -131,7 +131,81 @@
                     $scope.$apply();
                 });
 
-            dataService.getCountryDevelopmentStatistic($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue);
+            dataService
+                .getCountryDevelopmentStatistic($scope.selectedCountryController, consideredYears, $scope.genreFilterValue)
+                .then((data) => {
+                    drawPieChart(data, "development-piechart");
+                });
+
+            dataService
+                .getCountryIncomeStatistic($scope.selectedCountryController, consideredYears, $scope.genreFilterValue)
+                .then((data) => {
+                    drawPieChart(data, "income-piechart");
+                });
+        };
+
+        let drawPieChart = (data, container) => {
+            const developmentContainer = d3.select("#" + container);
+            const developmentContainerDim = developmentContainer.node().getBoundingClientRect();
+            const width = developmentContainerDim.width;
+            const height = developmentContainerDim.height;
+
+            const svg = developmentContainer.append("svg").attr("width", width).attr("height", height);
+            const pieChartGroup = svg.append("g").attr("transform", `translate(${width / 2}, ${height / 2})`);
+            const pieChartLabels = svg
+                .append("g")
+                .attr("class", "labels")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+            const radius = Math.min(width, height) / 2;
+            const colors = d3.scaleOrdinal(d3.schemePaired);
+            const arc = d3
+                .arc()
+                .outerRadius(radius - 50)
+                .innerRadius(0);
+            const pie = d3.pie().value((d) => d.value);
+            const piedData = pie(data);
+
+            const arcs = pieChartGroup
+                .selectAll(".arc")
+                .data(piedData)
+                .join((enter) => enter.append("path").attr("class", "arc").style("stroke", "white"))
+                .attr("d", arc)
+                .style("fill", (d, i) => colors(i));
+
+            let legendIndex = 0;
+            var labelGroups = pieChartLabels.selectAll(".label").data(piedData).enter().append("g").attr("class", "label");
+            labelGroups
+                .append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("rx", 0)
+                .attr("ry", 0)
+                .attr("width", 10)
+                .attr("height", 10)
+                .attr("stroke", "#FFFFFF")
+                .attr("fill", (d, i) => colors(i))
+                .attr("transform", (d, i) => {
+                    if (i < data.length / 2) return `translate(${-(width / 2 - 50)}, ${height / 2 - 15 * (i + 1)})`;
+                    else {
+                        return `translate(${width / 4 - 100}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                    }
+                })
+                .attr("class", "label-circle");
+
+            legendIndex = 0;
+            let textLabels = labelGroups
+                .append("text")
+                .attr("x", "0")
+                .attr("y", "5")
+                .attr("transform", (d, i) => {
+                    if (i < data.length / 2) {
+                        return `translate(${-(width / 2 - 70)}, ${height / 2 - 15 * (i + 1)})`;
+                    } else {
+                        return `translate(${width / 4 - 80}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                    }
+                })
+                .attr("class", "label-text")
+                .text((d) => d.data.type);
         };
 
         /**

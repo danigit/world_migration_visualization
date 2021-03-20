@@ -65,11 +65,9 @@
                                         placeholder="Search a country..." class="header-search-box md-text"
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
-                                <md-optgroup label="Europe">
-                                    <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: searchSource">
-                                        {{country.name}}</md-option>
-                                </md-optgroup>
+                                <md-option ng-value="country.name"
+                                    ng-repeat="country in countries | filter: searchSource">
+                                    {{country.name}}</md-option>
                             </md-select>
                         </md-input-container>
                         <hr class="menu-divider width-100" />
@@ -81,11 +79,9 @@
                                         placeholder="Search a country..." class="header-search-box md-text"
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
-                                <md-optgroup label="Europe">
-                                    <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: searchSource">
-                                        {{country.name}}</md-option>
-                                </md-optgroup>
+                                <md-option ng-value="country.name"
+                                    ng-repeat="country in countries | filter: searchSource">
+                                    {{country.name}}</md-option>
                             </md-select>
                         </md-input-container>
                         <hr class="menu-divider width-100" />

@@ -11,3 +11,16 @@
     font-size: small;
     transform: rotate(45deg) !important;
 }
+
+.label-text {
+    alignment-baseline: middle;
+    font-size: 12px;
+    font-family: arial, helvetica, "sans-serif";
+    fill: #FFFFFF;
+}
+.label-line {
+    stroke-width: 1;
+    stroke: #FFFFFF;
+}
+.label-circle {
+}
