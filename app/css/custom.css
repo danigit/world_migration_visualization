@@ -132,6 +132,9 @@ DISPLAY
 /******************************************************************
 FONTS
 *******************************************************************/
+.no-transform {
+    text-transform: none !important;
+}
 
 .text-center {
     text-align: center !important;
@@ -393,7 +396,7 @@ POSITION
     float: right;
 }
 
-.float-left {
+.float-left {   
     float: left;
 }
 
@@ -403,4 +406,16 @@ POSITION
     background-color: #2d2e2e;
     color: #ffffff;
     z-index: -100;
+}
+
+/******************************************************************
+Navbar
+*******************************************************************/
+
+.active {
+    color: #ffffff !important;
+}
+
+.inactive {
+    color: #d3d3d3 !important;
 }

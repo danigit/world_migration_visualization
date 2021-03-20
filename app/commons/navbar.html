@@ -1,0 +1,10 @@
+<md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
+    <div layout="row" layout-align="start center" ng-controller="navbarController">
+        <img src="app/img/home/logo.png" class="margin-auto" height="40" />
+        <h2 class="padding-left-20px color-darkcyan font-size-larger">
+            International Migrant Stock
+        </h2>
+        <md-button ng-click="loadMap()" class="margin-left-20px font-size-medium text-bold no-transform" ng-class="active==='home' ? 'active' : 'inactive'">Home</md-button>
+        <md-button ng-click="loadStatistics()" class="font-size-medium text-bold no-transform" ng-class="active==='statistics' ? 'active' : 'inactive'">Statistics</md-button>
+    </div>
+</md-toolbar>
