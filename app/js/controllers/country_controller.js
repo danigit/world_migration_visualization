@@ -153,6 +153,26 @@
                 });
         };
 
+        const arcTweenEnter = (d, arc) => {
+            var i = d3.interpolate(d.endAngle, d.startAngle);
+
+            console.log("enter function");
+            return (t) => {
+                d.startAngle = i(t);
+                return arc(d);
+            };
+        };
+
+        const arcTweenUpdate = (d, i, n, arc) => {
+            var interpolate = d3.interpolate(n[i]._current, d);
+
+            console.log("update function");
+            n[i]._current = d;
+            return (t) => {
+                return arc(interpolate(t));
+            };
+        };
+
         let drawPieChart = (data, container) => {
             const developmentContainer = d3.select("#" + container);
             developmentContainer.html("");
@@ -179,7 +199,7 @@
             const piedData = pie(data);
 
             pieChartGroup
-                .selectAll(".arc")
+                .selectAll("path")
                 .data(piedData)
                 .join(
                     (enter) => {
@@ -188,9 +208,17 @@
                             .attr("class", "arc")
                             .style("stroke", "white")
                             .style("fill", (d, i) => colors(i))
-                            .attr("d", arc);
+                            .each((d) => (this._current = d))
+                            .transition()
+                            .duration(1000)
+                            .attrTween("d", (d) => arcTweenEnter(d, arc));
                     },
-                    (update) => update
+                    (update) =>
+                        update
+                            .transition()
+                            .duration(1000)
+                            .attrTween("d", (d, i, n) => arcTweenUpdate(d, i, n, arc)),
+                    (exit) => exit.remove()
                 );
 
             let legendIndex = 0;
@@ -216,12 +244,14 @@
                     return arc.centroid(d)[1];
                 })
                 .attr("x2", (d, i) => {
+                    if (d.value == 0) return arc.centroid[0];
                     let centroid = arc.centroid(d);
                     let midAngle = Math.atan2(centroid[1], centroid[0]);
                     let x = Math.cos(midAngle) * (radius - 45);
                     return x;
                 })
                 .attr("y2", (d, i) => {
+                    if (d.value == 0) return arc.centroid[1];
                     let centroid = arc.centroid(d);
                     let midAngle = Math.atan2(centroid[1], centroid[0]);
                     let y = Math.sin(midAngle) * (radius - 45);
@@ -243,7 +273,7 @@
                     let y = Math.sin(midAngle) * (radius - 45);
                     return y;
                 })
-                .attr("r", 4)
+                .attr("r", (d) => (d.value !== 0 ? 4 : 0))
                 .attr("fill", (d, i) => colors(i));
 
             labelGroups
@@ -292,7 +322,7 @@
                 .attr("class", "label-text")
                 .text((d) => {
                     console.log(typeof d.data.percentage);
-                    return d.data.percentage !== "0.000" ? d.data.percentage + "%" : "";
+                    return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
                 });
 
             labelGroups

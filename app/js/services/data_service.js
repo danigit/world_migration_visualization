@@ -230,7 +230,7 @@
             let total = d3.sum(values);
             let percentages = [];
             values.forEach((val) => {
-                percentages.push(val / total);
+                percentages.push((val / total) * 100);
             });
             return percentages;
         };
@@ -426,8 +426,8 @@
                 development[0].value = d3.mean(development[0].value).toFixed(2);
                 development[1].value = d3.mean(development[1].value).toFixed(2);
                 let percentages = data_service.computePercentage([development[0].value, development[1].value]);
-                development[0].percentage = percentages[0].toFixed(3);
-                development[1].percentage = percentages[1].toFixed(3);
+                development[0].percentage = percentages[0].toFixed(1);
+                development[1].percentage = percentages[1].toFixed(1);
                 return development;
             });
         };
@@ -465,7 +465,7 @@
 
                 let percentages = data_service.computePercentage(incomeValues);
                 income.forEach((elem, index) => {
-                    income[index].percentage = percentages[index].toFixed(3);
+                    income[index].percentage = percentages[index].toFixed(1);
                 });
 
                 return income;

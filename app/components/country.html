@@ -46,7 +46,7 @@
             </div>
             <div layout="column" class="width-25 padding-right-30px">
                 <div class="margin-top-60-px width-100">
-                    <img class="display-block height-300-px width-300-px margin-lr-auto"
+                    <img class="display-block height-200-px width-200-px margin-lr-auto"
                         src="../../app/img/countries/outlines/{{selectedCountryController}}.svg" />
                 </div>
                 <h1 class="color-white font-size-large margin-lr-auto">{{selectedCountryController}}</h1>
@@ -81,7 +81,8 @@
                         </div>
                     </div>
                 </div>
-                <div layout="column" class="margin-auto margin-top-100-px min-width-250-px max-width-700-px">
+                <div layout="column"
+                    class="margin-auto margin-top-60-px margin-bottom-50-px min-width-250-px max-width-700-px">
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                         ng-model="selectedTopCountryValue" countries="topFlags"
                         show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
