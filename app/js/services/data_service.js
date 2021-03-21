@@ -226,6 +226,15 @@
             { value: "value", text: "Value" },
         ];
 
+        data_service.computePercentage = (values) => {
+            let total = d3.sum(values);
+            let percentages = [];
+            values.forEach((val) => {
+                percentages.push(val / total);
+            });
+            return percentages;
+        };
+
         /**
          * Function that handles the routing for the secondary menu
          */
@@ -405,16 +414,20 @@
                     { type: "Less Developed", value: [] },
                     { type: "More Developed", value: [] },
                 ];
+                console.log(yearsColumns);
                 Object.values(data).forEach((elem) => {
-                    if (elem["Destination"] === "More developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                    if (elem["Destination"] === "More developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1) {
+                        console.log(elem["Year"]);
                         development[0].value.push(elem[selectedCountry]);
-                    else if (elem["Destination"] === "Less developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                    } else if (elem["Destination"] === "Less developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
                         development[1].value.push(elem[selectedCountry]);
                 });
 
                 development[0].value = d3.mean(development[0].value).toFixed(2);
                 development[1].value = d3.mean(development[1].value).toFixed(2);
-
+                let percentages = data_service.computePercentage([development[0].value, development[1].value]);
+                development[0].percentage = percentages[0].toFixed(3);
+                development[1].percentage = percentages[1].toFixed(3);
                 return development;
             });
         };
@@ -445,12 +458,25 @@
                     income[index].value = d3.mean(income[index].value).toFixed(2);
                 });
 
+                let incomeValues = [];
+                income.forEach((elem) => {
+                    incomeValues.push(elem.value);
+                });
+
+                let percentages = data_service.computePercentage(incomeValues);
+                income.forEach((elem, index) => {
+                    income[index].percentage = percentages[index].toFixed(3);
+                });
+
                 return income;
             });
         };
 
-        data_service.getRateOfChange = () => {
-            
-        }
+        data_service.getRateOfChange = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            data_service.totMigrByOriginDest.then((data) => {
+                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                //Missing table
+            });
+        };
     }
 })();

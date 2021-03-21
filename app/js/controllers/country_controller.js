@@ -54,13 +54,22 @@
         let sliderMin = 1900;
         let sliderMax = 2019;
 
+        /**
+         * Function that returns an array with the selected years in the slider
+         * @returns selected years
+         */
+        let getSliderYears = () => {
+            return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
+        };
+
         // getting the years selected in the slider
-        let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
+        let consideredYears = getSliderYears();
 
         // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
+            consideredYears = getSliderYears();
             updateStatistics();
         });
 
@@ -68,7 +77,6 @@
          * Function that updates the statistics
          */
         let updateStatistics = () => {
-            console.log($scope.selectedCountryController);
             // getting the total migrants by origin and destination
             dataService
                 .getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
@@ -134,6 +142,7 @@
             dataService
                 .getCountryDevelopmentStatistic($scope.selectedCountryController, consideredYears, $scope.genreFilterValue)
                 .then((data) => {
+                    console.log(data);
                     drawPieChart(data, "development-piechart");
                 });
 
@@ -146,6 +155,7 @@
 
         let drawPieChart = (data, container) => {
             const developmentContainer = d3.select("#" + container);
+            developmentContainer.html("");
             const developmentContainerDim = developmentContainer.node().getBoundingClientRect();
             const width = developmentContainerDim.width;
             const height = developmentContainerDim.height;
@@ -160,20 +170,81 @@
             const colors = d3.scaleOrdinal(d3.schemePaired);
             const arc = d3
                 .arc()
-                .outerRadius(radius - 50)
+                .outerRadius(radius - 70)
                 .innerRadius(0);
             const pie = d3.pie().value((d) => d.value);
             const piedData = pie(data);
 
-            const arcs = pieChartGroup
+            pieChartGroup
                 .selectAll(".arc")
                 .data(piedData)
-                .join((enter) => enter.append("path").attr("class", "arc").style("stroke", "white"))
-                .attr("d", arc)
-                .style("fill", (d, i) => colors(i));
+                .join(
+                    (enter) => {
+                        enter
+                            .append("path")
+                            .attr("class", "arc")
+                            .style("stroke", "white")
+                            .style("fill", (d, i) => colors(i))
+                            .attr("d", arc);
+                    },
+                    (update) => {
+                        update.attr("d", arc);
+                    }
+                );
 
             let legendIndex = 0;
             var labelGroups = pieChartLabels.selectAll(".label").data(piedData).enter().append("g").attr("class", "label");
+
+            labelGroups
+                .append("circle")
+                .attr("cx", 0)
+                .attr("cy", 0)
+                .attr("r", 2)
+                .attr("fill", "#FFFFFF")
+                .attr("transform", (d, i) => {
+                    return "translate(" + arc.centroid(d) + ")";
+                })
+                .attr("class", "label-circle");
+
+            labelGroups
+                .append("line")
+                .attr("x1", (d, i) => {
+                    return arc.centroid(d)[0];
+                })
+                .attr("y1", (d, i) => {
+                    return arc.centroid(d)[1];
+                })
+                .attr("x2", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x;
+                })
+                .attr("y2", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let y = Math.sin(midAngle) * (radius - 45);
+                    return y;
+                })
+                .attr("class", "label-line");
+
+            labelGroups
+                .append("circle")
+                .attr("cx", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x;
+                })
+                .attr("cy", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let y = Math.sin(midAngle) * (radius - 45);
+                    return y;
+                })
+                .attr("r", 4)
+                .attr("fill", (d, i) => colors(i));
+
             labelGroups
                 .append("rect")
                 .attr("x", 0)
@@ -187,13 +258,43 @@
                 .attr("transform", (d, i) => {
                     if (i < data.length / 2) return `translate(${-(width / 2 - 50)}, ${height / 2 - 15 * (i + 1)})`;
                     else {
-                        return `translate(${width / 4 - 100}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                        return `translate(${width / 4 - 55}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
                     }
                 })
                 .attr("class", "label-circle");
 
             legendIndex = 0;
-            let textLabels = labelGroups
+
+            labelGroups
+                .append("text")
+                .attr("x", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    let sign = x > 0 ? 1 : -1;
+                    let labelX = x + 5 * sign;
+                    return labelX;
+                })
+                .attr("y", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let y = Math.sin(midAngle) * (radius - 45);
+                    return y;
+                })
+                .attr("stroke", (d, i) => colors(i))
+                .attr("text-anchor", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x > 0 ? "start" : "end";
+                })
+                .attr("class", "label-text")
+                .text((d) => {
+                    console.log(typeof d.data.percentage);
+                    return d.data.percentage !== "0.000" ? d.data.percentage + "%" : "";
+                });
+
+            labelGroups
                 .append("text")
                 .attr("x", "0")
                 .attr("y", "5")
@@ -201,7 +302,7 @@
                     if (i < data.length / 2) {
                         return `translate(${-(width / 2 - 70)}, ${height / 2 - 15 * (i + 1)})`;
                     } else {
-                        return `translate(${width / 4 - 80}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                        return `translate(${width / 4 - 35}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
                     }
                 })
                 .attr("class", "label-text")
