@@ -97,6 +97,10 @@ DISPLAY
     width: 30%;
 }
 
+.width-300-px {
+    width: 300px;
+}
+
 .height-300-px {
     height: 300px;
 }
@@ -396,7 +400,7 @@ POSITION
     float: right;
 }
 
-.float-left {   
+.float-left {
     float: left;
 }
 

@@ -21,7 +21,7 @@
                 dataService.selectedCountryController == "" ? $scope.countries[0].visName : dataService.selectedCountryController;
 
             $scope.genreFilterValue = "menu-all";
-            updateStatistics();
+            $scope.updateStatistics();
         });
 
         $scope.secondaryMenuSelectedValue =
@@ -70,13 +70,13 @@
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
             consideredYears = getSliderYears();
-            updateStatistics();
+            $scope.updateStatistics();
         });
 
         /**
          * Function that updates the statistics
          */
-        let updateStatistics = () => {
+        $scope.updateStatistics = () => {
             // getting the total migrants by origin and destination
             dataService
                 .getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
@@ -161,7 +161,10 @@
             const height = developmentContainerDim.height;
 
             const svg = developmentContainer.append("svg").attr("width", width).attr("height", height);
-            const pieChartGroup = svg.append("g").attr("transform", `translate(${width / 2}, ${height / 2})`);
+            const pieChartGroup = svg
+                .append("g")
+                .attr("class", "slices")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
             const pieChartLabels = svg
                 .append("g")
                 .attr("class", "labels")
@@ -187,9 +190,7 @@
                             .style("fill", (d, i) => colors(i))
                             .attr("d", arc);
                     },
-                    (update) => {
-                        update.attr("d", arc);
-                    }
+                    (update) => update
                 );
 
             let legendIndex = 0;
@@ -315,7 +316,7 @@
          */
         $scope.handleGenreClick = function (value) {
             $scope.genreFilterValue = value;
-            updateStatistics();
+            $scope.updateStatistics();
         };
 
         /**
