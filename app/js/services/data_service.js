@@ -164,7 +164,6 @@
                 let countries = [];
 
                 const geoRegions = data["WORLD"]["Geographic regions"];
-                console.log(geoRegions);
                 const geoRegions_lc = geoRegions.map((region) => region.toLowerCase());
 
                 for (const key in data) {
@@ -226,6 +225,15 @@
             { value: "global_rank", text: "Global rank" },
             { value: "value", text: "Value" },
         ];
+
+        data_service.computePercentage = (values) => {
+            let total = d3.sum(values);
+            let percentages = [];
+            values.forEach((val) => {
+                percentages.push((val / total) * 100);
+            });
+            return percentages;
+        };
 
         /**
          * Function that handles the routing for the secondary menu
@@ -508,107 +516,75 @@
                 });
 
                 });
-                
-                /* statisticsArray.push({
-                        "Destination":data[country].name,
-                        "AverageTotalMigrants": avgCountryTotalMigrants
-                    });
-                statisticsArray.sort(destObj => destObj.AverageTotalMigrants); */
-                /* statisticsArray = statisticsArray.map((destObj, destIdx) => ({
-                    "Destination":destObj.Destination,
-                    "AverageTotalMigrants": destObj.AverageTotalMigrants,
-                    "AverageTotalMigrantsGlobalRank": destIdx + 1
-                })); */
-/* 
-            let filteredData = data.filter(countryData => 
-                countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
-            );
-            let groupedByCountry = groupBy(filteredData, "Destination"); */
-
-            /* for (let destination in groupedByCountry) {
-                statisticsArray.push({
-                    "Destination":destination,
-                    "AverageTotalMigrants": d3.mean(groupedByCountry[destination], yearData => yearData.Total)
-                })
-            }
-            statisticsArray.sort(destObj => destObj.AverageTotalMigrants);
-            statisticsArray = statisticsArray.map((destObj, destIdx) => ({
-                "Destination":destObj.Destination,
-                "AverageTotalMigrants": destObj.AverageTotalMigrants,
-                "AverageTotalMigrantsGlobalRank": destIdx + 1
-            })); */
-            /* let selectedCsv = [];
-            switch (selectedGender) {
-                case "menu-all":
-                    selectedCsv = data_service.totMigrByOriginDest;
-                    break;
-                case "menu-male":
-                    selectedCsv = data_service.maleMigrByOriginDest;
-                    break;
-                case "menu-female":
-                    selectedCsv = data_service.femaleMigrByOriginDest;
-                    break;
-            }
-            return selectedCsv.then((data) => {
-                let filteredData = data.filter(countryData => 
-                    countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
-                );
-                let groupedByCountry = groupBy(filteredData, "Destination");
-                let statisticsArray = [];
-                for (let destination in groupedByCountry) {
-                    statisticsArray.push({
-                        "Destination":destination,
-                        "AverageTotalMigrants": d3.mean(groupedByCountry[destination], yearData => yearData.Total)
-                    })
-                }
-                statisticsArray.sort(destObj => destObj.AverageTotalMigrants);
-                statisticsArray = statisticsArray.map((destObj, destIdx) => ({
-                    "Destination":destObj.Destination,
-                    "AverageTotalMigrants": destObj.AverageTotalMigrants,
-                    "AverageTotalMigrantsGlobalRank": destIdx + 1
-                }));
-                data_service.totPopulationByAgeSex.then((data) => {
-                    let columnName = "";
-                    switch (selectedGender) {
-                        case "menu-all":
-                            columnName = "Total_(mf)";
-                            break;
-                        case "menu-male":
-                            columnName = "Total_(m)";
-                            break;
-                        case "menu-female":
-                            columnName = "Total_(f)";
-                            break;
-                    }
-                    let filteredData = data.filter(countryData => 
-                        countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
-                    );
-                    let groupedByCountry = groupBy(filteredData, "Destination");
-                    let statisticsArray = [];
-                    for (let destination in groupedByCountry) {
-                        statisticsArray.push({
-                            "Destination":destination,
-                            "AverageTotalPopulation": d3.mean(groupedByCountry[destination], yearData => yearData[columnName])
-                        })
-                    }
-                    statisticsArray.sort(destObj => destObj.AverageTotalMigrants);
-                    statisticsArray = statisticsArray.map((destObj, destIdx) => ({
-                        "Destination":destObj.Destination,
-                        "AverageTotalMigrants": destObj.AverageTotalMigrants,
-                        "AverageTotalMigrantsGlobalRank": destIdx + 1
-                    }));   
-                });
-                return statisticsArray;
-            }); */
         };
-        data_service.getCountryDevelopmentStatistic = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            getOriginAndDestinationByGender(selectedGender).then((data) => {
+        data_service.getCountryDevelopmentStatistic = (selectedCountry, yearsColumns, selectedGender) => {
+            return getOriginAndDestinationByGender(selectedGender).then((data) => {
+                let development = [
+                    { type: "Less Developed", value: [] },
+                    { type: "More Developed", value: [] },
+                ];
+                console.log(yearsColumns);
                 Object.values(data).forEach((elem) => {
-                    console.log(elem[selectedCountry]);
+                    if (elem["Destination"] === "More developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1) {
+                        console.log(elem["Year"]);
+                        development[0].value.push(elem[selectedCountry]);
+                    } else if (elem["Destination"] === "Less developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        development[1].value.push(elem[selectedCountry]);
                 });
+
+                development[0].value = d3.mean(development[0].value).toFixed(2);
+                development[1].value = d3.mean(development[1].value).toFixed(2);
+                let percentages = data_service.computePercentage([development[0].value, development[1].value]);
+                development[0].percentage = percentages[0].toFixed(1);
+                development[1].percentage = percentages[1].toFixed(1);
+                return development;
+            });
+        };
+
+        data_service.getCountryIncomeStatistic = (selectedCountry, yearsColumns, selectedGender) => {
+            return getOriginAndDestinationByGender(selectedGender).then((data) => {
+                let income = [
+                    { type: "High Income", value: [] },
+                    { type: "Upper Middle Income", value: [] },
+                    { type: "Lower Middle Income", value: [] },
+                    { type: "Low Income", value: [] },
+                    { type: "Other Income", value: [] },
+                ];
+                Object.values(data).forEach((elem) => {
+                    if (elem["Destination"] === "High-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[0].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Upper-middle-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[1].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Lower-middle-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[2].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "Low-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[3].value.push(elem[selectedCountry]);
+                    else if (elem["Destination"] === "No income group available" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                        income[4].value.push(elem[selectedCountry]);
+                });
+
+                Object.values(income).forEach((elem, index) => {
+                    income[index].value = d3.mean(income[index].value).toFixed(2);
+                });
+
+                let incomeValues = [];
+                income.forEach((elem) => {
+                    incomeValues.push(elem.value);
+                });
+
+                let percentages = data_service.computePercentage(incomeValues);
+                income.forEach((elem, index) => {
+                    income[index].percentage = percentages[index].toFixed(1);
+                });
+
+                return income;
+            });
+        };
+
+        data_service.getRateOfChange = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            data_service.totMigrByOriginDest.then((data) => {
                 let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
-                console.log(filteredData);
-                console.log(filterColumn(data, selectedCountry, yearMin, yearMax));
+                //Missing table
             });
         };
     }

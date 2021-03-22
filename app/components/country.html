@@ -1,14 +1,5 @@
 <div layout="column" class="parent-size">
-    <md-toolbar class="background-gray padding-top-bottom-5px" layout="row" layout-align="start center">
-        <div layout="row" layout-align="start center" ng-controller="navbarController">
-            <img src="app/img/home/logo.png" class="margin-auto" height="40" />
-            <h2 class="padding-left-20px color-darkcyan font-size-larger">
-                International Migrant Stock
-            </h2>
-            <md-button ng-click="loadMap()" class="margin-left-20px font-size-small text-bold">Home</md-button>
-            <md-button ng-click="loadStatistics()" class="font-size-small text-bold">Statistics</md-button>
-        </div>
-    </md-toolbar>
+    <div ng-include="'app/commons/navbar.html'" onload="active='statistics'"></div>
 
     <div layout="column" class="parent-size background-dark">
         <div class="width-30 margin-auto margin-top-20-px height-5">
@@ -21,9 +12,9 @@
                 <div class="country-search-container width-100 margin-top-40-px">
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
-                        <md-select ng-model="selectedCountryController" md-on-close="clearSearch()">
+                        <md-select ng-model="selectedCountryController" ng-change="updateStatistics()">
                             <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
-                                <md-option ng-value="country.visName"
+                                <md-option ng-value="country.name"
                                     ng-repeat="country in countries | filter: {continent: continent}">
                                     {{country.visName}}</md-option>
                             </md-optgroup>
@@ -44,12 +35,18 @@
                         rz-slider-options="sliderCountry.options"></rzslider>
                 </div>
             </div>
-            <div class="width-60">
-
+            <div layout="column" class="width-60">
+                <div layout="row" class="parent-size">
+                    <div id="development-piechart" class="width-50 height-50">
+                    </div>
+                    <div id="income-piechart" class="width-50 height-50">
+                    </div>
+                </div>
+                <div layout="row"></div>
             </div>
             <div layout="column" class="width-25 padding-right-30px">
                 <div class="margin-top-60-px width-100">
-                    <img class="display-block height-300-px margin-lr-auto"
+                    <img class="display-block height-200-px width-200-px margin-lr-auto"
                         src="../../app/img/countries/outlines/{{selectedCountryController}}.svg" />
                 </div>
                 <h1 class="color-white font-size-large margin-lr-auto">{{selectedCountryController}}</h1>
@@ -109,7 +106,8 @@
                         </div>
                     </div>
                 </div>
-                <div layout="column" class="margin-auto margin-top-100-px min-width-250-px max-width-700-px">
+                <div layout="column"
+                    class="margin-auto margin-top-60-px margin-bottom-50-px min-width-250-px max-width-700-px">
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                         ng-model="selectedTopCountryValue" countries="topFlags"
                         show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
