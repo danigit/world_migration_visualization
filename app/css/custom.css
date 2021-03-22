@@ -97,8 +97,20 @@ DISPLAY
     width: 30%;
 }
 
+.width-300-px {
+    width: 300px;
+}
+
+.width-200-px {
+    width: 200px;
+}
+
 .height-300-px {
     height: 300px;
+}
+
+.height-200-px {
+    height: 200px;
 }
 
 .height-450-px {
@@ -115,6 +127,10 @@ DISPLAY
 
 .height-80 {
     height: 80%;
+}
+
+.height-50 {
+    height: 50%;
 }
 
 .height-20 {
@@ -206,6 +222,10 @@ MARGINS
 
 .margin-top-200-px {
     margin-top: 200px !important;
+}
+
+.margin-bottom-50-px {
+    margin-bottom: 50px !important;
 }
 
 .margin-right-10-px {
@@ -397,7 +417,7 @@ POSITION
     float: right;
 }
 
-.float-left {   
+.float-left {
     float: left;
 }
 

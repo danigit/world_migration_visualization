@@ -36,6 +36,13 @@
             immigrationAverageAge: "",
             refugeeVsImmigration: "",
         };
+        $scope.globalRankCountryStatisticsValues = {
+            totalImmigrationsGlobalRank: "",
+            totalPopulationGlobalRank: "",
+            immigrationVsPopulationGlobalRank: "",
+            immigrationAverageAgeGlobalRank: "",
+            refugeeVsImmigrationGlobalRank: "",
+        };
 
         // variable that holds the slider values
         $scope.sliderCountry = {
@@ -53,13 +60,22 @@
         let sliderMin = 1900;
         let sliderMax = 2019;
 
+        /**
+         * Function that returns an array with the selected years in the slider
+         * @returns selected years
+         */
+        let getSliderYears = () => {
+            return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
+        };
+
         // getting the years selected in the slider
-        let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
+        let consideredYears = getSliderYears();
 
         // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
+            consideredYears = getSliderYears();
             $scope.updateStatistics();
         });
 
@@ -80,6 +96,41 @@
                     $scope.$apply();
                 });
 
+            // $scope.selectedCountryController, sliderMin, sliderMax
+        dataService
+            .getGlobalRankStatistics(
+                sliderMin, sliderMax,
+                $scope.genreFilterValue
+            )
+            .then(data => {
+
+                let countryData = data.filter(obj => obj.name==$scope.selectedCountryController.name)[0];
+
+                let avgEstRefGlobalRank = "";
+                if (isNaN(countryData.average_est_refugees_global_rank)) {
+                    avgEstRefGlobalRank = "Not available";
+                } else {
+                    avgEstRefGlobalRank = "" + transformNumberFormat(countryData.average_est_refugees_global_rank, true);
+                }
+
+                $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_tot_migrants_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_tot_population_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_perc_immigration_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_age_migrants_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+                
+                $scope.$apply();
+            });
+
+        
             // getting the total population by age and sex
             dataService
                 .getTotPopulationByAgeAndSex(
@@ -134,16 +185,214 @@
                     $scope.$apply();
                 });
 
-            dataService.getCountryDevelopmentStatistic($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue);
+            dataService
+                .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
+                .then((data) => {
+                    console.log(data);
+                    drawPieChart(data, "development-piechart");
+                });
+
+            dataService
+                .getCountryIncomeStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
+                .then((data) => {
+                    drawPieChart(data, "income-piechart");
+                });
 
             countryService.getTopCountries($scope.selectedCountryController.name,
-                    sliderMin, sliderMax,
-                    $scope.genreFilterValue).then((data) => {
-                        $scope.top5InwardCountries = [...data];
-                        $scope.$apply();
+                sliderMin, sliderMax,
+                $scope.genreFilterValue).then((data) => {
+                    $scope.top5InwardCountries = [...data];
+                    $scope.$apply();
 
-                        // $scope.top5OutwardCountries = [...data];
-                    });
+                    // $scope.top5OutwardCountries = [...data];
+                });
+        };
+
+        const arcTweenEnter = (d, arc) => {
+            var i = d3.interpolate(d.endAngle, d.startAngle);
+
+            console.log("enter function");
+            return (t) => {
+                d.startAngle = i(t);
+                return arc(d);
+            };
+        };
+
+        const arcTweenUpdate = (d, i, n, arc) => {
+            var interpolate = d3.interpolate(n[i]._current, d);
+
+            console.log("update function");
+            n[i]._current = d;
+            return (t) => {
+                return arc(interpolate(t));
+            };
+        };
+
+        let drawPieChart = (data, container) => {
+            const developmentContainer = d3.select("#" + container);
+            developmentContainer.html("");
+            const developmentContainerDim = developmentContainer.node().getBoundingClientRect();
+            const width = developmentContainerDim.width;
+            const height = developmentContainerDim.height;
+
+            const svg = developmentContainer.append("svg").attr("width", width).attr("height", height);
+            const pieChartGroup = svg
+                .append("g")
+                .attr("class", "slices")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+            const pieChartLabels = svg
+                .append("g")
+                .attr("class", "labels")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+            const radius = Math.min(width, height) / 2;
+            const colors = d3.scaleOrdinal(d3.schemePaired);
+            const arc = d3
+                .arc()
+                .outerRadius(radius - 70)
+                .innerRadius(0);
+            const pie = d3.pie().value((d) => d.value);
+            const piedData = pie(data);
+
+            pieChartGroup
+                .selectAll("path")
+                .data(piedData)
+                .join(
+                    (enter) => {
+                        enter
+                            .append("path")
+                            .attr("class", "arc")
+                            .style("stroke", "white")
+                            .style("fill", (d, i) => colors(i))
+                            .each((d) => (this._current = d))
+                            .transition()
+                            .duration(1000)
+                            .attrTween("d", (d) => arcTweenEnter(d, arc));
+                    },
+                    (update) =>
+                        update
+                            .transition()
+                            .duration(1000)
+                            .attrTween("d", (d, i, n) => arcTweenUpdate(d, i, n, arc)),
+                    (exit) => exit.remove()
+                );
+
+            let legendIndex = 0;
+            var labelGroups = pieChartLabels.selectAll(".label").data(piedData).enter().append("g").attr("class", "label");
+
+            labelGroups
+                .append("circle")
+                .attr("cx", 0)
+                .attr("cy", 0)
+                .attr("r", 2)
+                .attr("fill", "#FFFFFF")
+                .attr("transform", (d, i) => {
+                    return "translate(" + arc.centroid(d) + ")";
+                })
+                .attr("class", "label-circle");
+
+            labelGroups
+                .append("line")
+                .attr("x1", (d, i) => {
+                    return arc.centroid(d)[0];
+                })
+                .attr("y1", (d, i) => {
+                    return arc.centroid(d)[1];
+                })
+                .attr("x2", (d, i) => {
+                    if (d.value == 0) return arc.centroid[0];
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x;
+                })
+                .attr("y2", (d, i) => {
+                    if (d.value == 0) return arc.centroid[1];
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let y = Math.sin(midAngle) * (radius - 45);
+                    return y;
+                })
+                .attr("class", "label-line");
+
+            labelGroups
+                .append("circle")
+                .attr("cx", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x;
+                })
+                .attr("cy", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let y = Math.sin(midAngle) * (radius - 45);
+                    return y;
+                })
+                .attr("r", (d) => (d.value !== 0 ? 4 : 0))
+                .attr("fill", (d, i) => colors(i));
+
+            labelGroups
+                .append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("rx", 0)
+                .attr("ry", 0)
+                .attr("width", 10)
+                .attr("height", 10)
+                .attr("stroke", "#FFFFFF")
+                .attr("fill", (d, i) => colors(i))
+                .attr("transform", (d, i) => {
+                    if (i < data.length / 2) return `translate(${-(width / 2 - 50)}, ${height / 2 - 15 * (i + 1)})`;
+                    else {
+                        return `translate(${width / 4 - 55}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                    }
+                })
+                .attr("class", "label-circle");
+
+            legendIndex = 0;
+
+            labelGroups
+                .append("text")
+                .attr("x", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    let sign = x > 0 ? 1 : -1;
+                    let labelX = x + 5 * sign;
+                    return labelX;
+                })
+                .attr("y", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let y = Math.sin(midAngle) * (radius - 45);
+                    return y;
+                })
+                .attr("stroke", (d, i) => colors(i))
+                .attr("text-anchor", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x > 0 ? "start" : "end";
+                })
+                .attr("class", "label-text")
+                .text((d) => {
+                    console.log(typeof d.data.percentage);
+                    return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
+                });
+
+            labelGroups
+                .append("text")
+                .attr("x", "0")
+                .attr("y", "5")
+                .attr("transform", (d, i) => {
+                    if (i < data.length / 2) {
+                        return `translate(${-(width / 2 - 70)}, ${height / 2 - 15 * (i + 1)})`;
+                    } else {
+                        return `translate(${width / 4 - 35}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                    }
+                })
+                .attr("class", "label-text")
+                .text((d) => d.data.type);
         };
 
         /**
