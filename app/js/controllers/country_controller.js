@@ -18,10 +18,10 @@
             $scope.countries = data;
 
             $scope.selectedCountryController =
-                dataService.selectedCountryController == "" ? $scope.countries[0].visName : dataService.selectedCountryController;
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
 
             $scope.genreFilterValue = "menu-all";
-            updateStatistics();
+            $scope.updateStatistics();
         });
 
         $scope.secondaryMenuSelectedValue =
@@ -29,7 +29,6 @@
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.genreButtons = dataService.genreButtons;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
-        $scope.topFlags = dataService.topFlags;
         $scope.countryStatisticsValues = {
             totalImmigrations: "",
             totalPopulation: "",
@@ -61,17 +60,21 @@
         $scope.$on("slideEnded", () => {
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
-            updateStatistics();
+            $scope.updateStatistics();
         });
 
         /**
          * Function that updates the statistics
          */
-        let updateStatistics = () => {
+        $scope.updateStatistics = () => {
+            console.log('Selected new country:');
             console.log($scope.selectedCountryController);
+
+            dataService.selectedCountryController = $scope.selectedCountryController;
+
             // getting the total migrants by origin and destination
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
                     $scope.countryStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
                     $scope.$apply();
@@ -80,7 +83,7 @@
             // getting the total population by age and sex
             dataService
                 .getTotPopulationByAgeAndSex(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
@@ -93,7 +96,7 @@
             // getting the migrants as percentage of population
             dataService
                 .getMigrantsAsPercentageOfPopulationByAgeAndSex(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
@@ -106,7 +109,7 @@
             // getting the immigration average ag
             dataService
                 .getImmigrationAverageAge(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
@@ -118,9 +121,9 @@
             // getting the estimated refugees
             dataService
                 .getEstimatedRefugees(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     consideredYears,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_est")
+                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
                 )
                 .then((data) => {
                     if (isNaN(data)) {
@@ -131,7 +134,16 @@
                     $scope.$apply();
                 });
 
-            dataService.getCountryDevelopmentStatistic($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue);
+            dataService.getCountryDevelopmentStatistic($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue);
+
+            countryService.getTopCountries($scope.selectedCountryController.name,
+                    sliderMin, sliderMax,
+                    $scope.genreFilterValue).then((data) => {
+                        $scope.top5InwardCountries = [...data];
+                        $scope.$apply();
+
+                        // $scope.top5OutwardCountries = [...data];
+                    });
         };
 
         /**
@@ -140,7 +152,7 @@
          */
         $scope.handleGenreClick = function (value) {
             $scope.genreFilterValue = value;
-            updateStatistics();
+            $scope.updateStatistics();
         };
 
         /**
@@ -168,6 +180,7 @@
         $scope.handleTopCountryClick = function (value, type) {
             $scope.selectedTopCountry = value;
             $scope.selectedCountryController = value;
+            $scope.updateStatistics();
         };
 
         /**
@@ -175,7 +188,7 @@
          * @param {string} value
          */
         $scope.showTopCountryHint = function (value, event, type) {
-            $scope.selectedTopFlag = value.toUpperCase();
+            $scope.selectedTopFlag = value;
             let tooltip = document.getElementById("top-flags-tooltip");
             tooltip.classList.remove("hide");
             tooltip.style.top = event.clientY - 50 + "px";

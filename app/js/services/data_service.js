@@ -87,35 +87,35 @@
             return [];
         };
 
-        // variable that holds the top five countries with income and outcome migrants
-        data_service.topFlags = [
-            //data_service.getTopCountries()
-            {
-                name: "Italy",
-                value: "italy",
-                path: "../../../sketch/MicrosoftTeams-image_1.png",
-            },
-            {
-                name: "France",
-                value: "france",
-                path: "../../../sketch/MicrosoftTeams-image_2.png",
-            },
-            {
-                name: "Greece",
-                value: "greece",
-                path: "../../../sketch/MicrosoftTeams-image_3.png",
-            },
-            {
-                name: "Spain",
-                value: "spain",
-                path: "../../../sketch/MicrosoftTeams-image_4.png",
-            },
-            {
-                name: "Germany",
-                value: "germany",
-                path: "../../../sketch/MicrosoftTeams-image_5.png",
-            },
-        ];
+        // // variable that holds the top five countries with income and outcome migrants
+        // data_service.topFlags = [
+        //     //data_service.getTopCountries()
+        //     {
+        //         name: "Italy",
+        //         value: "italy",
+        //         path: "../../../sketch/MicrosoftTeams-image_1.png",
+        //     },
+        //     {
+        //         name: "France",
+        //         value: "france",
+        //         path: "../../../sketch/MicrosoftTeams-image_2.png",
+        //     },
+        //     {
+        //         name: "Greece",
+        //         value: "greece",
+        //         path: "../../../sketch/MicrosoftTeams-image_3.png",
+        //     },
+        //     {
+        //         name: "Spain",
+        //         value: "spain",
+        //         path: "../../../sketch/MicrosoftTeams-image_4.png",
+        //     },
+        //     {
+        //         name: "Germany",
+        //         value: "germany",
+        //         path: "../../../sketch/MicrosoftTeams-image_5.png",
+        //     },
+        // ];
 
         // variable that holds the types of visualization in the statistics page
         data_service.visualizationTypes = [
@@ -274,12 +274,22 @@
          * @param {number} yearMax
          * @returns {promise}
          */
-        let filterData = (data, selectedCountry, yearMin, yearMax) => {
+        data_service.filterData = (data, selectedCountry, yearMin, yearMax) => {
             return data.filter(
                 (countryData) =>
                     countryData["Destination"] == selectedCountry && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
             );
         };
+
+        function pick(o, fields) {
+            let picked = {};
+
+            for (const field of fields) {
+                picked[field] = o[field];
+            }
+
+            return picked;
+        }
 
         /**
          * Function that filter the data passed as parameter using the elements passed as parameter also
@@ -289,12 +299,12 @@
          * @param {number} yearMax
          * @returns {promise}
          */
-        let filterColumn = (data, selectedCountry, yearMin, yearMax) => {
-            console.log(data);
-            return data[selectedCountry];
+         data_service.filterColumn = (data, columns) => {
+            // console.log(selectedCountry);
+            return data.map((row) => pick(row, columns));
         };
 
-        let getOriginAndDestinationByGender = (selectedGender) => {
+        data_service.getOriginAndDestinationByGender = (selectedGender) => {
             switch (selectedGender) {
                 case "menu-all":
                     return data_service.totMigrByOriginDest;
@@ -312,8 +322,8 @@
          * @returns {promise}
          */
         data_service.getTotMigrantsByOriginAndDestination = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            return getOriginAndDestinationByGender(selectedGender).then((data) => {
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+            return data_service.getOriginAndDestinationByGender(selectedGender).then((data) => {
+                let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 return filteredData.reduce((sum, curr) => sum + +curr.Total, 0) / filteredData.length;
             });
         };
@@ -328,7 +338,7 @@
          */
         data_service.getTotPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.totPopulationByAgeSex.then((data) => {
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 return (filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length) * 1000;
             });
         };
@@ -343,7 +353,7 @@
          */
         data_service.getMigrantsAsPercentageOfPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.migrAsPercOfPopulationAgeSex.then((data) => {
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 return filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length;
             });
         };
@@ -358,7 +368,7 @@
          */
         data_service.getImmigrationAverageAge = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.totMigrByAgeSex.then((data) => {
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
+                let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 let columns = Object.keys(filteredData[0]).filter((key) => {
                     if (typeof key === "string" && key !== "Total" + selectedGender) {
                         return key.includes(selectedGender);
@@ -395,18 +405,18 @@
         data_service.getEstimatedRefugees = (selectedCountry, yearsColumns, selectedGender) => {
             return data_service.estimatedRefugees.then((data) => {
                 let selectedCountryData = getSelectedCountryData(data, selectedCountry);
-                return yearsColumns.reduce((sum, elem) => sum + +selectedCountryData[0]["" + elem + selectedGender]) / yearsColumns.length;
+                return yearsColumns.reduce((sum, elem) => +sum + +selectedCountryData[0]["" + elem + selectedGender], 0) / yearsColumns.length;
             });
         };
 
         data_service.getCountryDevelopmentStatistic = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            getOriginAndDestinationByGender(selectedGender).then((data) => {
+            data_service.getOriginAndDestinationByGender(selectedGender).then((data) => {
                 Object.values(data).forEach((elem) => {
-                    console.log(elem[selectedCountry]);
+                    // console.log(elem[selectedCountry]);
                 });
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
-                console.log(filteredData);
-                console.log(filterColumn(data, selectedCountry, yearMin, yearMax));
+                let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
+                // console.log(filteredData);
+                // console.log(filterColumn(data, selectedCountry, yearMin, yearMax));
             });
         };
     }
