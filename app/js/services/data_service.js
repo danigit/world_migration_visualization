@@ -290,6 +290,13 @@
             );
         };
 
+        data_service.filterDataMulti = (data, countries, yearMin, yearMax) => {
+            return data.filter(
+                (countryData) =>
+                    countries.includes(countryData["Destination"]) && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+            );
+        };
+
         function pick(o, fields) {
             let picked = {};
 
@@ -593,6 +600,10 @@
                 let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
                 //Missing table
             });
+        };
+
+        data_service.getActiveYears = (yearMin, yearMax) => {
+            return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
     }
 })();

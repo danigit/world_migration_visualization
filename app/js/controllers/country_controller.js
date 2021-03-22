@@ -65,7 +65,7 @@
          * @returns selected years
          */
         let getSliderYears = () => {
-            return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
+            return dataService.getActiveYears(sliderMin, sliderMax);
         };
 
         // getting the years selected in the slider
@@ -188,7 +188,6 @@
             dataService
                 .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
                 .then((data) => {
-                    console.log(data);
                     drawPieChart(data, "development-piechart");
                 });
 
@@ -201,17 +200,18 @@
             countryService.getTopCountries($scope.selectedCountryController.name,
                 sliderMin, sliderMax,
                 $scope.genreFilterValue).then((data) => {
-                    $scope.top5InwardCountries = [...data];
-                    $scope.$apply();
+                    const topCountries = data;
 
-                    // $scope.top5OutwardCountries = [...data];
+                    $scope.top5InwardCountries  = topCountries['topInward'];
+                    $scope.top5OutwardCountries = topCountries['topOutward'];
+                    
+                    $scope.$apply();
                 });
         };
 
         const arcTweenEnter = (d, arc) => {
             var i = d3.interpolate(d.endAngle, d.startAngle);
 
-            console.log("enter function");
             return (t) => {
                 d.startAngle = i(t);
                 return arc(d);
@@ -376,7 +376,6 @@
                 })
                 .attr("class", "label-text")
                 .text((d) => {
-                    console.log(typeof d.data.percentage);
                     return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
                 });
 
