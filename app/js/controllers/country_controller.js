@@ -37,6 +37,13 @@
             immigrationAverageAge: "",
             refugeeVsImmigration: "",
         };
+        $scope.globalRankCountryStatisticsValues = {
+            totalImmigrationsGlobalRank: "",
+            totalPopulationGlobalRank: "",
+            immigrationVsPopulationGlobalRank: "",
+            immigrationAverageAgeGlobalRank: "",
+            refugeeVsImmigrationGlobalRank: "",
+        };
 
         // variable that holds the slider values
         $scope.sliderCountry = {
@@ -83,10 +90,32 @@
                 sliderMin, sliderMax,
                 $scope.genreFilterValue
             )
-            .then((data) => {
-                /* $scope.countryStatisticsValues.refugeeVsImmigration = "" + data;
-                $scope.$apply(); */
-                console.log("Grouped data: " + data);
+            .then(data => {
+
+                let countryData = data.filter(obj => obj.name==$scope.selectedCountryController)[0];
+
+                let avgEstRefGlobalRank = "";
+                if (isNaN(countryData.average_est_refugees_global_rank)) {
+                    avgEstRefGlobalRank = "Not available";
+                } else {
+                    avgEstRefGlobalRank = "" + transformNumberFormat(countryData.average_est_refugees_global_rank, true);
+                }
+
+                $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_tot_migrants_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_tot_population_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_perc_immigration_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank = 
+                    "" + transformNumberFormat(countryData.average_age_migrants_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+                
+                $scope.$apply();
             });
 
         

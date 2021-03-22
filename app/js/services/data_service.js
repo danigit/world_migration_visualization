@@ -402,8 +402,7 @@
 
     
         /**
-         * Function that returns the total migrants global rank
-         * @param {string} selectedCountry
+         * Function that returns the global rank statistics for each country
          * @param {number} yearMin
          * @param {number} yearMax
          * @param {string} selectedGender
@@ -411,59 +410,105 @@
          */
          data_service.getGlobalRankStatistics = (yearMin, yearMax, selectedGender) => {
             return data_service.countries.then((data) => {
+                let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
                 let globalRankStatisticsArray = [];
-                for (let country in data) {
+                for (let country_idx in data) {
                     let avgTotalMigrantsCountry = data_service.getTotMigrantsByOriginAndDestination(
-                        data[country].name, yearMin, yearMax).
-                        then((data) => {
-                                return data;
-                        });
+                        data[country_idx].name, yearMin, 
+                        yearMax, selectedGender)
+                        .then(avgTotalMigrantsCountry => {
+                            return avgTotalMigrantsCountry;
+                            })
                     let avgTotPopulationCountry = data_service.getTotPopulationByAgeAndSex(
-                        data[country].name, sliderMin, sliderMax, genderColumn).
-                        then((data) => {
-                                return data;
-                        });
+                        data[country_idx].name, yearMin, 
+                        yearMax, data_service.getSelectedGenderColumn(selectedGender, "Total"))
+                        .then(avgTotPopulationCountry => {
+                            return avgTotPopulationCountry;
+                        })
                     let avgMigrPercCountry = data_service.getMigrantsAsPercentageOfPopulationByAgeAndSex(
-                        data[country].name, sliderMin, sliderMax, genderColumn).
-                        then((data) => {
-                                return data;
-                        });
+                        data[country_idx].name, yearMin, 
+                        yearMax, data_service.getSelectedGenderColumn(selectedGender, "Total"))
+                        .then(avgMigrPercCountry => { 
+                            return avgMigrPercCountry;
+                        })
                     let avgAgeCountry = data_service.getImmigrationAverageAge(
-                        data[country].name, sliderMin, sliderMax, genderColumn).
-                        then((data) => {
-                                return data;
-                        });
-                    globalRankStatisticsArray.push({
-                        "name":data[country].name,
-                        "average_tot_migrants": avgTotalMigrantsCountry,
-                        "average_tot_population": avgTotPopulationCountry,
-                        "average_perc_immigration": avgMigrPercCountry,
-                        "average_age_migrants": avgAgeCountry
+                        data[country_idx].name, yearMin, 
+                        yearMax, data_service.getSelectedGenderColumn(selectedGender, ""))
+                        .then(avgAgeCountry => {
+                            return avgAgeCountry;
+                        })
+                    let averageEstRefugees = data_service.getEstimatedRefugees(
+                        data[country_idx].name,
+                        consideredYears,
+                        data_service.getSelectedGenderColumn(selectedGender, "_est"))
+                        .then(averageEstRefugees => {
+                            /* if (isNaN(averageEstRefugees)) {
+                                averageEstRefugees = "Not available";
+                            } else {
+                                averageEstRefugees = "" + transformNumberFormat(averageEstRefugees);
+                            }  */
+                            return averageEstRefugees;
+                        })
+
+                    let promisedResultsList = [avgTotalMigrantsCountry, avgTotPopulationCountry, avgMigrPercCountry,
+                        avgAgeCountry, averageEstRefugees];
+
+                    let computedStatistics = Promise.all(promisedResultsList).then(values => {
+                        return {
+                            "name":data[country_idx].name,
+                            "average_tot_migrants": values[0],
+                            "average_tot_population": values[1],
+                            "average_perc_immigration": values[2],
+                            "average_age_migrants": values[3],
+                            "average_est_refugees": values[4]
+                        };
                     });
+                    globalRankStatisticsArray.push(computedStatistics);
                 }
-                globalRankStatisticsArray.sort(destObj => destObj.average_tot_migrants).reverse();
-                globalRankStatisticsArray.forEach((destObj, destIdx) => {
-                    destObj["average_tot_migrants_global_rank"] = destIdx + 1;
+                return Promise.all(globalRankStatisticsArray).then(globalRanks => {
+
+                    globalRanks.sort((a, b) => 
+                        b.average_tot_migrants - a.average_tot_migrants);
+
+                    globalRanks.forEach((destObj, destIdx) => {
+                        destObj["average_tot_migrants_global_rank"] = destIdx + 1;
+                    });
+
+                    globalRanks.sort((a, b) => 
+                        b.average_tot_population - a.average_tot_population);
+
+                    globalRanks.forEach((destObj, destIdx) => {
+                        destObj["average_tot_population_global_rank"] = destIdx + 1;
+                    });
+
+                    globalRanks.sort((a, b) => 
+                        b.average_perc_immigration - a.average_perc_immigration);
+
+                    globalRanks.forEach((destObj, destIdx) => {
+                        destObj["average_perc_immigration_global_rank"] = destIdx + 1;
+                    });
+
+                    globalRanks.sort((a, b) => 
+                        b.average_age_migrants - a.average_age_migrants);
+
+                    globalRanks.forEach((destObj, destIdx) => {
+                        destObj["average_age_migrants_global_rank"] = destIdx + 1;
+                    });
+
+                    if (selectedGender=='menu-all') {
+                        globalRanks.sort((a, b) => 
+                            b.average_est_refugees - a.average_est_refugees);
+                            
+                        globalRanks.forEach((destObj, destIdx) => {
+                            destObj["average_est_refugees_global_rank"] = destIdx + 1;
+                        });
+                    }
+
+                    return globalRanks;
                 });
 
-                globalRankStatisticsArray.sort(destObj => destObj.average_tot_population).reverse();
-                globalRankStatisticsArray.forEach((destObj, destIdx) => {
-                    destObj["average_tot_population_global_rank"] = destIdx + 1;
                 });
-
-                globalRankStatisticsArray.sort(destObj => destObj.average_perc_immigration).reverse();
-                globalRankStatisticsArray.forEach((destObj, destIdx) => {
-                    destObj["average_perc_immigration_global_rank"] = destIdx + 1;
-                });
-
-                globalRankStatisticsArray.sort(destObj => destObj.average_age_migrants).reverse();
-                globalRankStatisticsArray.forEach((destObj, destIdx) => {
-                    destObj["average_age_migrants_global_rank"] = destIdx + 1;
-                });
-
-                return globalRankStatisticsArray;
-
-                });
+                
                 /* statisticsArray.push({
                         "Destination":data[country].name,
                         "AverageTotalMigrants": avgCountryTotalMigrants
@@ -555,6 +600,7 @@
                 });
                 return statisticsArray;
             }); */
+        };
         data_service.getCountryDevelopmentStatistic = (selectedCountry, yearMin, yearMax, selectedGender) => {
             getOriginAndDestinationByGender(selectedGender).then((data) => {
                 Object.values(data).forEach((elem) => {
