@@ -21,8 +21,13 @@
                 left: $scope.countries[0].visName,
                 right: $scope.countries[1].visName,
             };
+            $scope.$apply();
         });
 
+        $scope.countryChanged = () => {
+            console.log($scope.selectedCountry.left);
+            console.log($scope.selectedCountry.right);
+        };
         /**
          * Function that handles the click on the secondary menu buttons
          * @param {string} value

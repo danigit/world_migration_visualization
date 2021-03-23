@@ -22,9 +22,11 @@
                             </md-select>
                         </md-input-container>
                     </div>
-                    <civ class="float-left margin-top-20-px margin-left-50-px">
-                        <img src="../../app/img/countries/outlines/{{selectedCountry.left}}.svg" class="height-300-px">
-                    </civ>
+                    <div class="float-left margin-top-20-px margin-left-50-px">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.left}}.svg"
+                            class="height-300-px width-300-px">
+                        <h2 class="color-white text-center">{{selectedCountry.left}}</h2>
+                    </div>
                 </div>
                 <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">
                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
@@ -55,13 +57,13 @@
                     </div>
                 </div>
             </div>
-            <div class="vertical-line margin-top-20-px"></div>
+            <div class="vertical-line height-95 margin-top-20-px"></div>
             <div layout="column" class="width-50">
                 <div class="width-100">
                     <div class="compare-search-container margin-left-20px float-left">
                         <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
-                            <md-select ng-model="selectedCountry.right" md-on-close="clearSearch()">
+                            <md-select ng-model="selectedCountry.right" ng-change="countryChanged()">
                                 <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
                                     <md-option ng-value="country.name"
                                         ng-repeat="country in countries | filter: {continent: continent}">
@@ -71,7 +73,9 @@
                         </md-input-container>
                     </div>
                     <civ class="float-right margin-top-20-px margin-right-50-px">
-                        <img src="../../app/img/countries/outlines/{{selectedCountry.right}}.svg" class="height-300-px">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.right}}.svg"
+                            class="height-300-px width-300-px">
+                        <h2 class="color-white text-center">{{selectedCountry.right}}</h2>
                     </civ>
                 </div>
                 <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">

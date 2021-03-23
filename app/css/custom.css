@@ -122,11 +122,11 @@ DISPLAY
 }
 
 .height-95 {
-    height: 95%;
+    height: 95% !important;
 }
 
 .height-80 {
-    height: 80%;
+    height: 80% !important;
 }
 
 .height-50 {
@@ -233,7 +233,7 @@ MARGINS
 }
 
 .margin-right-20-px {
-    margin-right: 20px;
+    margin-right: 20px !important;
 }
 
 .margin-right-40-px {
@@ -439,4 +439,15 @@ Navbar
 
 .inactive {
     color: #d3d3d3 !important;
+}
+
+.rzslider .rz-pointer {
+    top: -10px !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.rzslider .rz-pointer:after {
+    top: 6px !important;
+    left: 6px !important;
 }

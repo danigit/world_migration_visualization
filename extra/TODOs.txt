@@ -5,13 +5,10 @@
 
 - bug -> timespan in home menu
 - HTML fix
-    - add measure unit to values
-    - change the country top countries icons
     - change the span circles
     - add description to top flags and other elements
     - add continent and region in country bellow the country name
     - add migrant amount into tooltip
-- put refugees as percentage
 
 Queries/Statistics for country page:
 

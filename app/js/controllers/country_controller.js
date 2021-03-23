@@ -537,6 +537,7 @@
          */
         $scope.showTopCountryHint = function (value, event, type) {
             $scope.selectedTopFlag = value;
+            console.log(value);
             let tooltip = document.getElementById("top-flags-tooltip");
             tooltip.classList.remove("hide");
             tooltip.style.top = event.clientY - 50 + "px";

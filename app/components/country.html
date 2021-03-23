@@ -45,9 +45,9 @@
                 </div>
                 <div layout="row"></div>
             </div>
-            <div layout="column" class="width-25 padding-right-30px">
+            <div layout="column" class="width-25">
                 <div class="margin-top-60-px width-100">
-                    <img class="display-block height-300-px margin-lr-auto"
+                    <img class="display-block height-200-px width-200-px margin-lr-auto"
                         src="../../app/img/countries/outlines/{{selectedCountryController.visName}}.svg" />
                 </div>
                 <h1 class="color-white font-size-large margin-lr-auto">{{selectedCountryController.visName}}</h1>
@@ -59,51 +59,51 @@
                     <div layout="column" class="color-white margin-top-40-px width-100">
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Total
                                 immigration</span>
-                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
-                                    {{globalRankCountryStatisticsValues.totalImmigrationsGlobalRank}}
-                                  </span>
-                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
-                                    {{countryStatisticsValues.totalImmigrations}}
-                                  </span>
+                            <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                {{globalRankCountryStatisticsValues.totalImmigrationsGlobalRank}}
+                            </span>
+                            <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                {{countryStatisticsValues.totalImmigrations}}
+                            </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Total
                                 population</span>
-                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
-                                    {{globalRankCountryStatisticsValues.totalPopulationGlobalRank}}
-                                  </span>
-                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
-                                    {{countryStatisticsValues.totalPopulation}}
-                                  </span>
+                            <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                {{globalRankCountryStatisticsValues.totalPopulationGlobalRank}}
+                            </span>
+                            <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                {{countryStatisticsValues.totalPopulation}}
+                            </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span
                                 class="float-left font-size-small">Immigration vs.
                                 Population</span>
-                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
-                                    {{globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank}}
-                                  </span>
-                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
-                                    {{countryStatisticsValues.immigrationVsPopulation}}
-                                  </span>
+                            <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                {{globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank}}
+                            </span>
+                            <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                {{countryStatisticsValues.immigrationVsPopulation}} %
+                            </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span
                                 class="float-left font-size-small">Immigrants average
                                 age</span>
-                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
-                                    {{globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank}}
-                                  </span>
-                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
-                                    {{countryStatisticsValues.immigrationAverageAge}}
-                                  </span>
+                            <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                {{globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank}}
+                            </span>
+                            <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                {{countryStatisticsValues.immigrationAverageAge}} age
+                            </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Refugees
                                 vs.
                                 Immigrants</span>
-                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
-                                    {{globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank}}
-                                  </span>
-                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
-                                    {{countryStatisticsValues.refugeeVsImmigration}}
-                                  </span> 
+                            <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                {{globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank}}
+                            </span>
+                            <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                {{countryStatisticsValues.refugeeVsImmigration}} %
+                            </span>
                         </div>
                     </div>
                 </div>
