@@ -14,9 +14,10 @@
                         <label>Select country...</label>
                         <md-select ng-model="selectedCountryController" ng-change="updateStatistics()">
                             <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
-                                <md-option ng-value="country.name"
+                                <md-option ng-value="country"
                                     ng-repeat="country in countries | filter: {continent: continent}">
-                                    {{country.visName}}</md-option>
+                                    {{country.visName}}
+                                </md-option>
                             </md-optgroup>
                         </md-select>
                     </md-input-container>
@@ -46,10 +47,10 @@
             </div>
             <div layout="column" class="width-25 padding-right-30px">
                 <div class="margin-top-60-px width-100">
-                    <img class="display-block height-200-px width-200-px margin-lr-auto"
-                        src="../../app/img/countries/outlines/{{selectedCountryController}}.svg" />
+                    <img class="display-block height-300-px margin-lr-auto"
+                        src="../../app/img/countries/outlines/{{selectedCountryController.visName}}.svg" />
                 </div>
-                <h1 class="color-white font-size-large margin-lr-auto">{{selectedCountryController}}</h1>
+                <h1 class="color-white font-size-large margin-lr-auto">{{selectedCountryController.visName}}</h1>
                 <div class="margin-auto margin-top-100-px min-width-250-px max-width-700-px">
                     <radio-button-group selected-button="countryInfoValue"
                         handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
@@ -57,41 +58,66 @@
                     </radio-button-group>
                     <div layout="column" class="color-white margin-top-40-px width-100">
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Total
-                                immigrations</span><span
-                                class="float-right font-size-small">{{countryStatisticsValues.totalImmigrations}}</span>
+                                immigration</span>
+                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                    {{globalRankCountryStatisticsValues.totalImmigrationsGlobalRank}}
+                                  </span>
+                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                    {{countryStatisticsValues.totalImmigrations}}
+                                  </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Total
-                                population</span><span
-                                class="float-right font-size-small">{{countryStatisticsValues.totalPopulation}}</span>
+                                population</span>
+                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                    {{globalRankCountryStatisticsValues.totalPopulationGlobalRank}}
+                                  </span>
+                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                    {{countryStatisticsValues.totalPopulation}}
+                                  </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span
-                                class="float-left font-size-small">Immigration vs
-                                Population</span><span
-                                class="float-right font-size-small">{{countryStatisticsValues.immigrationVsPopulation}}</span>
+                                class="float-left font-size-small">Immigration vs.
+                                Population</span>
+                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                    {{globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank}}
+                                  </span>
+                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                    {{countryStatisticsValues.immigrationVsPopulation}}
+                                  </span>
                         </div>
                         <div class="width-100 padding-top-bottom-10px"><span
-                                class="float-left font-size-small">Immigration average
-                                age</span><span
-                                class="float-right font-size-small">{{countryStatisticsValues.immigrationAverageAge}}</span>
+                                class="float-left font-size-small">Immigrants average
+                                age</span>
+                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                    {{globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank}}
+                                  </span>
+                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                    {{countryStatisticsValues.immigrationAverageAge}}
+                                  </span>
                         </div>
-                        <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Refugee
+                        <div class="width-100 padding-top-bottom-10px"><span class="float-left font-size-small">Refugees
                                 vs.
-                                Immigration</span><span
-                                class="float-right font-size-small">{{countryStatisticsValues.refugeeVsImmigration}}</span>
+                                Immigrants</span>
+                                <span ng-if="countryInfoValue === 'global_rank'" class="float-right font-size-small">
+                                    {{globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank}}
+                                  </span>
+                                  <span ng-if="countryInfoValue === 'value'" class="float-right font-size-small">
+                                    {{countryStatisticsValues.refugeeVsImmigration}}
+                                  </span> 
                         </div>
                     </div>
                 </div>
                 <div layout="column"
                     class="margin-auto margin-top-60-px margin-bottom-50-px min-width-250-px max-width-700-px">
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
-                        ng-model="selectedTopCountryValue" countries="topFlags"
+                        ng-model="selectedTopCountryValue" countries="top5InwardCountries"
                         show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
-                        top-countries-icon-path="'app/img/home/up.png'"></top-countries>
+                        top-countries-icon-path="'app/img/home/inward.png'"></top-countries>
                     <hr class="menu-divider" />
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
-                        ng-model="selectedTopCountryValue" countries="topFlags"
+                        ng-model="selectedTopCountryValue" countries="top5OutwardCountries"
                         show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
-                        top-countries-icon-path="'app/img/home/down.png'"></top-countries>
+                        top-countries-icon-path="'app/img/home/outward.png'"></top-countries>
                 </div>
                 <div layout="column" id="top-flags-tooltip">
                     <div>{{selectedTopFlag}}</div>

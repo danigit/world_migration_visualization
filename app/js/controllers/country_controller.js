@@ -23,18 +23,32 @@
         dataService.countries.then((data) => {
             $scope.countries = data;
             $scope.selectedCountryController =
-                dataService.selectedCountryController == "" ? $scope.countries[0].visName : dataService.selectedCountryController;
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
+
             $scope.genreFilterValue = "menu-all";
             $scope.updateStatistics();
             developmentStructure = createPieStructure("development-piechart", "development");
             incomeStructure = createPieStructure("income-piechart", "income");
         });
+
+        $scope.secondaryMenuSelectedValue =
+            dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "country";
+        $scope.secondaryMenuButtons = dataService.menuButtons;
+        $scope.genreButtons = dataService.genreButtons;
+        $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
         $scope.countryStatisticsValues = {
             totalImmigrations: "",
             totalPopulation: "",
             immigrationVsPopulation: "",
             immigrationAverageAge: "",
             refugeeVsImmigration: "",
+        };
+        $scope.globalRankCountryStatisticsValues = {
+            totalImmigrationsGlobalRank: "",
+            totalPopulationGlobalRank: "",
+            immigrationVsPopulationGlobalRank: "",
+            immigrationAverageAgeGlobalRank: "",
+            refugeeVsImmigrationGlobalRank: "",
         };
 
         // variable that holds the slider values
@@ -64,7 +78,7 @@
          * @returns selected years
          */
         let getSliderYears = () => {
-            return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +sliderMin && year <= +sliderMax);
+            return dataService.getActiveYears(sliderMin, sliderMax);
         };
 
         // getting the years selected in the slider
@@ -82,18 +96,58 @@
          * Function that updates the statistics
          */
         $scope.updateStatistics = () => {
+            console.log('Selected new country:');
+            console.log($scope.selectedCountryController);
+
+            dataService.selectedCountryController = $scope.selectedCountryController;
+
             // getting the total migrants by origin and destination
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
                     $scope.countryStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
+            // $scope.selectedCountryController, sliderMin, sliderMax
+        dataService
+            .getGlobalRankStatistics(
+                sliderMin, sliderMax,
+                $scope.genreFilterValue
+            )
+            .then(data => {
+
+                let countryData = data.filter(obj => obj.name==$scope.selectedCountryController.name)[0];
+
+                let avgEstRefGlobalRank = "";
+                if (isNaN(countryData.average_est_refugees_global_rank)) {
+                    avgEstRefGlobalRank = "Not available";
+                } else {
+                    avgEstRefGlobalRank = "" + transformNumberFormat(countryData.average_est_refugees_global_rank, true);
+                }
+
+                $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank =
+                    "" + transformNumberFormat(countryData.average_tot_migrants_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank =
+                    "" + transformNumberFormat(countryData.average_tot_population_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank =
+                    "" + transformNumberFormat(countryData.average_perc_immigration_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank =
+                    "" + transformNumberFormat(countryData.average_age_migrants_global_rank, true);
+
+                $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+
+                $scope.$apply();
+            });
+
+
             // getting the total population by age and sex
             dataService
                 .getTotPopulationByAgeAndSex(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
@@ -106,7 +160,7 @@
             // getting the migrants as percentage of population
             dataService
                 .getMigrantsAsPercentageOfPopulationByAgeAndSex(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
@@ -119,7 +173,7 @@
             // getting the immigration average ag
             dataService
                 .getImmigrationAverageAge(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
@@ -131,9 +185,9 @@
             // getting the estimated refugees
             dataService
                 .getEstimatedRefugees(
-                    $scope.selectedCountryController,
+                    $scope.selectedCountryController.name,
                     consideredYears,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_est")
+                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
                 )
                 .then((data) => {
                     if (isNaN(data)) {
@@ -145,15 +199,26 @@
                 });
 
             dataService
-                .getCountryDevelopmentStatistic($scope.selectedCountryController, consideredYears, $scope.genreFilterValue)
+                .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
                 .then((data) => {
                     drawPieChart(data, developmentStructure, "development");
                 });
 
             dataService
-                .getCountryIncomeStatistic($scope.selectedCountryController, consideredYears, $scope.genreFilterValue)
+                .getCountryIncomeStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
                 .then((data) => {
                     drawPieChart(data, incomeStructure, "income");
+                });
+
+            countryService.getTopCountries($scope.selectedCountryController.name,
+                sliderMin, sliderMax,
+                $scope.genreFilterValue).then((data) => {
+                    const topCountries = data;
+
+                    $scope.top5InwardCountries  = topCountries['topInward'];
+                    $scope.top5OutwardCountries = topCountries['topOutward'];
+
+                    $scope.$apply();
                 });
         };
 
@@ -460,6 +525,7 @@
         $scope.handleTopCountryClick = function (value, type) {
             $scope.selectedTopCountry = value;
             $scope.selectedCountryController = value;
+            $scope.updateStatistics();
         };
 
         /**
@@ -467,7 +533,7 @@
          * @param {string} value
          */
         $scope.showTopCountryHint = function (value, event, type) {
-            $scope.selectedTopFlag = value.toUpperCase();
+            $scope.selectedTopFlag = value;
             let tooltip = document.getElementById("top-flags-tooltip");
             tooltip.classList.remove("hide");
             tooltip.style.top = event.clientY - 50 + "px";

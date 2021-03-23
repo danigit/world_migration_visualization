@@ -376,6 +376,11 @@ OTHER
 .bottom-0 {
     bottom: 0 !important;
 }
+
+md-optgroup label {
+    text-transform: none !important;
+}
+
 /******************************************************************
 BACKGROUND
 *******************************************************************/
