@@ -414,10 +414,8 @@
                     { type: "Less Developed", value: [] },
                     { type: "More Developed", value: [] },
                 ];
-                console.log(yearsColumns);
                 Object.values(data).forEach((elem) => {
                     if (elem["Destination"] === "More developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1) {
-                        console.log(elem["Year"]);
                         development[0].value.push(elem[selectedCountry]);
                     } else if (elem["Destination"] === "Less developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
                         development[1].value.push(elem[selectedCountry]);
