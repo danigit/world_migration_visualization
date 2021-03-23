@@ -96,7 +96,7 @@
          * Function that updates the statistics
          */
         $scope.updateStatistics = () => {
-            console.log('Selected new country:');
+            console.log("Selected new country:");
             console.log($scope.selectedCountryController);
 
             dataService.selectedCountryController = $scope.selectedCountryController;
@@ -110,14 +110,8 @@
                 });
 
             // $scope.selectedCountryController, sliderMin, sliderMax
-        dataService
-            .getGlobalRankStatistics(
-                sliderMin, sliderMax,
-                $scope.genreFilterValue
-            )
-            .then(data => {
-
-                let countryData = data.filter(obj => obj.name==$scope.selectedCountryController.name)[0];
+            dataService.getGlobalRankStatistics(sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
+                let countryData = data.filter((obj) => obj.name == $scope.selectedCountryController.name)[0];
 
                 let avgEstRefGlobalRank = "";
                 if (isNaN(countryData.average_est_refugees_global_rank)) {
@@ -142,7 +136,6 @@
 
                 $scope.$apply();
             });
-
 
             // getting the total population by age and sex
             dataService
@@ -210,13 +203,13 @@
                     drawPieChart(data, incomeStructure, "income");
                 });
 
-            countryService.getTopCountries($scope.selectedCountryController.name,
-                sliderMin, sliderMax,
-                $scope.genreFilterValue).then((data) => {
+            countryService
+                .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
                     const topCountries = data;
 
-                    $scope.top5InwardCountries  = topCountries['topInward'];
-                    $scope.top5OutwardCountries = topCountries['topOutward'];
+                    $scope.top5InwardCountries = topCountries["topInward"];
+                    $scope.top5OutwardCountries = topCountries["topOutward"];
 
                     $scope.$apply();
                 });
@@ -327,11 +320,7 @@
                 .attr("class", type + "-label-line");
 
             // creating the outer circles for the label
-            enterLabel
-                .append("circle")
-                .attr("r", (d) => (d.value !== 0 ? 4 : 0))
-                .attr("fill", (d, i) => colors(i))
-                .attr("class", type + "-label-outer-circle");
+            enterLabel.append("circle").attr("class", type + "-label-outer-circle");
 
             // creating the colored rectangles for the legend
             enterLabel
@@ -358,16 +347,7 @@
             enterLabel
                 .append("text")
                 .attr("stroke", (d, i) => colors(i))
-                .attr("class", type + "-label-text")
-                .attr("text-anchor", (d, i) => {
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let x = Math.cos(midAngle) * (radius - 45);
-                    return x > 0 ? "start" : "end";
-                })
-                .text((d) => {
-                    return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
-                });
+                .attr("class", type + "-label-text");
 
             // creating the text for the legend
             enterLabel
@@ -393,6 +373,7 @@
          * @param {string} type
          */
         let handleUpdateLabels = (svgElement, piedData, type) => {
+            // updating the inner circle label
             svgElement
                 .selectAll("." + type + "-label-inner-circle")
                 .data(piedData)
@@ -409,6 +390,7 @@
                     };
                 });
 
+            // updating the label line
             svgElement
                 .selectAll("." + type + "-label-line")
                 .data(piedData)
@@ -419,14 +401,18 @@
                 .attr("x2", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "x"))
                 .attr("y2", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
 
+            // updating the label outer circle
             svgElement
                 .selectAll("." + type + "-label-outer-circle")
                 .data(piedData)
                 .transition()
                 .duration(1000)
+                .attr("r", (d) => (d.value !== 0 ? 4 : 0))
+                .attr("fill", (d, i) => colors(i))
                 .attr("cx", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "x"))
                 .attr("cy", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
 
+            // updating the label text
             svgElement
                 .selectAll("." + type + "-label-text")
                 .data(piedData)
@@ -436,10 +422,25 @@
                     let x = computePieChartEndOfLabelLineXY(d, arc, "x");
                     if (x == undefined) x = 0;
                     let sign = x > 0 ? 1 : -1;
-                    let xLabel = x + 5 * sign;
+                    let xLabel = x + 10 * sign;
                     return xLabel;
                 })
-                .attr("y", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
+                .attr("y", (d, i) => {
+                    let y = computePieChartEndOfLabelLineXY(d, arc, "y");
+                    if (y == undefined) y = 0;
+                    let sign = y > 0 ? 1 : -1;
+                    let yLabel = y + 1 * sign;
+                    return yLabel;
+                })
+                .attr("text-anchor", (d, i) => {
+                    let centroid = arc.centroid(d);
+                    let midAngle = Math.atan2(centroid[1], centroid[0]);
+                    let x = Math.cos(midAngle) * (radius - 45);
+                    return x > 0 ? "start" : "end";
+                })
+                .text((d) => {
+                    return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
+                });
         };
 
         /**
@@ -478,7 +479,8 @@
                 .data(piedData)
                 .join(
                     (enter) => handleEnter(enter, type),
-                    (update) => handleUpdate(update)
+                    (update) => handleUpdate(update),
+                    (exit) => exit.remove()
                 );
 
             svgElement
@@ -487,7 +489,8 @@
                 .data(piedData)
                 .join(
                     (enter) => handleEnterLabels(enter, data.length, type),
-                    (update) => handleUpdateLabels(svgElement, piedData, type)
+                    (update) => handleUpdateLabels(svgElement, piedData, type),
+                    (exit) => exit.remove()
                 );
         };
 
