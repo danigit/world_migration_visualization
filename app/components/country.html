@@ -12,13 +12,17 @@
                 <div class="country-search-container width-100 margin-top-40-px">
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
-                        <md-select ng-model="selectedCountryController" ng-change="updateStatistics()">
-                            <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
-                                <md-option ng-value="country"
-                                    ng-repeat="country in countries | filter: {continent: continent}">
-                                    {{country.visName}}
-                                </md-option>
-                            </md-optgroup>
+                        <md-select ng-model="selectedCountryController" md-on-close="clearSearch()"
+                            ng-change="updateStatistics()">
+                            <md-select-header class="select-header-search-box background-white zindex-100">
+                                <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                    placeholder="Search a country..." class="header-search-box md-text"
+                                    ng-keydown="updateSearch($event)" />
+                            </md-select-header>
+                            <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
+                                ng-class="{'margin-top-50-px' : $first}">
+                                {{country.visName}}
+                            </md-option>
                         </md-select>
                     </md-input-container>
                 </div>

@@ -13,6 +13,7 @@
     function countryController($scope, $state, dataService, countryService) {
         $scope.countryInfoValue = "global_rank";
         $scope.selectedTopCountry = "";
+        $scope.searchSource = "";
         $scope.continents = dataService.continents;
         $scope.secondaryMenuSelectedValue =
             dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "country";
@@ -552,6 +553,18 @@
         $scope.hideTopCountryHint = function (type) {
             let tooltip = document.getElementById("top-flags-tooltip");
             tooltip.style.zIndex = -100;
+        };
+
+        /**
+         * Function that clears the search box in the source select filter
+         */
+        $scope.clearSearch = () => {
+            $scope.searchSource = "";
+            $scope.searchDestination = "";
+        };
+
+        $scope.updateSearch = (event) => {
+            event.stopPropagation();
         };
     }
 })();
