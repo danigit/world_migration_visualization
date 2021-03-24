@@ -57,6 +57,14 @@ DISPLAY
     max-width: 700px;
 }
 
+.min-height-400-px {
+    min-height: 400px;
+}
+
+.max-height-700-px {
+    max-height: 700px;
+}
+
 .width-0 {
     width: 0;
 }
@@ -505,4 +513,8 @@ Navbar
 .rzslider .rz-pointer:after {
     top: 6px !important;
     left: 6px !important;
+}
+
+.rzslider .rz-tick-legend {
+    left: -5px !important;
 }
