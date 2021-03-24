@@ -14,11 +14,16 @@
                         <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
                             <md-select ng-model="selectedCountry.left" md-on-close="clearSearch()">
-                                <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
-                                    <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: {continent: continent}">
-                                        {{country.visName}}</md-option>
-                                </md-optgroup>
+                                <md-select-header class="select-header-search-box background-white zindex-100">
+                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                        placeholder="Search a country..."
+                                        class="header-search-box md-text padding-left-10px"
+                                        ng-keydown="updateSearch($event)" />
+                                </md-select-header>
+                                <md-option ng-value="country.name"
+                                    ng-repeat="country in countries | filter: searchSource"
+                                    ng-class="{'margin-top-50-px' : $first}">
+                                    {{country.visName}}</md-option>
                             </md-select>
                         </md-input-container>
                     </div>
@@ -64,11 +69,16 @@
                         <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
                             <label>Select country...</label>
                             <md-select ng-model="selectedCountry.right" ng-change="countryChanged()">
-                                <md-optgroup label="{{continent}}" ng-repeat="continent in continents">
-                                    <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: {continent: continent}">
-                                        {{country.visName}}</md-option>
-                                </md-optgroup>
+                                <md-select-header class="select-header-search-box background-white zindex-100">
+                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                        placeholder="Search a country..."
+                                        class="header-search-box md-text padding-left-10px"
+                                        ng-keydown="updateSearch($event)" />
+                                </md-select-header>
+                                <md-option ng-value="country.name"
+                                    ng-repeat="country in countries | filter: searchSource"
+                                    ng-class="{'margin-top-50-px' : $first}">
+                                    {{country.visName}}</md-option>
                             </md-select>
                         </md-input-container>
                     </div>
