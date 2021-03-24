@@ -8,7 +8,7 @@
                 buttons="secondaryMenuButtons" radio-buttons-class="'md-button border-1'">
         </div>
         <div layout="row" class="height-95">
-            <div layout="column" class="margin-left-20px width-15 min-width-250-px max-width-500-px">
+            <div layout="column" class="margin-left-20px width-15 min-width-200-px max-width-500-px">
                 <div class="country-search-container width-100 margin-top-40-px">
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
@@ -50,8 +50,27 @@
                     <img class="display-block height-200-px width-200-px margin-lr-auto"
                         src="../../app/img/countries/outlines/{{selectedCountryController.visName}}.svg" />
                 </div>
-                <h1 class="color-white font-size-large margin-lr-auto">{{selectedCountryController.visName}}</h1>
-                <div class="margin-auto margin-top-100-px min-width-250-px max-width-700-px">
+                <div layout="row">
+                    <img class="country-image-thumbnail" src="{{selectedCountryController.flagPath}}">
+                    <h1 class="color-white font-size-large margin-right-auto">{{selectedCountryController.visName}}</h1>
+                </div>
+                <div class="width-100 color-white" layout="row">
+                    <div class="width-50" layout="column">
+                        <div
+                            class="text-center font-size-x-small border-left-radius-5-px b padding-5-px background-darkgray border-right-1-gray">
+                            Continent</div>
+                        <div class="text-center margin-top-10-px color-darkcyan">
+                            {{selectedCountryController.continent}}</div>
+                    </div>
+                    <div class="width-50">
+                        <div
+                            class="text-center font-size-x-small border-right-radius-5-px padding-5-px background-darkgray">
+                            Region</div>
+                        <div class="text-center margin-top-10-px color-darkcyan">{{selectedCountryController.region}}
+                        </div>
+                    </div>
+                </div>
+                <div class="margin-lr-20-px margin-top-100-px min-width-200-px max-width-700-px">
                     <radio-button-group selected-button="countryInfoValue"
                         handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
                         buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
@@ -108,7 +127,7 @@
                     </div>
                 </div>
                 <div layout="column"
-                    class="margin-auto margin-top-60-px margin-bottom-50-px min-width-250-px max-width-700-px">
+                    class="margin-auto margin-top-60-px margin-bottom-50-px min-width-200-px max-width-700-px">
                     <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                         ng-model="selectedTopCountryValue" countries="top5InwardCountries"
                         show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"

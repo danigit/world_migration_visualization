@@ -16,11 +16,18 @@
     alignment-baseline: middle;
     font-size: 12px;
     font-family: arial, helvetica, "sans-serif";
-    fill: #FFFFFF;
+    fill: #ffffff;
 }
 .label-line {
     stroke-width: 1;
-    stroke: #FFFFFF;
+    stroke: #ffffff;
 }
 .label-circle {
+}
+
+.country-image-thumbnail {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+    margin: auto;
 }
