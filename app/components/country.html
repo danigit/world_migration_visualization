@@ -16,7 +16,8 @@
                             ng-change="updateStatistics()">
                             <md-select-header class="select-header-search-box background-white zindex-100">
                                 <input ng-model="searchSource" aria-label="Source filter" type="search"
-                                    placeholder="Search a country..." class="header-search-box md-text"
+                                    placeholder="Search a country..."
+                                    class="header-search-box md-text padding-left-10px"
                                     ng-keydown="updateSearch($event)" />
                             </md-select-header>
                             <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
@@ -143,7 +144,7 @@
                         top-countries-icon-path="'app/img/home/outward.png'"></top-countries>
                 </div>
                 <div layout="column" id="top-flags-tooltip">
-                    <div>{{selectedTopFlag}}</div>
+                    <div>{{selectedTopFlag[0].visName}}</div>
                 </div>
             </div>
         </div>

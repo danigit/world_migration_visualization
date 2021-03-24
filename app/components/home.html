@@ -51,27 +51,29 @@
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
                             <label>Select sources...</label>
                             <md-select ng-model="selectedCountries.source" md-on-close="clearSearch()" multiple>
-                                <md-select-header class="select-header-search-box">
+                                <md-select-header class="select-header-search-box background-white zindex-100">
                                     <input ng-model="searchSource" aria-label="Source filter" type="search"
-                                        placeholder="Search a country..." class="header-search-box md-text"
+                                        placeholder="Search a country..." class="header-search-box md-text padding-left-10px"
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
-                                    <md-option ng-value="country.name"
-                                        ng-repeat="country in countries | filter: searchSource">
-                                        {{country.visName}}</md-option>
+                                <md-option ng-value="country.name"
+                                    ng-repeat="country in countries | filter: searchSource"
+                                    ng-class="{'margin-top-50-px' : $first}">
+                                    {{country.visName}}</md-option>
                             </md-select>
                         </md-input-container>
                         <hr class="menu-divider width-100" />
                         <md-input-container id="destination-selector" class="width-90 display-block margin-auto">
                             <label>Select destinations...</label>
                             <md-select ng-model="selectedCountries.destination" md-on-close="clearSearch()" multiple>
-                                <md-select-header class="select-header-search-box">
+                                <md-select-header class="select-header-search-box background-white zindex-100">
                                     <input ng-model="searchDestination" aria-label="Destination filter" type="search"
-                                        placeholder="Search a country..." class="header-search-box md-text"
+                                        placeholder="Search a country..." class="header-search-box md-text padding-left-10px"
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
                                 <md-option ng-value="country.name"
-                                    ng-repeat="country in countries | filter: searchSource">
+                                    ng-repeat="country in countries | filter: searchSource"
+                                    ng-class="{'margin-top-50-px' : $first}">
                                     {{country.visName}}</md-option>
                             </md-select>
                         </md-input-container>
