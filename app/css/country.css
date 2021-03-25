@@ -31,3 +31,24 @@
     object-fit: contain;
     margin: auto;
 }
+
+/* Immigration by age stacked barchart */
+.axis path,
+.axis line,
+.axis text {
+    fill: none;
+    stroke: #63b3d4;
+    stroke-width: 0.5px;
+    shape-rendering: crispEdges;
+}
+ 
+.bar {
+    fill: steelblue;
+}
+ 
+.x.axis path {
+    display: none;
+}
+
+.y.axis path {
+}
