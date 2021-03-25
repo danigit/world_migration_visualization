@@ -6,6 +6,10 @@
 
 - Clarify whether plots/info/data are inward or outward material
 
+## World page
+
+- Create the mapping from TopoJSON's countries short name to our full name in the CVS files.
+
 ## Country page
 
 - Add descriptive labels to flags, idioms and country

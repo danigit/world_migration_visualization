@@ -77,8 +77,16 @@ DISPLAY
     width: 90% !important;
 }
 
+.width-95 {
+    width: 95% !important;
+}
+
 .width-80 {
-    width: 80%;
+    width: 80% !important;
+}
+
+.width-75 {
+    width: 75% !important;
 }
 
 .width-60 {
@@ -106,11 +114,7 @@ DISPLAY
 }
 
 .width-25 {
-    width: 25%;
-}
-
-.width-50 {
-    width: 50%;
+    width: 25% !important;
 }
 
 .width-300-px {
@@ -517,4 +521,16 @@ Navbar
 
 .rzslider .rz-tick-legend {
     left: -5px !important;
+}
+
+.axis-dark-cyan line {
+    stroke: #0093c4;
+}
+
+.axis-dark-cyan path {
+    stroke: #0093c4;
+}
+
+.axis-dark-cyan text {
+    stroke: #0093c4;
 }

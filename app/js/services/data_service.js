@@ -88,7 +88,7 @@
         };
 
         data_service.loadWorldMap = () => {
-            return data_service.loadJson("../../../app/data/json/world_map_simplified.json");
+            return data_service.loadJson("../../../app/data/json/world_map_full.json");
         };
 
         // variable that holds the types of visualization in the statistics page
