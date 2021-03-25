@@ -114,7 +114,7 @@ DISPLAY
 }
 
 .width-25 {
-    width: 25%;
+    width: 25% !important;
 }
 
 .width-30 {
