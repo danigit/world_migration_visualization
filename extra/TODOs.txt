@@ -1,29 +1,26 @@
-- Ensure pan-and-zoom actions do NOT cut information out of the dynamic map
+## Map page
+
+- Ensure pan-and-zoom actions do not cut information out of the dynamic map
+
+## Statistics pages
 
 - Clarify whether plots/info/data are inward or outward material
 
+## Country page
 
-- bug -> timespan in home menu
-- HTML fix
-    - change the span circles
-    - add description to top flags and other elements
-    - add continent and region in country bellow the country name
-    - add migrant amount into tooltip
+- Add descriptive labels to flags, idioms and country
 
-Queries/Statistics for country page:
+## Compare page
 
-Migrants for each year: same meaning as per the population (absolute value)
+- Mutual migration information between the two countries
+- No timespan (that is, full 1990-2019 range)
+- Keep gender information female/male/all
+- Stacked barchart with common/most frequent migration regions/countries
+- Line chart with mutual annual rates of change
+- Suitable idioms with migratory patterns comparison
+- Suitable idioms for a specific age range (0-4, or 18-35)
+- Possible textual comparison summary
 
-When considering 1 year:
-    - Total immigrations: a single "Total" value for the corresponding table
-    - Average age: to be computed across several ranges (research one formula to do so)
-    - In quel
+## FIXMEs
 
-When considering multiple years:
-    - Mean across the various years (for the total number of migrants)
-
-- Mean-sum values?
-- Total population: mean throughout the years/most recent population
-- Immigration vs population:
-
-When
+- Collapsing timespan when closing nav menu in Map page
