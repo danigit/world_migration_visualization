@@ -121,7 +121,12 @@
             <div id="map" class="height-80 width-100 min-height-400-px background-dark">
             </div>
             <div layout="column" id="footer" class="height-20 width-100 background-gray">
-                <div id="feeds" layout="row" class="margin-top-10-px height-20">
+                <div id="feeds" layout="row" class="margin-top-10-px height-20 position-relative">
+                    <div label="row">
+                        <div class="migration-flow-label background-gray">Large-Flow Migration</div>
+                        <div id="triangle-right">
+                        </div>
+                    </div>
                     <feed-chip ng-repeat="feedObject in feeds" ng-model="feedModel" feed="feedObject" index="$index">
                     </feed-chip>
                 </div>
