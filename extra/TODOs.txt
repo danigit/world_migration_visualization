@@ -10,6 +10,8 @@
     - add continent and region in country bellow the country name
     - add migrant amount into tooltip
 
+- create the mapping from the countries short name in topojson to the full country name
+
 Queries/Statistics for country page:
 
 Migrants for each year: same meaning as per the population (absolute value)

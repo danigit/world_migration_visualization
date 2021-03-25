@@ -36,6 +36,7 @@
 
 .feed-container {
     background-color: #707070;
+    height: 15px;
     padding: 10px 20px;
     border-radius: 16px;
     color: white;
@@ -47,4 +48,19 @@
 md-sidenav {
     max-width: 2000px !important;
     width: 100% !important;
+}
+
+.area-chart {
+    fill: #444444;
+    stroke: #0093c4;
+}
+
+.year-circle {
+    fill: #63b3d4;
+    stroke: none;
+}
+
+.year-line {
+    stroke-dasharray: 1 !important;
+    stroke: #63b3d4 !important;
 }

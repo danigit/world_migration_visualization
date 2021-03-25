@@ -117,17 +117,20 @@
         </div>
         <!--end menu container-->
         <!-- map container-->
-        <div layout="column" class="parent-size">
-            <div id="map" class="height-100 min-height-400-px background-dark">
+        <div layout="column" class="width-75 height-100">
+            <div id="map" class="height-80 width-100 min-height-400-px background-dark">
             </div>
             <div layout="column" id="footer" class="height-20 width-100 background-gray">
-                <div id="feeds" layout="row" class="margin-top-10-px">
+                <div id="feeds" layout="row" class="margin-top-10-px height-20">
                     <feed-chip ng-repeat="feedObject in feeds" ng-model="feedModel" feed="feedObject"></feed-chip>
                 </div>
-                <div>
+                <!-- <div>
                     <img src="app/img/home/play.png" class="float-right margin-top-10-px margin-right-20-px">
-                </div>
+                </div> -->
+
+                <div id="home-line-chart" class="height-80 display-block"></div>
             </div>
+
         </div>
     </div>
     <!-- end map container-->
