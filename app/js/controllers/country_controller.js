@@ -229,10 +229,21 @@
     
                 resolve(dummyData);
             });
-    
-            getDummyData.then((data) =>
-                    drawAgeStackedBarchart(data, "age-stacked-barchart"));
 
+            // Extract the immigration by age groups:
+            // 0-4, 5-18, 19-34, 35-54, 55-74, 75+
+            dataService
+                .getImmigrationByAgeGroups(
+                    $scope.selectedCountryController.name,
+                    sliderMin, sliderMax,
+                    $scope.genreFilterValue)
+                .then(ageGroupsData => 
+                    drawAgeStackedBarchart(ageGroupsData,
+                        ["Total", "Year"],
+                        "age-stacked-barchart")
+                    );                    
+
+            // Extract Top 5 inward/outward migration countries
             countryService.getTopCountries($scope.selectedCountryController.name,
                 sliderMin, sliderMax,
                 $scope.genreFilterValue).then((data) => {
@@ -524,7 +535,7 @@
                 );
         };
 
-        let drawAgeStackedBarchart = (data, containerId) => {
+        let drawAgeStackedBarchart = (data, toExclude, containerId) => {
             const containerElem = d3.select("#" + containerId);
             containerElem.html("");
 
@@ -533,15 +544,17 @@
             const legendMargin = 15;
 
             // Stack up the data
-            const subgroups = Object.keys(data[0]).slice(1);
             const groups = d3.map(data, d => +d.Year);
+
+            const subgroups = Object.keys(data[0])
+                .filter(i => !toExclude.includes(i));
 
             const stackedData = d3.stack().keys(
                 subgroups)(data);
 
             // Setup Bostock's margin convention
-            const svgMargins = { top: 48, right: 32, left: 32,
-                    bottom: 96 + Math.floor(subgroups.length/3)*legendMargin }; // Legend labels are stacked at
+            const svgMargins = { top: 8, right: 32, left: 32,
+                    bottom: 64 + Math.floor(subgroups.length/3)*legendMargin }; // Legend labels are stacked at
                                                                                 // the bottom in 3 separate columns
 
             const svgWidth  = containerDims.width
@@ -568,7 +581,7 @@
             let xScale = d3.scaleBand()
                 .domain(groups)
                 .rangeRound([4, svgWidth-2])
-                .padding(0.02);
+                .padding(0.16);
 
             let yScale = d3.scaleLinear()
                 .domain([0, d3.max(stackedData, layerData =>
@@ -581,6 +594,7 @@
             // Define and draw axes
             const yAxis = d3.axisLeft()
                 .scale(yScale)
+                .ticks(6)
                 .tickSize(-svgWidth, 0, 0)
                 .tickFormat(d => d + "%");
 
@@ -615,17 +629,18 @@
                     .classed("hide", true);
 
             tooltipElem.append("rect")
-                    .attr("width", 30)
+                    .attr("width", 40)
                     .attr("height", 20)
                     .attr("fill", "white")
+                    .style("padding", "1em")
                     .style("opacity", 0.5);
 
             tooltipElem.append("text")
-                    .attr("x", 15)
+                    .attr("x", 20)
                     .attr("dy", "1.2em")
-                    .style("text-anchor", "middle")
-                    .attr("font-size", "12px")
-                    .attr("font-weight", "bold");
+                    .style("font-size", "12px")
+                    .style("font-weight", "bold")
+                    .style("text-anchor", "middle");
 
             // Create rects for each segment
             groupsElem.selectAll("rect")
@@ -646,7 +661,8 @@
                         // while hovering onto a rect
                         tooltipElem.attr("transform",
                                 "translate(" + xPos + "," + yPos + ")");
-                        tooltipElem.select("text").text(d[1] - d[0]);
+                        tooltipElem.select("text")
+                            .text((d[1] - d[0]).toFixed(1) + "%");
                     });
 
             const getLegendTranslation = (datumId) => {
@@ -695,12 +711,7 @@
                     .classed("label-text", true)
                     .attr("dy", "-0em")
                     .style("text-anchor", "start")
-                .text((_, i) => { switch(i) {
-                    case 0: return "Anjou pears";
-                    case 1: return "Naval oranges";
-                    case 2: return "McIntosh apples";
-                    case 3: return "Red Delicious apples";
-                }});
+                .text((_, i) => subgroups[i] + " years");
         };
 
         /**
