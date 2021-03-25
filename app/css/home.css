@@ -64,3 +64,19 @@ md-sidenav {
     stroke-dasharray: 1 !important;
     stroke: #63b3d4 !important;
 }
+
+.move-feed {
+    animation: move-right 20s linear infinite;
+    position: fixed;
+    width: 100%;
+    left: 0;
+}
+
+@keyframes move-right {
+    0% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(100%);
+    }
+}
