@@ -382,6 +382,10 @@ OTHER
     overflow: auto !important;
 }
 
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
 .overflow-y-scroll {
     overflow-y: scroll;
 }
