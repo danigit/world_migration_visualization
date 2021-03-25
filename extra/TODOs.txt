@@ -3,12 +3,12 @@
 - Clarify whether plots/info/data are inward or outward material
 
 
-- add visname in coutry object (to show the flag and the name of the country)
-- add dictionary for future infos for every country
-
-
-- insert filters in left menu
 - bug -> timespan in home menu
+- HTML fix
+    - change the span circles
+    - add description to top flags and other elements
+    - add continent and region in country bellow the country name
+    - add migrant amount into tooltip
 
 Queries/Statistics for country page:
 

@@ -20,6 +20,10 @@ DISPLAY
     display: block !important;
 }
 
+.display-inline-block {
+    display: inline-block;
+}
+
 .position-absolute {
     position: absolute !important;
 }
@@ -41,12 +45,24 @@ DISPLAY
     min-width: 250px !important;
 }
 
+.min-width-200-px {
+    min-width: 200px !important;
+}
+
 .max-width-500-px {
     max-width: 500px;
 }
 
 .max-width-700-px {
     max-width: 700px;
+}
+
+.min-height-400-px {
+    min-height: 400px;
+}
+
+.max-height-700-px {
+    max-height: 700px;
 }
 
 .width-0 {
@@ -58,7 +74,7 @@ DISPLAY
 }
 
 .width-90 {
-    width: 90%;
+    width: 90% !important;
 }
 
 .width-80 {
@@ -67,6 +83,10 @@ DISPLAY
 
 .width-60 {
     width: 60%;
+}
+
+.width-50 {
+    width: 50% !important;
 }
 
 .width-15 {
@@ -122,11 +142,11 @@ DISPLAY
 }
 
 .height-95 {
-    height: 95%;
+    height: 95% !important;
 }
 
 .height-80 {
-    height: 80%;
+    height: 80% !important;
 }
 
 .height-50 {
@@ -150,6 +170,10 @@ FONTS
 
 .text-center {
     text-align: center !important;
+}
+
+.text-right {
+    text-align: right !important;
 }
 
 .text-bold {
@@ -178,6 +202,10 @@ FONTS
 
 .font-size-small {
     font-size: small !important;
+}
+
+.font-size-x-small {
+    font-size: x-small !important;
 }
 
 /******************************************************************
@@ -212,6 +240,10 @@ MARGINS
     margin-top: 40px !important;
 }
 
+.margin-top-50-px {
+    margin-top: 50px !important;
+}
+
 .margin-top-60-px {
     margin-top: 60px !important;
 }
@@ -228,12 +260,16 @@ MARGINS
     margin-bottom: 50px !important;
 }
 
+.margin-right-auto {
+    margin-right: auto !important;
+}
+
 .margin-right-10-px {
     margin-right: 10px;
 }
 
 .margin-right-20-px {
-    margin-right: 20px;
+    margin-right: 20px !important;
 }
 
 .margin-right-40-px {
@@ -266,6 +302,11 @@ MARGINS
     margin-right: 40px;
 }
 
+.margin-lr-20-px {
+    margin-left: 20px !important;
+    margin-right: 20px !important;
+}
+
 /******************************************************************
 MARGINS
 *******************************************************************/
@@ -274,12 +315,16 @@ MARGINS
     padding: 10px;
 }
 
+.padding-5-px {
+    padding: 5px;
+}
+
 .padding-left-20px {
     padding-left: 20px;
 }
 
 .padding-left-10px {
-    padding-left: 10px;
+    padding-left: 10px !important;
 }
 
 .padding-right-30px {
@@ -337,6 +382,10 @@ OTHER
     overflow: auto !important;
 }
 
+.overflow-hidden {
+    overflow: hidden !important;
+}
+
 .overflow-y-scroll {
     overflow-y: scroll;
 }
@@ -361,12 +410,26 @@ OTHER
     position: fixed !important;
 }
 
+.border-left-radius-5-px {
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+}
+
+.border-right-radius-5-px {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
 .border-radius-10px {
     border-radius: 10px !important;
 }
 
 .border-1 {
     border: 1px solid black !important;
+}
+
+.border-right-1-gray {
+    border-right: 1px solid #2d2e2e;
 }
 
 .vertical-align-middle {
@@ -387,6 +450,10 @@ BACKGROUND
 
 .background-gray {
     background-color: #2d2e2e !important;
+}
+
+.background-darkgray {
+    background-color: #0a0a0a !important;
 }
 
 .background-darkteal {
@@ -439,4 +506,19 @@ Navbar
 
 .inactive {
     color: #d3d3d3 !important;
+}
+
+.rzslider .rz-pointer {
+    top: -10px !important;
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.rzslider .rz-pointer:after {
+    top: 6px !important;
+    left: 6px !important;
+}
+
+.rzslider .rz-tick-legend {
+    left: -5px !important;
 }

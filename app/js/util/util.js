@@ -24,7 +24,7 @@ function transformNumberFormat(number, order=false) {
             { value: 1, symbol: "" },
             { value: 1e3, symbol: "k" },
             { value: 1e6, symbol: "M" },
-            { value: 1e9, symbol: "G" },
+            { value: 1e9, symbol: "B" },
             { value: 1e12, symbol: "T" },
             { value: 1e15, symbol: "P" },
             { value: 1e18, symbol: "E" },
@@ -37,7 +37,7 @@ function transformNumberFormat(number, order=false) {
                 break;
             }
         }
-        return (number / steps[i].value).toFixed(2).replace(regularExpression, "$1") + steps[i].symbol;
+        return (number / steps[i].value).toFixed(2).replace(regularExpression, "$1") + " " + steps[i].symbol;
     }
 
     else {

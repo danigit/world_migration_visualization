@@ -52,7 +52,7 @@
 
                 for (const cInfo of topInwardCountries) {
                     let country = data.find(o => o.name === cInfo[0]);
-                    countries.push([country, cInfo[1]]);
+                    countries.push([country, transformNumberFormat(cInfo[1])]);
                 }
 
                 return countries;
@@ -86,6 +86,9 @@
                     if (a[1] < b[1]) return 1;
                     return -1;
                 });
+
+                avgEmigrants = avgEmigrants.map(d => [d[0],
+                        transformNumberFormat(d[1])]);
 
                 return avgEmigrants.slice(0, top);
             })

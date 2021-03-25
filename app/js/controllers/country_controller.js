@@ -13,6 +13,7 @@
     function countryController($scope, $state, dataService, countryService, $stateParams) {
         $scope.countryInfoValue = "global_rank";
         $scope.selectedTopCountry = "";
+        $scope.searchSource = "";
         $scope.continents = dataService.continents;
 
         dataService.countries.then((data) => {
@@ -35,6 +36,8 @@
 
             $scope.genreFilterValue = "menu-all";
             $scope.updateStatistics();
+            developmentStructure = createPieStructure("development-piechart", "development");
+            incomeStructure = createPieStructure("income-piechart", "income");
         });
 
         $scope.secondaryMenuSelectedValue =
@@ -69,9 +72,15 @@
             },
         };
 
-        // getting the min and max year in the slider
+        let svgWidth;
+        let svgHeight;
+        let radius;
+        let arc;
         let sliderMin = 1900;
         let sliderMax = 2019;
+        let developmentStructure;
+        let incomeStructure;
+        let colors = d3.scaleOrdinal(d3.schemePaired);
 
         /**
          * Function that returns an array with the selected years in the slider
@@ -96,7 +105,7 @@
          * Function that updates the statistics
          */
         $scope.updateStatistics = () => {
-            console.log('Selected new country:');
+            console.log("Selected new country:");
             console.log($scope.selectedCountryController);
 
             dataService.selectedCountryController = $scope.selectedCountryController;
@@ -110,14 +119,8 @@
                 });
 
             // $scope.selectedCountryController, sliderMin, sliderMax
-        dataService
-            .getGlobalRankStatistics(
-                sliderMin, sliderMax,
-                $scope.genreFilterValue
-            )
-            .then(data => {
-
-                let countryData = data.filter(obj => obj.name==$scope.selectedCountryController.name)[0];
+            dataService.getGlobalRankStatistics(sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
+                let countryData = data.filter((obj) => obj.name == $scope.selectedCountryController.name)[0];
 
                 let avgEstRefGlobalRank = "";
                 if (isNaN(countryData.average_est_refugees_global_rank)) {
@@ -126,24 +129,23 @@
                     avgEstRefGlobalRank = "" + transformNumberFormat(countryData.average_est_refugees_global_rank, true);
                 }
 
-                $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = 
+                $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank =
                     "" + transformNumberFormat(countryData.average_tot_migrants_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank = 
+                $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank =
                     "" + transformNumberFormat(countryData.average_tot_population_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank = 
+                $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank =
                     "" + transformNumberFormat(countryData.average_perc_immigration_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank = 
+                $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank =
                     "" + transformNumberFormat(countryData.average_age_migrants_global_rank, true);
 
                 $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
-                
+
                 $scope.$apply();
             });
 
-        
             // getting the total population by age and sex
             dataService
                 .getTotPopulationByAgeAndSex(
@@ -201,13 +203,13 @@
             dataService
                 .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
                 .then((data) => {
-                    drawPieChart(data, "development-piechart");
+                    drawPieChart(data, developmentStructure, "development");
                 });
 
             dataService
                 .getCountryIncomeStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
                 .then((data) => {
-                    drawPieChart(data, "income-piechart");
+                    drawPieChart(data, incomeStructure, "income");
                 });
 
             const getDummyData = new Promise((resolve, _) => {
@@ -236,136 +238,122 @@
                 $scope.genreFilterValue).then((data) => {
                     const topCountries = data;
 
-                    $scope.top5InwardCountries  = topCountries['topInward'];
-                    $scope.top5OutwardCountries = topCountries['topOutward'];
-                    
+                    $scope.top5InwardCountries = topCountries["topInward"];
+                    $scope.top5OutwardCountries = topCountries["topOutward"];
+
                     $scope.$apply();
                 });
         };
 
-        const arcTweenEnter = (d, arc) => {
-            var i = d3.interpolate(d.endAngle, d.startAngle);
+        /**
+         * Function that updates the pieChart values for the enter set
+         * @param {array} data
+         * @param {function} arc
+         * @returns
+         */
+        let arcTweenEnter = (data) => {
+            // let i = d3.interpolate(data.endAngle, data.startAngle);
+            let i = d3.interpolate(this._current, data);
 
-            return (t) => {
-                d.startAngle = i(t);
-                return arc(d);
+            this._current = i(0);
+            return function (t) {
+                // data.startAngle = i(t);
+                // return arc(data);
+                return arc(i(t));
             };
         };
 
-        const arcTweenUpdate = (d, i, n, arc) => {
-            var interpolate = d3.interpolate(n[i]._current, d);
+        /**
+         * Function that creates the base html structure for visualizing a pieChart
+         * @param {string} container
+         * @param {string} type
+         * @returns
+         */
+        let createPieStructure = (container, type) => {
+            let svgContainer = d3.select("#" + container);
+            svgWidth = svgContainer.node().getBoundingClientRect().width;
+            svgHeight = svgContainer.node().getBoundingClientRect().height;
+            radius = Math.min(svgWidth, svgHeight) / 2;
 
-            console.log("update function");
-            n[i]._current = d;
-            return (t) => {
-                return arc(interpolate(t));
-            };
-        };
-
-        let drawPieChart = (data, container) => {
-            const developmentContainer = d3.select("#" + container);
-            developmentContainer.html("");
-            const developmentContainerDim = developmentContainer.node().getBoundingClientRect();
-            const width = developmentContainerDim.width;
-            const height = developmentContainerDim.height;
-
-            const svg = developmentContainer.append("svg").attr("width", width).attr("height", height);
-            const pieChartGroup = svg
-                .append("g")
-                .attr("class", "slices")
-                .attr("transform", `translate(${width / 2}, ${height / 2})`);
-            const pieChartLabels = svg
-                .append("g")
-                .attr("class", "labels")
-                .attr("transform", `translate(${width / 2}, ${height / 2})`);
-            const radius = Math.min(width, height) / 2;
-            const colors = d3.scaleOrdinal(d3.schemePaired);
-            const arc = d3
+            let svg = svgContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
+            // .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
+            svg.append("g")
+                .attr("class", type + "-slices")
+                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
+            svg.append("g")
+                .attr("class", type + "-labels")
+                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
+            arc = d3
                 .arc()
                 .outerRadius(radius - 70)
                 .innerRadius(0);
-            const pie = d3.pie().value((d) => d.value);
-            const piedData = pie(data);
 
-            pieChartGroup
-                .selectAll("path")
-                .data(piedData)
-                .join(
-                    (enter) => {
-                        enter
-                            .append("path")
-                            .attr("class", "arc")
-                            .style("stroke", "white")
-                            .style("fill", (d, i) => colors(i))
-                            .each((d) => (this._current = d))
-                            .transition()
-                            .duration(1000)
-                            .attrTween("d", (d) => arcTweenEnter(d, arc));
-                    },
-                    (update) =>
-                        update
-                            .transition()
-                            .duration(1000)
-                            .attrTween("d", (d, i, n) => arcTweenUpdate(d, i, n, arc)),
-                    (exit) => exit.remove()
-                );
+            return svg;
+        };
 
+        /**
+         * Function that handles the enter set of the pieChart
+         * @param {array} enter
+         * @param {string} type
+         */
+        let handleEnter = (enter, type) => {
+            enter
+                .append("path")
+                .attr("class", type + "-arc")
+                .style("stroke", "white")
+                .style("fill", (d, i) => colors(i))
+                .transition()
+                .duration(1000)
+                .attrTween("d", arcTweenEnter);
+        };
+
+        /**
+         * Function that handles the update set of the pieChart
+         * @param {array} update
+         */
+        let handleUpdate = (update) => {
+            update
+                .transition()
+                .duration(1000)
+                .attrTween("d", function (d) {
+                    this._current = this._current || d;
+                    var interpolate = d3.interpolate(this._current, d);
+                    this._current = interpolate(0);
+                    return function (t) {
+                        return arc(interpolate(t));
+                    };
+                });
+        };
+
+        /**
+         * Function that handles the visualization of the labels
+         * @param {array} enter
+         * @param {number} dataLength
+         * @param {string} type
+         */
+        let handleEnterLabels = (enter, dataLength, type) => {
             let legendIndex = 0;
-            var labelGroups = pieChartLabels.selectAll(".label").data(piedData).enter().append("g").attr("class", "label");
+            let enterLabel = enter.append("g").attr("class", type + "-label");
 
-            labelGroups
+            // creating the inner circles for the labels
+            enterLabel
                 .append("circle")
-                .attr("cx", 0)
-                .attr("cy", 0)
                 .attr("r", 2)
                 .attr("fill", "#FFFFFF")
-                .attr("transform", (d, i) => {
-                    return "translate(" + arc.centroid(d) + ")";
-                })
-                .attr("class", "label-circle");
+                .attr("class", type + "-label-inner-circle");
 
-            labelGroups
+            // creating the line for the labels
+            enterLabel
                 .append("line")
-                .attr("x1", (d, i) => {
-                    return arc.centroid(d)[0];
-                })
-                .attr("y1", (d, i) => {
-                    return arc.centroid(d)[1];
-                })
-                .attr("x2", (d, i) => {
-                    if (d.value == 0) return arc.centroid[0];
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let x = Math.cos(midAngle) * (radius - 45);
-                    return x;
-                })
-                .attr("y2", (d, i) => {
-                    if (d.value == 0) return arc.centroid[1];
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let y = Math.sin(midAngle) * (radius - 45);
-                    return y;
-                })
-                .attr("class", "label-line");
+                .attr("stroke-width", 1)
+                .attr("stroke", "#FFFFFF")
+                .attr("class", type + "-label-line");
 
-            labelGroups
-                .append("circle")
-                .attr("cx", (d, i) => {
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let x = Math.cos(midAngle) * (radius - 45);
-                    return x;
-                })
-                .attr("cy", (d, i) => {
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let y = Math.sin(midAngle) * (radius - 45);
-                    return y;
-                })
-                .attr("r", (d) => (d.value !== 0 ? 4 : 0))
-                .attr("fill", (d, i) => colors(i));
+            // creating the outer circles for the label
+            enterLabel.append("circle").attr("class", type + "-label-outer-circle");
 
-            labelGroups
+            // creating the colored rectangles for the legend
+            enterLabel
                 .append("rect")
                 .attr("x", 0)
                 .attr("y", 0)
@@ -375,57 +363,165 @@
                 .attr("height", 12)
                 .attr("stroke", "#FFFFFF")
                 .attr("fill", (d, i) => colors(i))
+                .attr("class", type + "-legend-rect")
                 .attr("transform", (d, i) => {
-                    if (i < data.length / 2) return `translate(${-(width / 2 - 50)}, ${height / 2 - 15 * (i + 1)})`;
+                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - 15 * (i + 1)})`;
                     else {
-                        return `translate(${width / 4 - 55}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
+                        return `translate(${svgWidth / 4 - 55}, ${svgHeight / 2 - 15 * (legendIndex++ + 1)})`;
                     }
-                })
-                .attr("class", "label-circle");
+                });
 
             legendIndex = 0;
 
-            labelGroups
+            // creating the text of the labels
+            enterLabel
                 .append("text")
+                .attr("stroke", (d, i) => colors(i))
+                .attr("class", type + "-label-text");
+
+            // creating the text for the legend
+            enterLabel
+                .append("text")
+                .attr("x", "0")
+                .attr("y", "5")
+                .attr("class", type + "-legend-text")
+                .attr("class", "label-text")
+                .attr("transform", (d, i) => {
+                    if (i < dataLength / 2) {
+                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - 15 * (i + 1)})`;
+                    } else {
+                        return `translate(${svgWidth / 4 - 35}, ${svgHeight / 2 - 15 * (legendIndex++ + 1)})`;
+                    }
+                })
+                .text((d) => d.data.type);
+        };
+
+        /**
+         * Function that handles the updating of the labels in the pieChart
+         * @param {svg} svgElement
+         * @param {array} piedData
+         * @param {string} type
+         */
+        let handleUpdateLabels = (svgElement, piedData, type) => {
+            // updating the inner circle label
+            svgElement
+                .selectAll("." + type + "-label-inner-circle")
+                .data(piedData)
+                .transition()
+                .duration(1000)
+                .attrTween("transform", function (d, i, n) {
+                    n[i]._current = n[i]._current || d;
+                    let interpolate = d3.interpolate(n[i]._current, d);
+                    n[i]._current = interpolate(0);
+                    return function (t) {
+                        let inter = interpolate(t);
+                        let pos = arc.centroid(inter);
+                        return "translate(" + pos + ")";
+                    };
+                });
+
+            // updating the label line
+            svgElement
+                .selectAll("." + type + "-label-line")
+                .data(piedData)
+                .transition()
+                .duration(1000)
+                .attr("x1", (d, i) => arc.centroid(d)[0])
+                .attr("y1", (d, i) => arc.centroid(d)[1])
+                .attr("x2", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "x"))
+                .attr("y2", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
+
+            // updating the label outer circle
+            svgElement
+                .selectAll("." + type + "-label-outer-circle")
+                .data(piedData)
+                .transition()
+                .duration(1000)
+                .attr("r", (d) => (d.value !== 0 ? 4 : 0))
+                .attr("fill", (d, i) => colors(i))
+                .attr("cx", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "x"))
+                .attr("cy", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
+
+            // updating the label text
+            svgElement
+                .selectAll("." + type + "-label-text")
+                .data(piedData)
+                .transition()
+                .duration(1000)
                 .attr("x", (d, i) => {
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let x = Math.cos(midAngle) * (radius - 45);
+                    let x = computePieChartEndOfLabelLineXY(d, arc, "x");
+                    if (x == undefined) x = 0;
                     let sign = x > 0 ? 1 : -1;
-                    let labelX = x + 5 * sign;
-                    return labelX;
+                    let xLabel = x + 10 * sign;
+                    return xLabel;
                 })
                 .attr("y", (d, i) => {
-                    let centroid = arc.centroid(d);
-                    let midAngle = Math.atan2(centroid[1], centroid[0]);
-                    let y = Math.sin(midAngle) * (radius - 45);
-                    return y;
+                    let y = computePieChartEndOfLabelLineXY(d, arc, "y");
+                    if (y == undefined) y = 0;
+                    let sign = y > 0 ? 1 : -1;
+                    let yLabel = y + 1 * sign;
+                    return yLabel;
                 })
-                .attr("stroke", (d, i) => colors(i))
                 .attr("text-anchor", (d, i) => {
                     let centroid = arc.centroid(d);
                     let midAngle = Math.atan2(centroid[1], centroid[0]);
                     let x = Math.cos(midAngle) * (radius - 45);
                     return x > 0 ? "start" : "end";
                 })
-                .attr("class", "label-text")
                 .text((d) => {
                     return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
                 });
+        };
 
-            labelGroups
-                .append("text")
-                .attr("x", 0)
-                .attr("y", 6)
-                .attr("transform", (d, i) => {
-                    if (i < data.length / 2) {
-                        return `translate(${-(width / 2 - 70)}, ${height / 2 - 15 * (i + 1)})`;
-                    } else {
-                        return `translate(${width / 4 - 35}, ${height / 2 - 15 * (legendIndex++ + 1)})`;
-                    }
-                })
-                .attr("class", "label-text")
-                .text((d) => d.data.type);
+        /**
+         * Function that computes the position of the outer circle in the pieChart
+         * @param {object} d
+         * @param {function} arc
+         * @param {string} coord
+         * @returns
+         */
+        let computePieChartEndOfLabelLineXY = (d, arc, coord) => {
+            if (d.value == 0) {
+                if (coord === "x") return arc.centroid[0];
+                if (coord === "y") return arc.centroid[1];
+            }
+            let centroid = arc.centroid(d);
+            let midAngle = Math.atan2(centroid[1], centroid[0]);
+            let x = Math.cos(midAngle) * (radius - 55);
+            let y = Math.sin(midAngle) * (radius - 55);
+
+            if (coord === "x") return x;
+            if (coord === "y") return y;
+        };
+
+        /**
+         * Function that draws the pie chart
+         * @param {array} data
+         */
+        let drawPieChart = (data, svgElement, type) => {
+            const pie = d3.pie().value((d) => d.value);
+            const piedData = pie(data);
+
+            // variable used to split the legend in two columns
+            svgElement
+                .select("." + type + "-slices")
+                .selectAll("path")
+                .data(piedData)
+                .join(
+                    (enter) => handleEnter(enter, type),
+                    (update) => handleUpdate(update),
+                    (exit) => exit.remove()
+                );
+
+            svgElement
+                .select("." + type + "-labels")
+                .selectAll("." + type + "-label")
+                .data(piedData)
+                .join(
+                    (enter) => handleEnterLabels(enter, data.length, type),
+                    (update) => handleUpdateLabels(svgElement, piedData, type),
+                    (exit) => exit.remove()
+                );
         };
 
         let drawAgeStackedBarchart = (data, containerId) => {
@@ -664,6 +760,18 @@
         $scope.hideTopCountryHint = function (type) {
             let tooltip = document.getElementById("top-flags-tooltip");
             tooltip.style.zIndex = -100;
+        };
+
+        /**
+         * Function that clears the search box in the source select filter
+         */
+        $scope.clearSearch = () => {
+            $scope.searchSource = "";
+            $scope.searchDestination = "";
+        };
+
+        $scope.updateSearch = (event) => {
+            event.stopPropagation();
         };
     }
 })();
