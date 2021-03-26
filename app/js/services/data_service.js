@@ -22,7 +22,7 @@
                     return data;
                 })
                 .catch((error) => {
-                    alert("Could not load dataset..." + "\nCheck the console for more details!");
+                    // alert("Could not load dataset..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
@@ -34,7 +34,7 @@
                     return data;
                 })
                 .catch((error) => {
-                    alert("Could not load file..." + "\nCheck the console for more details!");
+                    // alert("Could not load file..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
@@ -362,12 +362,10 @@
          * @return {promise}       The loaded data waiting to be resolved.
          */
         data_service.getImmigrationByAgeGroups = (country, yearMin, yearMax, gender) => {
-            return data_service.migrPercDistributionAgeSex.then(data => {
-                let filteredData = data_service.filterData(data, country,
-                        yearMin, yearMax);
+            return data_service.migrPercDistributionAgeSex.then((data) => {
+                let filteredData = data_service.filterData(data, country, yearMin, yearMax);
 
-                const genderSuffix = data_service
-                    .getSelectedGenderColumn(gender, "");
+                const genderSuffix = data_service.getSelectedGenderColumn(gender, "");
 
                 let ageColumns = Object.keys(filteredData[0]).filter((k) => {
                     if (typeof k === "string") {
@@ -378,40 +376,33 @@
                 // Keep track of corresponding year
                 ageColumns.push("Year");
 
-                filteredData = data_service.filterColumn(
-                        filteredData, ageColumns);
+                filteredData = data_service.filterColumn(filteredData, ageColumns);
 
                 const ageGroupsAggregation = {
-                    "0-4":   ["0-4" + genderSuffix],
-                    "5-18":  ["5-9", "10-14", "15-19"]
-                        .map(d => d + genderSuffix),
-                    "19-34": ["20-24", "25-29", "30-34"]
-                        .map(d => d + genderSuffix),
-                    "35-54": ["35-39", "40-44", "45-49", "50-54"]
-                        .map(d => d + genderSuffix),
-                    "55-74": ["55-59", "60-64", "65-69", "70-74"]
-                        .map(d => d + genderSuffix),
-                    "75+":   ["75+" + genderSuffix]
+                    "0-4": ["0-4" + genderSuffix],
+                    "5-18": ["5-9", "10-14", "15-19"].map((d) => d + genderSuffix),
+                    "19-34": ["20-24", "25-29", "30-34"].map((d) => d + genderSuffix),
+                    "35-54": ["35-39", "40-44", "45-49", "50-54"].map((d) => d + genderSuffix),
+                    "55-74": ["55-59", "60-64", "65-69", "70-74"].map((d) => d + genderSuffix),
+                    "75+": ["75+" + genderSuffix],
                 };
 
-                return filteredData.map(d => {
+                return filteredData.map((d) => {
                     let aggregatedRow = {};
 
                     const ageGroups = Object.keys(ageGroupsAggregation);
-                    ageGroups.forEach(a => {
+                    ageGroups.forEach((a) => {
                         const oldCols = ageGroupsAggregation[a];
 
-                        const ageGroupData = Object.values(
-                                data_service.filterColumn([d], oldCols)[0]);
+                        const ageGroupData = Object.values(data_service.filterColumn([d], oldCols)[0]);
 
-                        const aggregatedVal = ageGroupData.reduce(
-                                (sum, curr) => sum + +curr, 0);
+                        const aggregatedVal = ageGroupData.reduce((sum, curr) => sum + +curr, 0);
 
                         aggregatedRow[a] = +aggregatedVal.toFixed(1);
                     });
 
                     aggregatedRow["Total"] = 100.0;
-                    aggregatedRow["Year"]  = +d.Year;
+                    aggregatedRow["Year"] = +d.Year;
 
                     return aggregatedRow;
                 });
@@ -651,6 +642,26 @@
                 });
 
                 return income;
+            });
+        };
+
+        data_service.getMutualMigration = (country_one, country_two) => {
+            return data_service.totMigrByOriginDest.then((data) => {
+                let countryOne = getSelectedCountryData(data, country_one);
+                let countryTwo = getSelectedCountryData(data, country_two);
+
+                let countryTwoToCountryOne = countryOne.reduce((sum, val) => {
+                    let value = val[country_two] !== "" ? +val[country_two] : 0;
+                    console.log(val[country_two]);
+                    return (sum += value);
+                }, 0);
+                console.log(countryTwoToCountryOne);
+                let countryOneToCountryTwo = countryTwo.reduce((sum, val) => {
+                    let value = val[country_one] !== "" ? +val[country_one] : 0;
+                    return (sum += value);
+                }, 0);
+
+                return { countryOneSend: countryOneToCountryTwo, countryTwoSend: countryTwoToCountryOne };
             });
         };
 

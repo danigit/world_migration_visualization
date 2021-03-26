@@ -13,7 +13,29 @@
                     <div class="float-left margin-top-20-px">
                         <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
                             class="height-300-px width-300-px">
-                        <h2 class="color-white text-center">{{selectedCountry.left.visName}}</h2>
+                        <div class="color-white margin-top-20-px font-size-x-large text-center">
+                            {{selectedCountry.left.visName}}</div>
+                        <div
+                            class="color-white border-radius-10px background-darkgray width-80 margin-auto font-size-small text-center padding-10-px margin-top-10-px">
+                            <div layout="column" class="width-100">
+                                <div layout="row" class="width-100">
+                                    <div class="width-45-px text-right">Send</div>
+                                    <div class="color-green width-80-px">
+                                        {{leftSendToRight}}</div>
+                                    <div class="width-30-px text-left margin-right-10-px">to</div>
+                                    <div class="color-darkcyan">
+                                        {{selectedCountry.right.visName}}</div>
+                                </div>
+                                <div layout="row">
+                                    <div class="width-45-px">Receive</div>
+                                    <div class="color-red width-80-px">
+                                        {{rightSendToLeft}}</div>
+                                    <div class="width-30-px margin-right-10-px">from</div>
+                                    <div class="color-darkcyan">
+                                        {{selectedCountry.right.visName}}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -220,10 +242,33 @@
                 <div layout="column" class="width-25">
                     <div class="width-100">
 
-                        <civ class="float-right margin-top-20-px margin-right-50-px">
+                        <div class="float-right margin-top-20-px margin-right-50-px">
                             <img src="../../app/img/countries/outlines/{{selectedCountry.right.visName}}.svg"
                                 class="height-300-px width-300-px">
-                            <h2 class="color-white text-center">{{selectedCountry.right.visName}}</h2>
+                            <div class="color-white margin-top-20-px font-size-x-large text-center">
+                                {{selectedCountry.right.visName}}</div>
+                            <div
+                                class="color-white border-radius-10px background-darkgray width-80 margin-auto font-size-small text-center padding-10-px margin-top-10-px">
+                                <div layout="column" class="width-100">
+                                    <div layout="row" class="width-100">
+                                        <div class="width-45-px text-right">Send</div>
+                                        <div class="color-green width-80-px">
+                                            {{rightSendToLeft}}</div>
+                                        <div class="width-30-px text-left margin-right-10-px">to</div>
+                                        <div class="color-darkcyan">
+                                            {{selectedCountry.left.visName}}</div>
+                                    </div>
+                                    <div layout="row">
+                                        <div class="width-45-px">Receive</div>
+                                        <div class="color-red width-80-px">
+                                            {{leftSendToRight}}</div>
+                                        <div class="width-30-px margin-right-10-px">from</div>
+                                        <div class="color-darkcyan">
+                                            {{selectedCountry.left.visName}}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         </civ>
                     </div>
                 </div>
