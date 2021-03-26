@@ -123,10 +123,10 @@ md-select:not([disabled]):focus .md-select-value {
 
 .select-header-search-box {
     box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(0, 0, 0, 0.14), 0 0 0 0 rgba(0, 0, 0, 0.12);
-    padding-left: 16px;
     height: 48px;
+    width: 100% !important;
     cursor: pointer;
-    position: relative;
+    position: fixed;
     display: flex;
     width: auto;
 }

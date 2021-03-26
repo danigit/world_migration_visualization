@@ -42,10 +42,13 @@
                 resolve: {},
             })
             .state("country", {
-                url: "/country",
+                url: "/country/:name",
                 templateUrl: components_folder + "country.html",
                 controller: "countryController as countCtrl",
                 resolve: {},
+                params: {
+                    name: { squash: true, value: null },
+                }
             });
     }
 })();

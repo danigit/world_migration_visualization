@@ -16,11 +16,11 @@
     alignment-baseline: middle;
     font-size: 12px;
     font-family: arial, helvetica, "sans-serif";
-    fill: #FFFFFF;
+    fill: #ffffff;
 }
 .label-line {
     stroke-width: 1;
-    stroke: #FFFFFF;
+    stroke: #ffffff;
 }
 .label-circle {
 }
@@ -45,3 +45,30 @@
     fill:white;
 }
 
+.country-image-thumbnail {
+    width: 45px;
+    height: 25px;
+    object-fit: contain;
+    margin: auto;
+}
+
+/* Immigration by age stacked barchart */
+.axis path,
+.axis line,
+.axis text {
+    fill: none;
+    stroke: #63b3d4;
+    stroke-width: 0.5px;
+    shape-rendering: crispEdges;
+}
+
+.bar {
+    fill: steelblue;
+}
+
+.x.axis path {
+    display: none;
+}
+
+.y.axis path {
+}

@@ -36,6 +36,7 @@
 
 .feed-container {
     background-color: #707070;
+    height: 15px;
     padding: 10px 20px;
     border-radius: 16px;
     color: white;
@@ -47,4 +48,58 @@
 md-sidenav {
     max-width: 2000px !important;
     width: 100% !important;
+}
+
+.area-chart {
+    fill: #444444;
+    stroke: #0093c4;
+}
+
+.year-circle {
+    fill: #63b3d4;
+    stroke: none;
+}
+
+.year-line {
+    stroke-dasharray: 1 !important;
+    stroke: #63b3d4 !important;
+}
+
+.move-feed {
+    animation: move-right 20s linear infinite;
+    position: fixed;
+    width: 100%;
+    left: 0;
+}
+
+@keyframes move-right {
+    0% {
+        transform: translate(0);
+    }
+    100% {
+        transform: translate(100%);
+    }
+}
+
+.migration-flow-label {
+    position: absolute;
+    left: 0;
+    padding-left: 20px;
+    padding-right: 10px;
+    color: #63b3d4;
+    font-size: larger;
+    height: 40px;
+    line-height: 1.5;
+    z-index: 100;
+}
+
+#triangle-right {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 18px solid transparent;
+    border-left: 15px solid #2d2e2e;
+    border-bottom: 18px solid transparent;
+    left: 210px;
+    z-index: 100;
 }

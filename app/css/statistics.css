@@ -5,3 +5,10 @@
 #visualization-type-container .md-select-value span {
     font-size: medium !important;
 }
+
+.countries {
+    stroke: #000000;
+    fill: #b0b0b0;
+}
+
+

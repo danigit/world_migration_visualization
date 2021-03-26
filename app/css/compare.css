@@ -26,3 +26,13 @@
     text-align: left;
     margin: 0 0 0 0;
 }
+
+.test {
+    position: absolute;
+    right: 37%;
+    top: 200px;
+}
+
+#compare-info-group .md-button {
+    width: 100px !important;
+}
