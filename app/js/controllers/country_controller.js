@@ -16,6 +16,7 @@
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
 
+        let margin = {top:30, bottom:30, left:30, right:30};
         dataService.countries.then((data) => {
             $scope.countries = data;
 
@@ -34,7 +35,7 @@
 
             $scope.genreFilterValue = "menu-all";
             
-            lineChartStructure = initializeLineChart("")
+            lineChartStructure = initializeLineChart("roc-linechart-container",margin,"roc-linechart-country")
             $scope.updateStatistics();
             developmentStructure = createPieStructure("development-piechart", "development");
             incomeStructure = createPieStructure("income-piechart", "income");
@@ -233,12 +234,16 @@
                 resolve(dummyData);
             });
 
-            getDummyData.then((data) =>
-                    drawAgeStackedBarchart(data, "age-stacked-barchart"));
+            // Extract the immigration by age groups:
+            // 0-4, 5-18, 19-34, 35-54, 55-74, 75+
+            dataService
+                .getImmigrationByAgeGroups($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((ageGroupsData) => drawAgeStackedBarchart(ageGroupsData, ["Total", "Year"], "age-stacked-barchart"));
 
-            countryService.getTopCountries($scope.selectedCountryController.name,
-                sliderMin, sliderMax,
-                $scope.genreFilterValue).then((data) => {
+            // Extract Top 5 inward/outward migration countries
+            countryService
+                .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
                     const topCountries = data;
 
                     $scope.top5InwardCountries = topCountries["topInward"];
@@ -248,7 +253,7 @@
                 });
             
             dataService
-                .getRateOfChange($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getRateOfChange($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
                     let xLabels = Object.keys(data);
                     const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
@@ -258,7 +263,7 @@
                     dataService.getGlobalMinMaxRateOfChange()
                         .then(minMax => {
                             drawLineChart(data, "roc-linechart-country", minMax.MinRateOfChange, 
-                                minMax.MaxRateOfChange, lineChartMargin, lineChartWidthHeight.width, lineChartWidthHeight.height);
+                                minMax.MaxRateOfChange, margin, lineChartStructure.width, lineChartStructure.height);
                         });
                 });
             };
@@ -304,12 +309,37 @@
                 .attr("height", height + margin.top + margin.bottom)
                 .attr("id", lineChartId + "-svg");
             
-                // .attr("class", "country-linechart")
-            svg.append("g")
+            let lineChartStructure = svg.append("g")
                 .attr("id", lineChartId)
                 .attr("class", "country-linechart");
 
-            return {"width": width, "height": height};
+
+            d3.select("#" + lineChartId + "-svg").append("g")
+                .attr("transform", "translate(0," + height + margin.bottom + ")")
+                .attr("color", "white")
+                .style("font-size","12px")
+                .attr("id", lineChartId + "-xaxis")
+                /* .call(d3.axisBottom(xScale)) */
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", "translate(" + 410 + "," + 40 + ")")
+                .style("text-anchor", "end")
+                .text("Time Span");
+            
+            // d3.select()
+            d3.select("#" + lineChartId + "-svg").append("g")
+                .attr("color", "white")
+                .attr("transform", "translate(" + (margin.left + margin.right) + "," + margin.bottom + ")")
+                .style("font-size","12px")
+                .attr("id", lineChartId + "-yaxis")
+                // .call(d3.axisLeft(yScale))
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", "rotate(-90) translate(" + 0 + "," + -35 +  ")")
+                .style("text-anchor", "end")
+                .text("Rate Of Change, Migrant Stock");
+
+            return {"lineChartStructure": lineChartStructure, "width": width, "height": height};
 
         };
 
@@ -753,7 +783,7 @@
                     .style("text-anchor", "start")
                 .text((_, i) => subgroups[i] + " years");
         };
-
+ 
         let drawLineChart = (data, lineChartId, globalMinY, globalMaxY, margin, lineChartWidth, lineChartHeight) => {
 
             let xScale = d3.scalePoint()
@@ -764,10 +794,10 @@
                 .domain([globalMinY, globalMaxY])
                 .range([lineChartHeight, 0]);
             
-            let updateTransitionDuration = 2000;
+            let updateTransitionDuration = 1500;
             let enterTransitionDuration = 1500;
 
-            d3.select("#" + lineChartId + "-svg").append("g")
+            /* d3.select("#" + lineChartId + "-svg").append("g")
                 .attr("transform", "translate(0," + lineChartHeight + margin.bottom + ")")
                 .attr("color", "white")
                 .style("font-size","12px")
@@ -777,10 +807,20 @@
                 .classed("legend", true)
                 .attr("transform", "translate(" + 410 + "," + 40 + ")")
                 .style("text-anchor", "end")
-                .text("Time Span");
+                .text("Time Span"); */
+
+            d3.select("#" + lineChartId + "-xaxis")
+                .transition()
+                .duration(updateTransitionDuration)
+                .call(d3.axisBottom(xScale));
+
+            d3.select("#" + lineChartId + "-yaxis")
+                .transition()
+                .duration(updateTransitionDuration)
+                .call(d3.axisLeft(yScale));
             
             // d3.select()
-            d3.select("#" + lineChartId + "-svg").append("g")
+            /* d3.select("#" + lineChartId + "-svg").append("g")
                 .attr("color", "white")
                 .attr("transform", "translate(" + (margin.left + margin.right) + ",0)")
                 .style("font-size","12px")
@@ -790,7 +830,7 @@
                 .classed("legend", true)
                 .attr("transform", "rotate(-90) translate(0, " + -35 +  ")")
                 .style("text-anchor", "end")
-                .text("Rate Of Change, Migrant Stock");
+                .text("Rate Of Change, Migrant Stock"); */
 
             /* d3.select("#" + lineChartId + "xaxis")
                 //.transition().duration(updateTransitionDuration)

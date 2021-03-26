@@ -654,17 +654,16 @@
             return data_service.totMigrRateOfChange.then((data) => {
                 let allRatesOfChange = data.map(row => Object.values(row).slice(1, Object.values(row).length));
                 let joinedRows = [];
-                for (let row in allRatesOfChange) {
-                    joinedRows = joinedRows.concat(row);
-                }
+                allRatesOfChange.forEach(elem => {
+                    joinedRows = joinedRows.concat(elem);
+                });
+                joinedRows = joinedRows.map(val => +val);
                 return {"MinRateOfChange":d3.min(joinedRows), "MaxRateOfChange":d3.max(joinedRows)};
             });
         };
 
         data_service.getRateOfChange = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.totMigrRateOfChange.then((data) => {
-                console.log("data is ", data)
-                console.log(Object.values(data[0]));
                 let filteredData = data.filter(countryData => countryData["Destination"] == selectedCountry);
                 let filteredDataColumns = Object.keys(filteredData[0]);
                 filteredDataColumns = filteredDataColumns.filter(columnName => {
