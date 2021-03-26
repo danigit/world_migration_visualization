@@ -244,6 +244,14 @@
                 });
         };
 
+        $scope.comparisonWinner = (field, left) => {
+            if (left) {
+                return $scope.globalRankCountryLeftStatisticsValues[field] < $scope.globalRankCountryRightStatisticsValues[field];
+            } else {
+                return $scope.globalRankCountryRightStatisticsValues[field] < $scope.globalRankCountryLeftStatisticsValues[field];
+            }
+        };
+
         $scope.countryChanged = () => {
             console.log($scope.selectedCountry.left);
             console.log($scope.selectedCountry.right);
