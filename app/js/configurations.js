@@ -40,3 +40,6 @@ const countries_classes_by_region = 'app/data/csv/countries_class_by_region.csv'
 
 // path for estimated refugee stock table
 const estimated_refugees = 'app/data/csv/est_refugee_stock.csv';
+
+// path for migrant stock rate of change table table
+const migrants_annual_rate_of_change = 'app/data/csv/migrants_annual_rate_of_change.csv';
