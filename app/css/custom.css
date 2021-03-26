@@ -133,6 +133,18 @@ DISPLAY
     width: 100px !important;
 }
 
+.width-80-px {
+    width: 80px !important;
+}
+
+.width-45-px {
+    width: 45px !important;
+}
+
+.width-30-px {
+    width: 30px !important;
+}
+
 .height-300-px {
     height: 300px;
 }
@@ -182,6 +194,10 @@ FONTS
 
 .text-right {
     text-align: right !important;
+}
+
+.text-left {
+    text-align: left !important;
 }
 
 .text-bold {

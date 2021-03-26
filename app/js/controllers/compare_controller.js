@@ -19,6 +19,9 @@
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
         $scope.countryInfoValue = "global_rank";
         $scope.genreButtons = dataService.genreButtons;
+        $scope.leftSendToRight;
+        $scope.rightSendToLeft;
+        let mutualMigrationInformation;
 
         $scope.countryLeftStatisticsValues = {
             totalImmigrations: "",
@@ -49,6 +52,7 @@
             immigrationAverageAgeGlobalRank: "",
             refugeeVsImmigrationGlobalRank: "",
         };
+
         dataService.countries.then((data) => {
             $scope.countries = data;
             $scope.selectedCountry = {
@@ -160,6 +164,12 @@
                     }
                     $scope.$apply();
                 });
+
+            dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
+                $scope.leftSendToRight = data.countryOneSend;
+                $scope.rightSendToLeft = data.countryTwoSend;
+                $scope.$apply();
+            });
         };
 
         $scope.updateStatisticsRight = () => {
@@ -242,6 +252,12 @@
                     }
                     $scope.$apply();
                 });
+
+            dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
+                $scope.leftSendToRight = transformNumberFormat(data.countryOneSend);
+                $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
+                $scope.$apply();
+            });
         };
 
         $scope.comparisonWinner = (field, left) => {
