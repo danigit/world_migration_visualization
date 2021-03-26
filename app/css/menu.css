@@ -37,7 +37,7 @@
 
 .menu-divider {
     height: 2px;
-    margin: 20px 0 20px 0 !important;
+    margin: 20px 0 20px 0;
     background-color: #2d2e2e;
     border: 0;
 }

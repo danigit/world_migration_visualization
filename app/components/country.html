@@ -40,12 +40,24 @@
                     <rzslider rz-slider-model="sliderCountry.minValue" rz-slider-high="sliderCountry.maxValue"
                         rz-slider-options="sliderCountry.options"></rzslider>
                 </div>
+                <div class="margin-top-100-px font-size-small color-white text-justify">
+                    Width <span class="color-darkcyan">Migratory pattern by development</span> we intend the percentage
+                    of the persons from this country that have migrated in countries...
+                </div>
+                <hr class="menu-divider width-100" />
+                <div class="font-size-small color-white text-justify">
+                    Width <span class="color-darkcyan">Migratory pattern by income</span> we intend the percentage
+                    of the persons from this country that have migrated in countries...
+                </div>
             </div>
-            <div layout="column" class="width-60">
-                <div layout="row" class="width-100 height-50">
-                    <div id="development-piechart" class="width-50 height-100">
+            <div layout="column" class="width-60 padding-left-20px">
+                <div layout="row" class="width-100 height-50 color-white margin-top-40-px">
+                    <div id="development-piechart" class="width-50 height-90">
+                        <civ class="display-block text-center text-bold">Migratory pattern by development</civ>
                     </div>
                     <div id="income-piechart" class="width-50 height-100">
+
+                        <civ class="display-block text-center text-bold">Migratory pattern by income</civ>
                     </div>
                 </div>
                 <div layout="row" class="width-100 height-50">
@@ -63,26 +75,29 @@
                         src="../../app/img/countries/outlines/{{selectedCountryController.visName}}.svg" />
                 </div>
                 <div layout="row">
-                    <img class="country-image-thumbnail" src="{{selectedCountryController.flagPath}}">
+                    <div class="box-shadow-dark-gray country-image-thumbnail"><img class="country-image-thumbnail"
+                            src="{{selectedCountryController.flagPath}}">
+                    </div>
                     <h1 class="color-white font-size-large margin-right-auto">{{selectedCountryController.visName}}</h1>
                 </div>
-                <div class="width-100 color-white" layout="row">
+                <div class="width-90 margin-auto color-white" layout="row">
                     <div class="width-50" layout="column">
                         <div
-                            class="text-center font-size-x-small border-left-radius-5-px b padding-5-px background-darkgray border-right-1-gray">
+                            class="text-center font-size-small border-left-radius-5-px b padding-5-px background-darkgray border-right-1-gray">
                             Continent</div>
-                        <div class="text-center margin-top-10-px color-darkcyan">
+                        <div class="text-center font-size-medium margin-top-10-px color-darkcyan">
                             {{selectedCountryController.continent}}</div>
                     </div>
                     <div class="width-50">
                         <div
-                            class="text-center font-size-x-small border-right-radius-5-px padding-5-px background-darkgray">
+                            class="text-center font-size-small border-right-radius-5-px padding-5-px background-darkgray">
                             Region</div>
-                        <div class="text-center margin-top-10-px color-darkcyan">{{selectedCountryController.region}}
+                        <div class="text-center font-size-medium margin-top-10-px color-darkcyan">
+                            {{selectedCountryController.region}}
                         </div>
                     </div>
                 </div>
-                <div class="margin-lr-20-px margin-top-100-px min-width-200-px max-width-700-px">
+                <div class="margin-left-20px margin-right-40-px margin-top-100-px min-width-200-px max-width-700-px">
                     <radio-button-group selected-button="countryInfoValue"
                         handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
                         buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
@@ -140,18 +155,36 @@
                 </div>
                 <div layout="column"
                     class="margin-auto margin-top-60-px margin-bottom-50-px min-width-200-px max-width-700-px">
-                    <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
-                        ng-model="selectedTopCountryValue" countries="top5InwardCountries"
-                        show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
-                        top-countries-icon-path="'app/img/home/inward.png'"></top-countries>
-                    <hr class="menu-divider" />
-                    <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
-                        ng-model="selectedTopCountryValue" countries="top5OutwardCountries"
-                        show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
-                        top-countries-icon-path="'app/img/home/outward.png'"></top-countries>
+                    <div
+                        class="color-white margin-bottom-10-px font-size-small background-darkgray padding-10-px width-90 text-justify">
+                        Ranking of the top 5 countries from
+                        which migrants <span class="color-green">arrive</span> into the selected country, and to which
+                        the selected country <span class="color-red">sends</span> migrants </div>
+                    <div class="width-90">
+                        <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
+                            ng-model="selectedTopCountryValue" countries="top5InwardCountries"
+                            show-hint="showTopCountryHint(flagValue, event, 'Send')"
+                            hide-hint="hideTopCountryHint(event, 'in')"
+                            top-countries-icon-path="'app/img/home/inward.png'">
+                        </top-countries>
+                        <hr class="menu-divider" />
+                        <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
+                            ng-model="selectedTopCountryValue" countries="top5OutwardCountries"
+                            show-hint="showTopCountryHint(flagValue, event, 'Receive')"
+                            hide-hint="hideTopCountryHint('in')" top-countries-icon-path="'app/img/home/outward.png'">
+                        </top-countries>
+                    </div>
                 </div>
-                <div layout="column" id="top-flags-tooltip">
-                    <div>{{selectedTopFlag[0].visName}}<br>{{selectedTopFlag[1]}} people</div>
+                <div id="top-flags-tooltip" class="display-none display-block">
+                    <div class="width-150-px">
+                        <div class="color-darkcyan">{{selectedTopFlag[0].visName}}</div>
+                        <hr class="menu-divider background-darkcyan margin-top-10-px margin-bottom-10-px width-100" />
+                        <div class="font-size-small">{{sendReceiveTopCountries}} <span id="tooltip-text"
+                                class="margin-top-10-px">{{selectedTopFlag[1]}}</span>
+                            people {{sendReceiveTopCountries == "Send" ? 'to' : 'from'}}
+                            {{selectedCountryController.visName}}</div>
+
+                    </div>
                 </div>
             </div>
         </div>

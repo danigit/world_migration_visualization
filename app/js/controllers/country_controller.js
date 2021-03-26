@@ -17,6 +17,7 @@
         $scope.continents = dataService.continents;
 
         let margin = {top:30, bottom:30, left:30, right:30};
+        $scope.sendReceiveTopCountries = "";
         dataService.countries.then((data) => {
             $scope.countries = data;
 
@@ -359,10 +360,10 @@
             // .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
             svg.append("g")
                 .attr("class", type + "-slices")
-                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
+                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 50})`);
             svg.append("g")
                 .attr("class", type + "-labels")
-                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
+                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 50})`);
             arc = d3
                 .arc()
                 .outerRadius(radius - 70)
@@ -439,15 +440,15 @@
                 .attr("y", 0)
                 .attr("rx", 0)
                 .attr("ry", 0)
-                .attr("width", 12)
-                .attr("height", 12)
+                .attr("width", 10)
+                .attr("height", 10)
                 .attr("stroke", "#FFFFFF")
                 .attr("fill", (d, i) => colors(i))
                 .attr("class", type + "-legend-rect")
                 .attr("transform", (d, i) => {
-                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - 15 * (i + 1)})`;
+                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - 20 * (i + 1)})`;
                     else {
-                        return `translate(${svgWidth / 4 - 55}, ${svgHeight / 2 - 15 * (legendIndex++ + 1)})`;
+                        return `translate(${svgWidth / 4 - 55}, ${svgHeight / 2 - 20 * (legendIndex++ + 1)})`;
                     }
                 });
 
@@ -468,9 +469,9 @@
                 .attr("class", "label-text")
                 .attr("transform", (d, i) => {
                     if (i < dataLength / 2) {
-                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - 15 * (i + 1)})`;
+                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - 20 * (i + 1)})`;
                     } else {
-                        return `translate(${svgWidth / 4 - 35}, ${svgHeight / 2 - 15 * (legendIndex++ + 1)})`;
+                        return `translate(${svgWidth / 4 - 35}, ${svgHeight / 2 - 20 * (legendIndex++ + 1)})`;
                     }
                 })
                 .text((d) => d.data.type);
@@ -548,6 +549,7 @@
                     let x = Math.cos(midAngle) * (radius - 45);
                     return x > 0 ? "start" : "end";
                 })
+                .attr("font-size", "small")
                 .text((d) => {
                     return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
                 });
@@ -613,18 +615,15 @@
             const legendMargin = 15;
 
             // Stack up the data
-            const groups = d3.map(data, d => +d.Year);
+            const groups = d3.map(data, (d) => +d.Year);
 
-            const subgroups = Object.keys(data[0])
-                .filter(i => !toExclude.includes(i));
+            const subgroups = Object.keys(data[0]).filter((i) => !toExclude.includes(i));
 
-            const stackedData = d3.stack().keys(
-                subgroups)(data);
+            const stackedData = d3.stack().keys(subgroups)(data);
 
             // Setup Bostock's margin convention
-            const svgMargins = { top: 8, right: 32, left: 32,
-                    bottom: 64 + Math.floor(subgroups.length/3)*legendMargin }; // Legend labels are stacked at
-                                                                                // the bottom in 3 separate columns
+            const svgMargins = { top: 8, right: 32, left: 32, bottom: 64 + Math.floor(subgroups.length / 3) * legendMargin }; // Legend labels are stacked at
+            // the bottom in 3 separate columns
 
             const svgWidth = containerDims.width - svgMargins.left - svgMargins.right;
 
@@ -647,7 +646,7 @@
             let xScale = d3
                 .scaleBand()
                 .domain(groups)
-                .rangeRound([4, svgWidth-2])
+                .rangeRound([4, svgWidth - 2])
                 .padding(0.16);
 
             let yScale = d3
@@ -688,47 +687,45 @@
                 .style("fill", (_, i) => colorScale(i));
 
             // Create the hover tooltip
-            const tooltipElem = svgElem.append("g")
-                    .classed("age-stacked-barchart-tooltip", true)
-                    .classed("hide", true);
+            const tooltipElem = svgElem.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
 
-            tooltipElem.append("rect")
-                    .attr("width", 40)
-                    .attr("height", 20)
-                    .attr("fill", "white")
-                    .style("padding", "1em")
-                    .style("opacity", 0.5);
+            tooltipElem
+                .append("rect")
+                .attr("width", 40)
+                .attr("height", 20)
+                .attr("fill", "white")
+                .style("padding", "1em")
+                .style("opacity", 0.5);
 
-            tooltipElem.append("text")
-                    .attr("x", 20)
-                    .attr("dy", "1.2em")
-                    .style("font-size", "12px")
-                    .style("font-weight", "bold")
-                    .style("text-anchor", "middle");
+            tooltipElem
+                .append("text")
+                .attr("x", 20)
+                .attr("dy", "1.2em")
+                .style("font-size", "12px")
+                .style("font-weight", "bold")
+                .style("text-anchor", "middle");
 
             // Create rects for each segment
             groupsElem
                 .selectAll("rect")
                 .data((d) => d)
                 .enter()
-                    .append("rect")
-                        .attr("x", d => xScale(+d.data.Year))
-                        .attr("y", d => yScale(d[1]))
-                        .attr("height", d => yScale(d[0]) - yScale(d[1]))
-                        .attr("width", xScale.bandwidth())
-                    .on("mouseover", () => tooltipElem.classed("hide", false))
-                    .on("mouseout",  () => tooltipElem.classed("hide", true))
-                    .on("mousemove", (e, d) => {
-                        let xPos = d3.pointer(e)[0] - 15;
-                        let yPos = d3.pointer(e)[1] - 25;
+                .append("rect")
+                .attr("x", (d) => xScale(+d.data.Year))
+                .attr("y", (d) => yScale(d[1]))
+                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .on("mouseover", () => tooltipElem.classed("hide", false))
+                .on("mouseout", () => tooltipElem.classed("hide", true))
+                .on("mousemove", (e, d) => {
+                    let xPos = d3.pointer(e)[0] - 15;
+                    let yPos = d3.pointer(e)[1] - 25;
 
-                        // Make the tooltip follow the mouse movement
-                        // while hovering onto a rect
-                        tooltipElem.attr("transform",
-                                "translate(" + xPos + "," + yPos + ")");
-                        tooltipElem.select("text")
-                            .text((d[1] - d[0]).toFixed(1) + "%");
-                    });
+                    // Make the tooltip follow the mouse movement
+                    // while hovering onto a rect
+                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
+                    tooltipElem.select("text").text((d[1] - d[0]).toFixed(1) + "%");
+                });
 
             const getLegendTranslation = (datumId) => {
                 const horizDelta = 16;
@@ -776,11 +773,11 @@
 
             legendElem
                 .append("text")
-                    .attr("x", svgWidth + 5)
-                    .attr("y", 7)
-                    .classed("label-text", true)
-                    .attr("dy", "-0em")
-                    .style("text-anchor", "start")
+                .attr("x", svgWidth + 5)
+                .attr("y", 7)
+                .classed("label-text", true)
+                .attr("dy", "-0em")
+                .style("text-anchor", "start")
                 .text((_, i) => subgroups[i] + " years");
         };
  
@@ -918,8 +915,18 @@
          */
         $scope.showTopCountryHint = function (value, event, type) {
             $scope.selectedTopFlag = value;
+            $scope.sendReceiveTopCountries = type;
             let tooltip = document.getElementById("top-flags-tooltip");
-            tooltip.classList.remove("hide");
+            let tooltip_text = document.getElementById("tooltip-text");
+            if (type == "Send") {
+                tooltip_text.classList.remove("color-red");
+                tooltip_text.classList.add("color-green");
+            } else {
+                tooltip_text.classList.remove("color-green");
+                tooltip_text.classList.add("color-red");
+            }
+            tooltip.classList.remove("display-none");
+            tooltip.classList.add("display-block");
             tooltip.style.top = event.clientY - 50 + "px";
             tooltip.style.left = event.clientX + "px";
             tooltip.style.zIndex = 100;
@@ -929,9 +936,11 @@
          * Function that handles the mouse out on the top countries flags
          * @param {string} value
          */
-        $scope.hideTopCountryHint = function (type) {
+        $scope.hideTopCountryHint = function (event, type) {
             let tooltip = document.getElementById("top-flags-tooltip");
-            tooltip.style.zIndex = -100;
+            console.log("mouse leave");
+            tooltip.classList.remove("display-block");
+            tooltip.classList.add("display-none");
         };
 
         /**
