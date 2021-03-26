@@ -50,6 +50,8 @@
         data_service.totPopulationByAgeSex = data_service.loadCsv(total_population_by_age_and_sex);
         data_service.migrAsPercOfPopulationAgeSex = data_service.loadCsv(migrants_as_percentage_of_total_population_by_age_and_sex);
         data_service.migrPercDistributionAgeSex = data_service.loadCsv(migrants_percentage_distribution_by_age_and_sex);
+        data_service.totMigrRateOfChange = data_service.loadCsv(migrants_annual_rate_of_change);
+
 
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
@@ -284,6 +286,7 @@
          * @returns {promise}
          */
         let filterData = (data, selectedCountry, yearMin, yearMax) => {
+
             return data.filter(
                 (countryData) =>
                     countryData["Destination"] == selectedCountry && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
@@ -450,11 +453,6 @@
                         consideredYears,
                         data_service.getSelectedGenderColumn(selectedGender, "_est"))
                         .then(averageEstRefugees => {
-                            /* if (isNaN(averageEstRefugees)) {
-                                averageEstRefugees = "Not available";
-                            } else {
-                                averageEstRefugees = "" + transformNumberFormat(averageEstRefugees);
-                            }  */
                             return averageEstRefugees;
                         })
 
@@ -581,11 +579,59 @@
             });
         };
 
-        data_service.getRateOfChange = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            data_service.totMigrByOriginDest.then((data) => {
-                let filteredData = filterData(data, selectedCountry, yearMin, yearMax);
-                //Missing table
+        data_service.getGlobalMinMaxRateOfChange = () => {
+            return data_service.totMigrRateOfChange.then((data) => {
+                let allRatesOfChange = data.map(row => Object.values(row).slice(1, Object.values(row).length));
+                let joinedRows = [];
+                for (let row in allRatesOfChange) {
+                    joinedRows = joinedRows.concat(row);
+                }
+                return {"MinRateOfChange":d3.min(joinedRows), "MaxRateOfChange":d3.max(joinedRows)};
             });
+        };
+
+        data_service.getRateOfChange = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            return data_service.totMigrRateOfChange.then((data) => {
+                console.log("data is ", data)
+                console.log(Object.values(data[0]));
+                let filteredData = data.filter(countryData => countryData["Destination"] == selectedCountry);
+                let filteredDataColumns = Object.keys(filteredData[0]);
+                filteredDataColumns = filteredDataColumns.filter(columnName => {
+                    let pattern = /([0-9]+)-([0-9]+)_(\(mf\)|\(m\)|\(f\))/g; 
+                    let match = pattern.exec(columnName);
+                    if (match!=null) {
+                        let leftLimit = +match[1];
+                        let rightLimit = +match[2];
+                        if (leftLimit >= +yearMin && rightLimit <= +yearMax) {
+                            return true;
+                        }
+                    }
+                    else return false;
+                });
+                if (filteredDataColumns.length==0) {
+                    return "Data not available for the specified time span!";
+                }
+                filteredDataColumns = filteredDataColumns.filter(columnName => {
+                    let pattern = /([0-9]+-[0-9]+)_(\(mf\)|\(m\)|\(f\))/g; 
+                    let match = pattern.exec(columnName);
+                    if (match!=null) {
+                        let matchedYearRange = match[1];
+                        return data_service.getSelectedGenderColumn(selectedGender, matchedYearRange) === columnName;
+                    }
+                    else return false;
+                    });
+                if (filteredDataColumns.length==0) {
+                    return "Data not available for the specified time span!";
+                }
+                let countryRateOfChange = {};
+                for (let key in filteredData[0]) {
+                    if (filteredDataColumns.includes(key))
+                        countryRateOfChange[key] = filteredData[0][key];
+                }
+                // countryRateOfChange["GlobalMin":M]
+                return countryRateOfChange;
+            });
+
         };
     }
 })();

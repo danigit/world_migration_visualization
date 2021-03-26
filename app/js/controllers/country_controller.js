@@ -193,8 +193,47 @@
                 .then((data) => {
                     drawPieChart(data, "income-piechart");
                 });
+
+            dataService
+                .getRateOfChange($scope.selectedCountryController, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
+                    let xLabels = Object.keys(data);
+                    const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
+                    xLabels = xLabels.map(label => label.replace(reg, ''));
+                    let yValues = Object.values(data).map(value => +value);
+                    data = xLabels.map((elem, idx) => ({label:elem, value:yValues[idx]}))
+                    dataService.getGlobalMinMaxRateOfChange()
+                        .then(minMax => {
+                            drawLineChart(data, "roc-linechart-country", minMax.MinRateOfChange, 
+                                minMax.MaxRateOfChange, lineChartMargin, lineChartWidthHeight.width, lineChartWidthHeight.height);
+                        });
+                });
         };
 
+        let initializeLineChart = (container, margin, lineChartId) => {
+            
+            let rateOfChangeLineChartContainer = d3.select("#" + container);
+            rateOfChangeLineChartContainer.html("");
+
+            let rateOfChangeLineChartContainerDim = rateOfChangeLineChartContainer.node().getBoundingClientRect();
+            let width = rateOfChangeLineChartContainerDim.width - margin.left - margin.right;
+            let height = rateOfChangeLineChartContainerDim.height - margin.top - margin.bottom;
+
+            let svg =  rateOfChangeLineChartContainer
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .attr("id", lineChartId + "-svg");
+            
+                // .attr("class", "country-linechart")
+            svg.append("g")
+                .attr("id", lineChartId)
+                .attr("class", "country-linechart");
+
+            return {"width": width, "height": height};
+
+        }
+        
         const arcTweenEnter = (d, arc) => {
             var i = d3.interpolate(d.endAngle, d.startAngle);
 
@@ -381,6 +420,87 @@
                 .attr("class", "label-text")
                 .text((d) => d.data.type);
         };
+
+        let drawLineChart = (data, lineChartId, globalMinY, globalMaxY, margin, lineChartWidth, lineChartHeight) => {
+
+            let xScale = d3.scalePoint()
+                .domain(data.map(rateOfChange => rateOfChange.label))
+                .range([margin.left + margin.right, lineChartWidth]);
+
+            let yScale = d3.scaleLinear()
+                .domain([globalMinY, globalMaxY])
+                .range([lineChartHeight, 0]);
+            
+            let updateTransitionDuration = 2000;
+            let enterTransitionDuration = 1500;
+
+            d3.select("#" + lineChartId + "-svg").append("g")
+                .attr("transform", "translate(0," + lineChartHeight + margin.bottom + ")")
+                .attr("color", "white")
+                .style("font-size","12px")
+                .attr("id", lineChartId + "-xaxis")
+                .call(d3.axisBottom(xScale))
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", "translate(" + 410 + "," + 40 + ")")
+                .style("text-anchor", "end")
+                .text("Time Span");
+            
+            // d3.select()
+            d3.select("#" + lineChartId + "-svg").append("g")
+                .attr("color", "white")
+                .attr("transform", "translate(" + (margin.left + margin.right) + ",0)")
+                .style("font-size","12px")
+                .attr("id", lineChartId + "-yaxis")
+                .call(d3.axisLeft(yScale))
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", "rotate(-90) translate(0, " + -35 +  ")")
+                .style("text-anchor", "end")
+                .text("Rate Of Change, Migrant Stock");
+
+            /* d3.select("#" + lineChartId + "xaxis")
+                //.transition().duration(updateTransitionDuration)
+                .call(d3.axisBottom(xScale))
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", "translate(" + 410 + "," + 40 + ")")
+                .style("text-anchor", "end")
+                .text("Time Span");
+
+            d3.select("#" + lineChartId + "yaxis")
+                //.transition().duration(updateTransitionDuration)
+                .call(d3.axisLeft(yScale))
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", "rotate(-90) translate(0, " + -35 +  ")")
+                .style("text-anchor", "end")
+                .text("Rate Of Change, Migrant Stock"); */
+
+            let lineGenerator = d3.line()
+                .x(function (d) {
+                    return xScale(d.label);
+                })
+                .y(function (d) {
+                    return yScale(d.value);
+                });
+
+            d3.select("#" + lineChartId).selectAll("path").data([data]).join(
+                (enter) => enter.append("path")
+                    .attr("class", "country-linechart-path")
+                    .call(enter => enter
+                        .transition()
+                        .duration(enterTransitionDuration)
+                        .attr("d",(d) => lineGenerator(d))),
+                    //.call(enter => { return isChartDefined ? enter : lineInitialTransition(enter);}),
+                (update) => update
+                    .call(update => update
+                        .transition()
+                        .duration(updateTransitionDuration)
+                        .attr("d",(d) => lineGenerator(d))),
+                (exit) => exit.remove()    
+            ); 
+        }
 
         /**
          * Function that handles the click on the genre radio group filter in the menu
