@@ -2,13 +2,13 @@
     <div ng-include="'app/commons/navbar.html'" onload="active='statistics'"></div>
 
     <div layout="column" class="parent-size background-dark">
-        <div class="width-30 margin-auto margin-top-20-px">
+        <div class="width-30 margin-lr-auto margin-top-20-px">
             <radio-button-group selected-button="secondaryMenuSelectedValue"
                 handle-button="handleSecondaryMenuClick(buttonValue) " ng-model="secondaryMenuSelectedValue"
                 buttons="secondaryMenuButtons" radio-buttons-class="'md-button border-1'">
         </div>
         <div layout="column">
-            <div layout="row" class="parent-size">
+            <div layout="row" class="width-100">
                 <div class="width-25">
                     <div class="float-left margin-top-20-px">
                         <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
@@ -56,6 +56,11 @@
                                 </md-select>
                             </md-input-container>
                         </div>
+                    </div>
+                    <div class="width-50 margin-auto margin-top-40-px height-5">
+                        <radio-button-group selected-button="genreFilterValue"
+                            handle-button="handleGenreClick(buttonValue) " ng-model="genreFilterValue"
+                            buttons="genreButtons" radio-buttons-class="'md-button border-1'">
                     </div>
                     <div class="margin-lr-20-px margin-top-40-px">
                         <div class="width-340-px margin-auto">
@@ -247,7 +252,7 @@
                         </div>
                     </div>
                 </div>
-                <div layout="column" class="widht-50">
+                <div layout="column" class="width-50">
                     <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">
                         Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt
                         sed

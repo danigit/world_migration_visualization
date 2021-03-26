@@ -18,7 +18,7 @@
         $scope.continents = dataService.continents;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
         $scope.countryInfoValue = "global_rank";
-        $scope.genreFilterValue = "menu-all";
+        $scope.genreButtons = dataService.genreButtons;
 
         $scope.countryLeftStatisticsValues = {
             totalImmigrations: "",
@@ -55,6 +55,8 @@
                 left: $scope.countries[0],
                 right: $scope.countries[1],
             };
+
+            $scope.genreFilterValue = "menu-all";
             $scope.updateStatisticsLeft();
             $scope.updateStatisticsRight();
             $scope.$apply();
@@ -73,36 +75,37 @@
             dataService
                 .getTotMigrantsByOriginAndDestination($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
-                    console.log("gettin origin");
                     $scope.countryLeftStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
             // $scope.selectedCountryController, sliderMin, sliderMax
-            dataService.getGlobalRankStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
-                let avgEstRefGlobalRank = "";
-                if (isNaN(data.average_est_refugees_global_rank)) {
-                    avgEstRefGlobalRank = "Not available";
-                } else {
-                    avgEstRefGlobalRank = "" + transformNumberFormat(data.average_est_refugees_global_rank, true);
-                }
+            dataService
+                .getGlobalRankStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
+                    let avgEstRefGlobalRank = "";
+                    if (isNaN(data.average_est_refugees_global_rank)) {
+                        avgEstRefGlobalRank = "Not available";
+                    } else {
+                        avgEstRefGlobalRank = "" + transformNumberFormat(data.average_est_refugees_global_rank, true);
+                    }
 
-                $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank =
-                    "" + transformNumberFormat(data.average_tot_migrants_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank =
+                        "" + transformNumberFormat(data.average_tot_migrants_global_rank, true);
 
-                $scope.globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank =
-                    "" + transformNumberFormat(data.average_tot_population_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank =
+                        "" + transformNumberFormat(data.average_tot_population_global_rank, true);
 
-                $scope.globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank =
-                    "" + transformNumberFormat(data.average_perc_immigration_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank =
+                        "" + transformNumberFormat(data.average_perc_immigration_global_rank, true);
 
-                $scope.globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank =
-                    "" + transformNumberFormat(data.average_age_migrants_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank =
+                        "" + transformNumberFormat(data.average_age_migrants_global_rank, true);
 
-                $scope.globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+                    $scope.globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
 
-                $scope.$apply();
-            });
+                    $scope.$apply();
+                });
 
             // getting the total population by age and sex
             dataService
@@ -245,6 +248,17 @@
             console.log($scope.selectedCountry.left);
             console.log($scope.selectedCountry.right);
         };
+
+        /**
+         * Function that handles the click on the genre radio group filter in the menu
+         * @param {string} value
+         */
+        $scope.handleGenreClick = function (value) {
+            $scope.genreFilterValue = value;
+            $scope.updateStatisticsLeft();
+            $scope.updateStatisticsRight();
+        };
+
         /**
          * Function that handles the click on the secondary menu buttons
          * @param {string} value
