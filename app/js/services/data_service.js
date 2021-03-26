@@ -697,7 +697,7 @@
                     if (filteredDataColumns.includes(key))
                         countryRateOfChange[key] = filteredData[0][key];
                 }
-                // countryRateOfChange["GlobalMin":M]
+                
                 return countryRateOfChange;
             });
 
