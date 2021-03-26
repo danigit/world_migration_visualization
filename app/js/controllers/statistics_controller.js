@@ -24,6 +24,7 @@
         });
 
         let svgGroup;
+        let colors = d3.scaleOrdinal(d3.schemeBlues[7]);
 
         let drawMap = (data) => {
             let mapContainer = d3.select("#map");
@@ -45,6 +46,10 @@
                 .attr("d", path)
                 .attr("class", "countries")
                 .attr("id", (d) => d.id)
+                .attr("fill", (d) => {
+                    let chars = d.id.split("");
+                    return colors(d3.sum(chars, (c) => c.charCodeAt(c)));
+                })
                 .on("click", (e, d) => {
                     console.log(e);
                     console.log(d);
