@@ -20,8 +20,7 @@
             $scope.countries = data;
 
             let countryName = $stateParams.name;
-            let selectedCountry = data.find((c) =>
-                    countryName === c.visName.toLowerCase())
+            let selectedCountry = data.find((c) => countryName === c.visName.toLowerCase());
 
             if (selectedCountry) {
                 dataService.selectedCountryController = selectedCountry;
@@ -30,9 +29,8 @@
                 $state.go($state.current, { name: null });
             }
 
-            $scope.selectedCountryController = dataService.selectedCountryController == ""
-                    ? $scope.countries[0]
-                    : dataService.selectedCountryController;
+            $scope.selectedCountryController =
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
 
             $scope.genreFilterValue = "menu-all";
             $scope.updateStatistics();
@@ -105,7 +103,6 @@
          * Function that updates the statistics
          */
         $scope.updateStatistics = () => {
-            console.log("Selected new country:");
             console.log($scope.selectedCountryController);
 
             dataService.selectedCountryController = $scope.selectedCountryController;
@@ -119,32 +116,32 @@
                 });
 
             // $scope.selectedCountryController, sliderMin, sliderMax
-            dataService.getGlobalRankStatistics(sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
-                let countryData = data.filter((obj) => obj.name == $scope.selectedCountryController.name)[0];
+            dataService
+                .getGlobalRankStatistics($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
+                    let avgEstRefGlobalRank = "";
+                    if (isNaN(data.average_est_refugees_global_rank)) {
+                        avgEstRefGlobalRank = "Not available";
+                    } else {
+                        avgEstRefGlobalRank = "" + transformNumberFormat(data.average_est_refugees_global_rank, true);
+                    }
 
-                let avgEstRefGlobalRank = "";
-                if (isNaN(countryData.average_est_refugees_global_rank)) {
-                    avgEstRefGlobalRank = "Not available";
-                } else {
-                    avgEstRefGlobalRank = "" + transformNumberFormat(countryData.average_est_refugees_global_rank, true);
-                }
+                    $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank =
+                        "" + transformNumberFormat(data.average_tot_migrants_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank =
-                    "" + transformNumberFormat(countryData.average_tot_migrants_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank =
+                        "" + transformNumberFormat(data.average_tot_population_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank =
-                    "" + transformNumberFormat(countryData.average_tot_population_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank =
+                        "" + transformNumberFormat(data.average_perc_immigration_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank =
-                    "" + transformNumberFormat(countryData.average_perc_immigration_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank =
+                        "" + transformNumberFormat(data.average_age_migrants_global_rank, true);
 
-                $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank =
-                    "" + transformNumberFormat(countryData.average_age_migrants_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
 
-                $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
-
-                $scope.$apply();
-            });
+                    $scope.$apply();
+                });
 
             // getting the total population by age and sex
             dataService
@@ -226,16 +223,15 @@
                     { Year: "2015", Delicious: "16", McIntosh: "19", Oranges: "6", Pears: "9" },
                     { Year: "2016", Delicious: "19", McIntosh: "17", Oranges: "5", Pears: "7" },
                 ];
-    
+
                 resolve(dummyData);
             });
-    
-            getDummyData.then((data) =>
-                    drawAgeStackedBarchart(data, "age-stacked-barchart"));
 
-            countryService.getTopCountries($scope.selectedCountryController.name,
-                sliderMin, sliderMax,
-                $scope.genreFilterValue).then((data) => {
+            getDummyData.then((data) => drawAgeStackedBarchart(data, "age-stacked-barchart"));
+
+            countryService
+                .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
                     const topCountries = data;
 
                     $scope.top5InwardCountries = topCountries["topInward"];
@@ -534,173 +530,172 @@
 
             // Stack up the data
             const subgroups = Object.keys(data[0]).slice(1);
-            const groups = d3.map(data, d => +d.Year);
+            const groups = d3.map(data, (d) => +d.Year);
 
-            const stackedData = d3.stack().keys(
-                subgroups)(data);
+            const stackedData = d3.stack().keys(subgroups)(data);
 
             // Setup Bostock's margin convention
-            const svgMargins = { top: 48, right: 32, left: 32,
-                    bottom: 96 + Math.floor(subgroups.length/3)*legendMargin }; // Legend labels are stacked at
-                                                                                // the bottom in 3 separate columns
+            const svgMargins = { top: 48, right: 32, left: 32, bottom: 96 + Math.floor(subgroups.length / 3) * legendMargin }; // Legend labels are stacked at
+            // the bottom in 3 separate columns
 
-            const svgWidth  = containerDims.width
-                    - svgMargins.left - svgMargins.right;
+            const svgWidth = containerDims.width - svgMargins.left - svgMargins.right;
 
-            const svgHeight = containerDims.height
-                    - svgMargins.top  - svgMargins.bottom;
+            const svgHeight = containerDims.height - svgMargins.top - svgMargins.bottom;
 
-            const containerWidth  = svgWidth  + svgMargins.left
-                    + svgMargins.right;
+            const containerWidth = svgWidth + svgMargins.left + svgMargins.right;
 
-            const containerHeight = svgHeight + svgMargins.top
-                    + svgMargins.bottom;
+            const containerHeight = svgHeight + svgMargins.top + svgMargins.bottom;
 
-            const svgElem = containerElem.append("svg")
-                    .attr("width",  containerWidth)
-                    .attr("height", containerHeight)
+            const svgElem = containerElem
+                .append("svg")
+                .attr("width", containerWidth)
+                .attr("height", containerHeight)
                 .append("g")
-                    .attr("transform", "translate(" + svgMargins.left + "," + svgMargins.top + ")");
+                .attr("transform", "translate(" + svgMargins.left + "," + svgMargins.top + ")");
 
             const timeFormat = d3.timeFormat("%Y").parse;
 
             // Set all the scales
-            let xScale = d3.scaleBand()
+            let xScale = d3
+                .scaleBand()
                 .domain(groups)
-                .rangeRound([4, svgWidth-2])
+                .rangeRound([4, svgWidth - 2])
                 .padding(0.02);
 
-            let yScale = d3.scaleLinear()
-                .domain([0, d3.max(stackedData, layerData =>
-                    d3.max(layerData, d => d[1]))])
+            let yScale = d3
+                .scaleLinear()
+                .domain([0, d3.max(stackedData, (layerData) => d3.max(layerData, (d) => d[1]))])
                 .range([svgHeight, 0]);
 
-            const colorScale = d3.scaleOrdinal(d3.schemePaired
-                    .slice(0, subgroups.length));
+            const colorScale = d3.scaleOrdinal(d3.schemePaired.slice(0, subgroups.length));
 
             // Define and draw axes
-            const yAxis = d3.axisLeft()
+            const yAxis = d3
+                .axisLeft()
                 .scale(yScale)
                 .tickSize(-svgWidth, 0, 0)
-                .tickFormat(d => d + "%");
+                .tickFormat((d) => d + "%");
 
-            const xAxis = d3.axisBottom()
-                .scale(xScale)
-                .tickFormat(timeFormat);
+            const xAxis = d3.axisBottom().scale(xScale).tickFormat(timeFormat);
 
-            const yAxis_group = svgElem.append("g")
-                    .classed("y", true)
-                    .classed("axis", true)
-                .call(yAxis);
+            const yAxis_group = svgElem.append("g").classed("y", true).classed("axis", true).call(yAxis);
 
             yAxis_group.selectAll(".tick line").remove();
 
-            svgElem.append("g")
-                    .classed("x", true)
-                    .classed("axis", true)
-                    .attr("transform", "translate(0," + svgHeight + ")")
+            svgElem
+                .append("g")
+                .classed("x", true)
+                .classed("axis", true)
+                .attr("transform", "translate(0," + svgHeight + ")")
                 .call(xAxis);
 
             // Create groups for each series
-            const groupsElem = svgElem.selectAll("g.age-group")
+            const groupsElem = svgElem
+                .selectAll("g.age-group")
                 .data(stackedData)
                 .enter()
-                    .append("g")
-                        .classed("age-group", true)
-                        .style("fill", (_, i) => colorScale(i));
+                .append("g")
+                .classed("age-group", true)
+                .style("fill", (_, i) => colorScale(i));
 
             // Create the hover tooltip
-            const tooltipElem = svgElem.append("g")
-                    .classed("age-stacked-barchart-tooltip", true)
-                    .classed("hide", true);
+            const tooltipElem = svgElem.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
 
-            tooltipElem.append("rect")
-                    .attr("width", 30)
-                    .attr("height", 20)
-                    .attr("fill", "white")
-                    .style("opacity", 0.5);
+            tooltipElem.append("rect").attr("width", 30).attr("height", 20).attr("fill", "white").style("opacity", 0.5);
 
-            tooltipElem.append("text")
-                    .attr("x", 15)
-                    .attr("dy", "1.2em")
-                    .style("text-anchor", "middle")
-                    .attr("font-size", "12px")
-                    .attr("font-weight", "bold");
+            tooltipElem
+                .append("text")
+                .attr("x", 15)
+                .attr("dy", "1.2em")
+                .style("text-anchor", "middle")
+                .attr("font-size", "12px")
+                .attr("font-weight", "bold");
 
             // Create rects for each segment
-            groupsElem.selectAll("rect")
-                .data(d => d)
+            groupsElem
+                .selectAll("rect")
+                .data((d) => d)
                 .enter()
-                    .append("rect")
-                        .attr("x", d => xScale(+d.data.Year))
-                        .attr("y", d => yScale(d[1]))
-                        .attr("height", d => yScale(d[0]) - yScale(d[1]))
-                        .attr("width", xScale.bandwidth())
-                    .on("mouseover", () => tooltipElem.classed("hide", false))
-                    .on("mouseout",  () => tooltipElem.classed("hide", true))
-                    .on("mousemove", (e, d) => {
-                        let xPos = d3.pointer(e)[0] - 15;
-                        let yPos = d3.pointer(e)[1] - 25;
+                .append("rect")
+                .attr("x", (d) => xScale(+d.data.Year))
+                .attr("y", (d) => yScale(d[1]))
+                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .on("mouseover", () => tooltipElem.classed("hide", false))
+                .on("mouseout", () => tooltipElem.classed("hide", true))
+                .on("mousemove", (e, d) => {
+                    let xPos = d3.pointer(e)[0] - 15;
+                    let yPos = d3.pointer(e)[1] - 25;
 
-                        // Make the tooltip follow the mouse movement
-                        // while hovering onto a rect
-                        tooltipElem.attr("transform",
-                                "translate(" + xPos + "," + yPos + ")");
-                        tooltipElem.select("text").text(d[1] - d[0]);
-                    });
+                    // Make the tooltip follow the mouse movement
+                    // while hovering onto a rect
+                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
+                    tooltipElem.select("text").text(d[1] - d[0]);
+                });
 
             const getLegendTranslation = (datumId) => {
                 const horizDelta = 16;
-                const vertDelta  = 16;
+                const vertDelta = 16;
 
                 // Get legend row/col Id
                 const r = Math.floor(datumId / 3);
                 const c = datumId % 3;
 
-                switch(c) {
-                    case 0: return `translate(${-(svgWidth + horizDelta)},
-                            ${svgHeight + vertDelta + legendMargin*(r + 1)})`;
+                switch (c) {
+                    case 0:
+                        return `translate(${-(svgWidth + horizDelta)},
+                            ${svgHeight + vertDelta + legendMargin * (r + 1)})`;
 
-                    case 1: return `translate(${-(svgWidth/2 + 2*horizDelta)},
-                            ${svgHeight + vertDelta + legendMargin*(r + 1)})`;
+                    case 1:
+                        return `translate(${-(svgWidth / 2 + 2 * horizDelta)},
+                            ${svgHeight + vertDelta + legendMargin * (r + 1)})`;
 
-                    case 2: return `translate(${-(0 + 4*horizDelta)},
-                            ${svgHeight + vertDelta + legendMargin*(r + 1)})`;
+                    case 2:
+                        return `translate(${-(0 + 4 * horizDelta)},
+                            ${svgHeight + vertDelta + legendMargin * (r + 1)})`;
                 }
             };
 
             // Draw layers legend
-            const legendElem = svgElem.selectAll(".legend")
+            const legendElem = svgElem
+                .selectAll(".legend")
                 .data(colorScale.range())
-                .enter().append("g")
-                    .classed("age-stacked-barchart-legend", true)
-                    .attr("width", 50)
-                    .attr("height", 12)
-                    // .attr("transform", (_, i) => "translate("
-                    //         + i*legendMargin +",30)")
-                    .attr("transform", (_, i) => getLegendTranslation(i))
-            
+                .enter()
+                .append("g")
+                .classed("age-stacked-barchart-legend", true)
+                .attr("width", 50)
+                .attr("height", 12)
+                // .attr("transform", (_, i) => "translate("
+                //         + i*legendMargin +",30)")
+                .attr("transform", (_, i) => getLegendTranslation(i));
+
             legendElem
                 .append("rect")
-                    .attr("x", svgWidth - 12)
-                    .attr("width", 12)
-                    .attr("height", 12)
-                    .attr("stroke", "white")
-                    .style("fill", (_, i) => colorScale(i));
-            
+                .attr("x", svgWidth - 12)
+                .attr("width", 12)
+                .attr("height", 12)
+                .attr("stroke", "white")
+                .style("fill", (_, i) => colorScale(i));
+
             legendElem
                 .append("text")
-                    .attr("x", svgWidth + 5)
-                    .attr("y", 7)
-                    .classed("label-text", true)
-                    .attr("dy", "-0em")
-                    .style("text-anchor", "start")
-                .text((_, i) => { switch(i) {
-                    case 0: return "Anjou pears";
-                    case 1: return "Naval oranges";
-                    case 2: return "McIntosh apples";
-                    case 3: return "Red Delicious apples";
-                }});
+                .attr("x", svgWidth + 5)
+                .attr("y", 7)
+                .classed("label-text", true)
+                .attr("dy", "-0em")
+                .style("text-anchor", "start")
+                .text((_, i) => {
+                    switch (i) {
+                        case 0:
+                            return "Anjou pears";
+                        case 1:
+                            return "Naval oranges";
+                        case 2:
+                            return "McIntosh apples";
+                        case 3:
+                            return "Red Delicious apples";
+                    }
+                });
         };
 
         /**

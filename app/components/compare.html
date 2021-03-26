@@ -7,113 +7,287 @@
                 handle-button="handleSecondaryMenuClick(buttonValue) " ng-model="secondaryMenuSelectedValue"
                 buttons="secondaryMenuButtons" radio-buttons-class="'md-button border-1'">
         </div>
-        <div layout="row" class="parent-size">
-            <div layout="column" class="width-50">
-                <div class="width-100">
-                    <div class="compare-search-container margin-right-20-px float-right">
-                        <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
-                            <label>Select country...</label>
-                            <md-select ng-model="selectedCountry.left" md-on-close="clearSearch()">
-                                <md-select-header class="select-header-search-box background-white zindex-100">
-                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
-                                        placeholder="Search a country..."
-                                        class="header-search-box md-text padding-left-10px"
-                                        ng-keydown="updateSearch($event)" />
-                                </md-select-header>
-                                <md-option ng-value="country.name"
-                                    ng-repeat="country in countries | filter: searchSource"
-                                    ng-class="{'margin-top-50-px' : $first}">
-                                    {{country.visName}}</md-option>
-                            </md-select>
-                        </md-input-container>
-                    </div>
-                    <div class="float-left margin-top-20-px margin-left-50-px">
-                        <img src="../../app/img/countries/outlines/{{selectedCountry.left}}.svg"
+        <div layout="column">
+            <div layout="row" class="parent-size">
+                <div class="width-25">
+                    <div class="float-left margin-top-20-px">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
                             class="height-300-px width-300-px">
-                        <h2 class="color-white text-center">{{selectedCountry.left}}</h2>
+                        <h2 class="color-white text-center">{{selectedCountry.left.visName}}</h2>
                     </div>
                 </div>
-                <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
-                    quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo? Sint
-                    expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod, sapiente
-                    tenetur itaque similique quos possimus aliquid ullam mollitia ipsam amet voluptatem facilis ipsa.
-                    Cupiditate maxime vero fugiat molestiae excepturi cum libero autem assumenda nisi recusandae rem
-                    repellendus, ipsa delectus iste repudiandae, vel nobis iusto pariatur! Debitis, eligendi autem
-                    delectus ducimus deserunt vitae neque aut quibusdam voluptate nemo corrupti adipisci exercitationem
-                    quae sequi repellat eos necessitatibus placeat veritatis nihil! Deserunt, suscipit quod deleniti sed
-                    fuga molestiae asperiores iure rem culpa nulla a ex maxime voluptates est obcaecati ab accusantium
-                    nemo illo ullam odit inventore.<br><br> Ducimus alias quas numquam voluptatum tenetur dicta eos ab,
-                    pariatur
-                    deserunt vitae aliquid exercitationem nostrum perferendis aspernatur mollitia ad nesciunt. Eaque
-                    sint in porro voluptatem corporis qui ratione labore est obcaecati asperiores corrupti impedit vero
-                    ducimus, fuga, possimus quibusdam distinctio odit delectus adipisci nostrum cum magnam eos nesciunt!
-                    Sint aperiam et cupiditate, ipsam itaque minima tempore corporis, amet temporibus eligendi voluptas
-                    nam a illo, ab fugit quis iure dicta pariatur expedita recusandae. Nesciunt fugiat, sunt, corporis
-                    amet id ipsam impedit excepturi tempore, nostrum qui non officia tempora voluptas. Eius quo, illo
-                    voluptatem blanditiis, quia praesentium inventore libero qui doloremque iste modi.
-                </div>
-                <div layout="row" class="margin-auto">
-                    <div class="margin-top-20-px margin-right-20-px">
-                        <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+
+                <div layout="column" class="width-50">
+                    <div layout="row" class="width-50 margin-lr-auto">
+                        <div class="compare-search-container width-50">
+                            <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
+                                <label>Select country...</label>
+                                <md-select ng-model="selectedCountry.left" ng-change="updateStatisticsLeft()"
+                                    md-on-close="clearSearch()">
+                                    <md-select-header class="select-header-search-box background-white zindex-100">
+                                        <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                            placeholder="Search a country..."
+                                            class="header-search-box md-text padding-left-10px"
+                                            ng-keydown="updateSearch($event)" />
+                                    </md-select-header>
+                                    <md-option ng-value="country"
+                                        ng-repeat="country in countries | filter: searchSource"
+                                        ng-class="{'margin-top-50-px' : $first}">
+                                        {{country.visName}}</md-option>
+                                </md-select>
+                            </md-input-container>
+                        </div>
+
+                        <div class="compare-search-container width-50">
+                            <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
+                                <label>Select country...</label>
+                                <md-select ng-model="selectedCountry.right" ng-change="updateStatisticsRight()"
+                                    md-on-close="clearSearch()">
+                                    <md-select-header class="select-header-search-box background-white zindex-100">
+                                        <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                            placeholder="Search a country..."
+                                            class="header-search-box md-text padding-left-10px"
+                                            ng-keydown="updateSearch($event)" />
+                                    </md-select-header>
+                                    <md-option ng-value="country"
+                                        ng-repeat="country in countries | filter: searchSource"
+                                        ng-class="{'margin-top-50-px' : $first}">
+                                        {{country.visName}}</md-option>
+                                </md-select>
+                            </md-input-container>
+                        </div>
                     </div>
-                    <div class="margin-top-20-px">
-                        <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                    <div class="margin-lr-20-px margin-top-40-px">
+                        <div class="width-340-px margin-auto">
+                            <div layout="row">
+                                <div class="float-left box-shadow-dark-gray margin-right-25-px"><img
+                                        class="country-image-thumbnail" src="{{selectedCountry.left.flagPath}}">
+                                </div>
+                                <radio-button-group id="compare-info-group" selected-button="countryInfoValue"
+                                    handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
+                                    buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
+                                </radio-button-group>
+
+                                <div class="float-right box-shadow-dark-gray margin-left-25-px"><img
+                                        class="country-image-thumbnail" src="{{selectedCountry.right.flagPath}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div layout="row" class="margin-auto">
+                            <div layout="column" class="margin-auto">
+                                <div layout="row">
+                                    <div class="color-white margin-top-20-px margin-right-50-px">
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryLeftStatisticsValues.totalImmigrations}}
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryLeftStatisticsValues.totalPopulation}}
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryLeftStatisticsValues.immigrationVsPopulation}} %
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryLeftStatisticsValues.immigrationAverageAge}} years
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryLeftStatisticsValues.refugeeVsImmigration}} %
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div layout="column" class="color-white margin-top-20-px">
+                                        <div class="margin-auto padding-top-bottom-10px"><span
+                                                class="font-size-small">Total
+                                                immigration</span>
+                                        </div>
+                                        <div class="margin-auto padding-top-bottom-10px"><span
+                                                class="font-size-small">Total
+                                                population</span>
+                                        </div>
+                                        <div class="margin-auto padding-top-bottom-10px"><span
+                                                class="font-size-small">Immigration
+                                                vs.
+                                                Population</span>
+                                        </div>
+                                        <div class="margin-auto padding-top-bottom-10px"><span
+                                                class="font-size-small">Immigrants
+                                                average
+                                                age</span>
+                                        </div>
+                                        <div class="margin-auto padding-top-bottom-10px"><span
+                                                class="float-left font-size-small">Refugees
+                                                vs.
+                                                Immigrants</span>
+                                        </div>
+                                    </div>
+                                    <div class="color-white margin-top-20-px margin-left-50-px">
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryRightStatisticsValues.totalImmigrations}}
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryRightStatisticsValues.totalPopulationGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryRightStatisticsValues.totalPopulation}}
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryRightStatisticsValues.immigrationVsPopulation}} %
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryRightStatisticsValues.immigrationAverageAge}} years
+                                            </span>
+                                        </div>
+                                        <div class="width-100 padding-top-bottom-10px">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                {{globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank}}
+                                            </span>
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                {{countryRightStatisticsValues.refugeeVsImmigration}} %
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- <div class="vertical-line height-95 margin-top-20-px"></div> -->
+                <div layout="column" class="width-25">
+                    <div class="width-100">
+
+                        <civ class="float-right margin-top-20-px margin-right-50-px">
+                            <img src="../../app/img/countries/outlines/{{selectedCountry.right.visName}}.svg"
+                                class="height-300-px width-300-px">
+                            <h2 class="color-white text-center">{{selectedCountry.right.visName}}</h2>
+                        </civ>
                     </div>
                 </div>
             </div>
-            <div class="vertical-line height-95 margin-top-20-px"></div>
-            <div layout="column" class="width-50">
-                <div class="width-100">
-                    <div class="compare-search-container margin-left-20px float-left">
-                        <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
-                            <label>Select country...</label>
-                            <md-select ng-model="selectedCountry.right" ng-change="countryChanged()">
-                                <md-select-header class="select-header-search-box background-white zindex-100">
-                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
-                                        placeholder="Search a country..."
-                                        class="header-search-box md-text padding-left-10px"
-                                        ng-keydown="updateSearch($event)" />
-                                </md-select-header>
-                                <md-option ng-value="country.name"
-                                    ng-repeat="country in countries | filter: searchSource"
-                                    ng-class="{'margin-top-50-px' : $first}">
-                                    {{country.visName}}</md-option>
-                            </md-select>
-                        </md-input-container>
+            <div layout="row">
+                <div layout="column" class="width-50">
+                    <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">
+                        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt
+                        sed
+                        quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo?
+                        Sint
+                        expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod,
+                        sapiente
+                        tenetur itaque similique quos possimus aliquid ullam mollitia ipsam amet voluptatem facilis
+                        ipsa.
+                        Cupiditate maxime vero fugiat molestiae excepturi cum libero autem assumenda nisi recusandae rem
+                        repellendus, ipsa delectus iste repudiandae, vel nobis iusto pariatur! Debitis, eligendi autem
+                        delectus ducimus deserunt vitae neque aut quibusdam voluptate nemo corrupti adipisci
+                        exercitationem
+                        quae sequi repellat eos necessitatibus placeat veritatis nihil! Deserunt, suscipit quod deleniti
+                        sed
+                        fuga molestiae asperiores iure rem culpa nulla a ex maxime voluptates est obcaecati ab
+                        accusantium
+                        nemo illo ullam odit inventore.<br><br> Ducimus alias quas numquam voluptatum tenetur dicta eos
+                        ab,
+                        pariatur
+                        deserunt vitae aliquid exercitationem nostrum perferendis aspernatur mollitia ad nesciunt. Eaque
+                        sint in porro voluptatem corporis qui ratione labore est obcaecati asperiores corrupti impedit
+                        vero
+                        ducimus, fuga, possimus quibusdam distinctio odit delectus adipisci nostrum cum magnam eos
+                        nesciunt!
+                        Sint aperiam et cupiditate, ipsam itaque minima tempore corporis, amet temporibus eligendi
+                        voluptas
+                        nam a illo, ab fugit quis iure dicta pariatur expedita recusandae. Nesciunt fugiat, sunt,
+                        corporis
+                        amet id ipsam impedit excepturi tempore, nostrum qui non officia tempora voluptas. Eius quo,
+                        illo
+                        voluptatem blanditiis, quia praesentium inventore libero qui doloremque iste modi.
                     </div>
-                    <civ class="float-right margin-top-20-px margin-right-50-px">
-                        <img src="../../app/img/countries/outlines/{{selectedCountry.right}}.svg"
-                            class="height-300-px width-300-px">
-                        <h2 class="color-white text-center">{{selectedCountry.right}}</h2>
-                    </civ>
-                </div>
-                <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt sed
-                    quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo? Sint
-                    expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod, sapiente
-                    tenetur itaque similique quos possimus aliquid ullam mollitia ipsam amet voluptatem facilis ipsa.
-                    Cupiditate maxime vero fugiat molestiae excepturi cum libero autem assumenda nisi recusandae rem
-                    repellendus, ipsa delectus iste repudiandae, vel nobis iusto pariatur! Debitis, eligendi autem
-                    delectus ducimus deserunt vitae neque aut quibusdam voluptate nemo corrupti adipisci exercitationem
-                    quae sequi repellat eos necessitatibus placeat veritatis nihil! Deserunt, suscipit quod deleniti sed
-                    fuga molestiae asperiores iure rem culpa nulla a ex maxime voluptates est obcaecati ab accusantium
-                    nemo illo ullam odit inventore.<br><br> Ducimus alias quas numquam voluptatum tenetur dicta eos ab,
-                    pariatur
-                    deserunt vitae aliquid exercitationem nostrum perferendis aspernatur mollitia ad nesciunt. Eaque
-                    sint in porro voluptatem corporis qui ratione labore est obcaecati asperiores corrupti impedit vero
-                    ducimus, fuga, possimus quibusdam distinctio odit delectus adipisci nostrum cum magnam eos nesciunt!
-                    Sint aperiam et cupiditate, ipsam itaque minima tempore corporis, amet temporibus eligendi voluptas
-                    nam a illo, ab fugit quis iure dicta pariatur expedita recusandae. Nesciunt fugiat, sunt, corporis
-                    amet id ipsam impedit excepturi tempore, nostrum qui non officia tempora voluptas. Eius quo, illo
-                    voluptatem blanditiis, quia praesentium inventore libero qui doloremque iste modi.
-                </div>
-                <div layout="row" class="margin-auto">
-                    <div class="margin-top-20-px margin-right-20-px">
-                        <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                    <div layout="row" class="margin-auto">
+                        <div class="margin-top-20-px margin-right-20-px">
+                            <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                        </div>
+                        <div class="margin-top-20-px">
+                            <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                        </div>
                     </div>
-                    <div class="margin-top-20-px">
-                        <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                </div>
+                <div layout="column" class="widht-50">
+                    <div class="color-white margin-lr-40-px font-size-small margin-top-100-px">
+                        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quis iste soluta perferendis, deserunt
+                        sed
+                        quia voluptate fugit dolorem natus qui non repellendus, necessitatibus ad quaerat cumque illo?
+                        Sint
+                        expedita consequuntur, placeat voluptatibus eius ducimus nemo error dignissimos odio quod,
+                        sapiente
+                        tenetur itaque similique quos possimus aliquid ullam mollitia ipsam amet voluptatem facilis
+                        ipsa.
+                        Cupiditate maxime vero fugiat molestiae excepturi cum libero autem assumenda nisi recusandae rem
+                        repellendus, ipsa delectus iste repudiandae, vel nobis iusto pariatur! Debitis, eligendi autem
+                        delectus ducimus deserunt vitae neque aut quibusdam voluptate nemo corrupti adipisci
+                        exercitationem
+                        quae sequi repellat eos necessitatibus placeat veritatis nihil! Deserunt, suscipit quod deleniti
+                        sed
+                        fuga molestiae asperiores iure rem culpa nulla a ex maxime voluptates est obcaecati ab
+                        accusantium
+                        nemo illo ullam odit inventore.<br><br> Ducimus alias quas numquam voluptatum tenetur dicta eos
+                        ab,
+                        pariatur
+                        deserunt vitae aliquid exercitationem nostrum perferendis aspernatur mollitia ad nesciunt. Eaque
+                        sint in porro voluptatem corporis qui ratione labore est obcaecati asperiores corrupti impedit
+                        vero
+                        ducimus, fuga, possimus quibusdam distinctio odit delectus adipisci nostrum cum magnam eos
+                        nesciunt!
+                        Sint aperiam et cupiditate, ipsam itaque minima tempore corporis, amet temporibus eligendi
+                        voluptas
+                        nam a illo, ab fugit quis iure dicta pariatur expedita recusandae. Nesciunt fugiat, sunt,
+                        corporis
+                        amet id ipsam impedit excepturi tempore, nostrum qui non officia tempora voluptas. Eius quo,
+                        illo
+                        voluptatem blanditiis, quia praesentium inventore libero qui doloremque iste modi.
+                    </div>
+                    <div layout="row" class="margin-auto">
+                        <div class="margin-top-20-px margin-right-20-px">
+                            <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                        </div>
+                        <div class="margin-top-20-px">
+                            <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                        </div>
                     </div>
                 </div>
             </div>

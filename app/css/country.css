@@ -26,8 +26,8 @@
 }
 
 .country-image-thumbnail {
-    width: 35px;
-    height: 35px;
+    width: 45px;
+    height: 25px;
     object-fit: contain;
     margin: auto;
 }
@@ -41,11 +41,11 @@
     stroke-width: 0.5px;
     shape-rendering: crispEdges;
 }
- 
+
 .bar {
     fill: steelblue;
 }
- 
+
 .x.axis path {
     display: none;
 }

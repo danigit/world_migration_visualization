@@ -125,8 +125,16 @@ DISPLAY
     width: 300px;
 }
 
+.width-340-px {
+    width: 340px !important;
+}
+
 .width-200-px {
     width: 200px;
+}
+
+.width-100-px {
+    width: 100px !important;
 }
 
 .height-300-px {
@@ -288,12 +296,20 @@ MARGINS
     margin-left: 20px !important;
 }
 
+.margin-left-25-px {
+    margin-left: 25px !important;
+}
+
 .margin-left-50-px {
     margin-left: 50px !important;
 }
 
 .margin-right-50-px {
     margin-right: 50px !important;
+}
+
+.margin-right-25-px {
+    margin-right: 25px !important;
 }
 
 .margin-lr-auto {
@@ -537,4 +553,8 @@ Navbar
 
 .axis-dark-cyan text {
     stroke: #0093c4;
+}
+
+.box-shadow-dark-gray {
+    box-shadow: 0px 0px 13px #1d1f1f;
 }

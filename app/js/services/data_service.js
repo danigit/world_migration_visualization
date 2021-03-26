@@ -312,6 +312,7 @@
          * @returns {promise}
          */
         data_service.getTotMigrantsByOriginAndDestination = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            console.log(selectedCountry);
             return data_service.getOriginAndDestinationByGender(selectedGender).then((data) => {
                 let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 return filteredData.reduce((sum, curr) => sum + +curr.Total, 0) / filteredData.length;
@@ -408,9 +409,10 @@
          * @param {string} selectedGender
          * @returns {promise}
          */
-        data_service.getGlobalRankStatistics = (yearMin, yearMax, selectedGender) => {
+        data_service.getGlobalRankStatistics = (selectedCountry, yearMin, yearMax, selectedGender) => {
+            console.log(selectedCountry);
             return data_service.countries.then((data) => {
-                let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
+                let consideredYears = data_service.getActiveYears(yearMin, yearMax);
                 let globalRankStatisticsArray = [];
                 for (let country_idx in data) {
                     let avgTotalMigrantsCountry = data_service
@@ -516,10 +518,11 @@
                         });
                     }
 
-                    return globalRanks;
+                    return globalRanks.filter((obj) => obj.name == selectedCountry)[0];
                 });
             });
         };
+
         data_service.getCountryDevelopmentStatistic = (selectedCountry, yearsColumns, selectedGender) => {
             return data_service.getOriginAndDestinationByGender(selectedGender).then((data) => {
                 let development = [

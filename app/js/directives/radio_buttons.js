@@ -12,12 +12,12 @@ angular.module("radio-button", []).directive("radioButtonGroup", function () {
             value: "=selectedButton",
         },
         template:
-            '<a class="radio-button-class {{radioButtonsClass}}" ' +
+            '<div><a class="radio-button-class {{radioButtonsClass}}" ' +
             '   ng-repeat="button in buttons" ' +
             '   ng-click="handleButton({buttonValue: button.value})" ' +
             "   ng-class=\"{'button-clicked': isActive(button.value), 'first-radius': $first, 'last-radius': $last }\"> " +
             "       {{button.text}} " +
-            "</a>",
+            "</a></div>",
         controller: [
             "$scope",
             function ($scope) {
