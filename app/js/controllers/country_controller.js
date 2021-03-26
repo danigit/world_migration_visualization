@@ -227,11 +227,23 @@
                 resolve(dummyData);
             });
 
-            getDummyData.then((data) => drawAgeStackedBarchart(data, "age-stacked-barchart"));
+            // Extract the immigration by age groups:
+            // 0-4, 5-18, 19-34, 35-54, 55-74, 75+
+            dataService
+                .getImmigrationByAgeGroups(
+                    $scope.selectedCountryController.name,
+                    sliderMin, sliderMax,
+                    $scope.genreFilterValue)
+                .then(ageGroupsData =>
+                    drawAgeStackedBarchart(ageGroupsData,
+                        ["Total", "Year"],
+                        "age-stacked-barchart")
+                    );
 
-            countryService
-                .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
-                .then((data) => {
+            // Extract Top 5 inward/outward migration countries
+            countryService.getTopCountries($scope.selectedCountryController.name,
+                sliderMin, sliderMax,
+                $scope.genreFilterValue).then((data) => {
                     const topCountries = data;
 
                     $scope.top5InwardCountries = topCountries["topInward"];
@@ -520,7 +532,7 @@
                 );
         };
 
-        let drawAgeStackedBarchart = (data, containerId) => {
+        let drawAgeStackedBarchart = (data, toExclude, containerId) => {
             const containerElem = d3.select("#" + containerId);
             containerElem.html("");
 
@@ -529,14 +541,18 @@
             const legendMargin = 15;
 
             // Stack up the data
-            const subgroups = Object.keys(data[0]).slice(1);
-            const groups = d3.map(data, (d) => +d.Year);
+            const groups = d3.map(data, d => +d.Year);
 
-            const stackedData = d3.stack().keys(subgroups)(data);
+            const subgroups = Object.keys(data[0])
+                .filter(i => !toExclude.includes(i));
+
+            const stackedData = d3.stack().keys(
+                subgroups)(data);
 
             // Setup Bostock's margin convention
-            const svgMargins = { top: 48, right: 32, left: 32, bottom: 96 + Math.floor(subgroups.length / 3) * legendMargin }; // Legend labels are stacked at
-            // the bottom in 3 separate columns
+            const svgMargins = { top: 8, right: 32, left: 32,
+                    bottom: 64 + Math.floor(subgroups.length/3)*legendMargin }; // Legend labels are stacked at
+                                                                                // the bottom in 3 separate columns
 
             const svgWidth = containerDims.width - svgMargins.left - svgMargins.right;
 
@@ -559,8 +575,8 @@
             let xScale = d3
                 .scaleBand()
                 .domain(groups)
-                .rangeRound([4, svgWidth - 2])
-                .padding(0.02);
+                .rangeRound([4, svgWidth-2])
+                .padding(0.16);
 
             let yScale = d3
                 .scaleLinear()
@@ -573,6 +589,7 @@
             const yAxis = d3
                 .axisLeft()
                 .scale(yScale)
+                .ticks(6)
                 .tickSize(-svgWidth, 0, 0)
                 .tickFormat((d) => d + "%");
 
@@ -599,39 +616,47 @@
                 .style("fill", (_, i) => colorScale(i));
 
             // Create the hover tooltip
-            const tooltipElem = svgElem.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
+            const tooltipElem = svgElem.append("g")
+                    .classed("age-stacked-barchart-tooltip", true)
+                    .classed("hide", true);
 
-            tooltipElem.append("rect").attr("width", 30).attr("height", 20).attr("fill", "white").style("opacity", 0.5);
+            tooltipElem.append("rect")
+                    .attr("width", 40)
+                    .attr("height", 20)
+                    .attr("fill", "white")
+                    .style("padding", "1em")
+                    .style("opacity", 0.5);
 
-            tooltipElem
-                .append("text")
-                .attr("x", 15)
-                .attr("dy", "1.2em")
-                .style("text-anchor", "middle")
-                .attr("font-size", "12px")
-                .attr("font-weight", "bold");
+            tooltipElem.append("text")
+                    .attr("x", 20)
+                    .attr("dy", "1.2em")
+                    .style("font-size", "12px")
+                    .style("font-weight", "bold")
+                    .style("text-anchor", "middle");
 
             // Create rects for each segment
             groupsElem
                 .selectAll("rect")
                 .data((d) => d)
                 .enter()
-                .append("rect")
-                .attr("x", (d) => xScale(+d.data.Year))
-                .attr("y", (d) => yScale(d[1]))
-                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
-                .attr("width", xScale.bandwidth())
-                .on("mouseover", () => tooltipElem.classed("hide", false))
-                .on("mouseout", () => tooltipElem.classed("hide", true))
-                .on("mousemove", (e, d) => {
-                    let xPos = d3.pointer(e)[0] - 15;
-                    let yPos = d3.pointer(e)[1] - 25;
+                    .append("rect")
+                        .attr("x", d => xScale(+d.data.Year))
+                        .attr("y", d => yScale(d[1]))
+                        .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                        .attr("width", xScale.bandwidth())
+                    .on("mouseover", () => tooltipElem.classed("hide", false))
+                    .on("mouseout",  () => tooltipElem.classed("hide", true))
+                    .on("mousemove", (e, d) => {
+                        let xPos = d3.pointer(e)[0] - 15;
+                        let yPos = d3.pointer(e)[1] - 25;
 
-                    // Make the tooltip follow the mouse movement
-                    // while hovering onto a rect
-                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
-                    tooltipElem.select("text").text(d[1] - d[0]);
-                });
+                        // Make the tooltip follow the mouse movement
+                        // while hovering onto a rect
+                        tooltipElem.attr("transform",
+                                "translate(" + xPos + "," + yPos + ")");
+                        tooltipElem.select("text")
+                            .text((d[1] - d[0]).toFixed(1) + "%");
+                    });
 
             const getLegendTranslation = (datumId) => {
                 const horizDelta = 16;
@@ -679,23 +704,12 @@
 
             legendElem
                 .append("text")
-                .attr("x", svgWidth + 5)
-                .attr("y", 7)
-                .classed("label-text", true)
-                .attr("dy", "-0em")
-                .style("text-anchor", "start")
-                .text((_, i) => {
-                    switch (i) {
-                        case 0:
-                            return "Anjou pears";
-                        case 1:
-                            return "Naval oranges";
-                        case 2:
-                            return "McIntosh apples";
-                        case 3:
-                            return "Red Delicious apples";
-                    }
-                });
+                    .attr("x", svgWidth + 5)
+                    .attr("y", 7)
+                    .classed("label-text", true)
+                    .attr("dy", "-0em")
+                    .style("text-anchor", "start")
+                .text((_, i) => subgroups[i] + " years");
         };
 
         /**

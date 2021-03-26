@@ -350,6 +350,76 @@
         };
 
         /**
+         * Extract the immigration by age groups for a given country, year range, and gender.
+         * 
+         * The age groups are all 5-years apart and will be aggregated into:
+         * 0-4, 5-18, 19-34, 35-54, 55-74, 75+
+         * 
+         * @param {string} country The country of interest.
+         * @param {number} yearMin The lower bound of the year range.
+         * @param {number} yearMax The upper bound of the year range.
+         * @param {string} gender  The gender of interest. 'mf' for both.
+         * 
+         * @return {promise}       The loaded data waiting to be resolved.
+         */
+        data_service.getImmigrationByAgeGroups = (country, yearMin, yearMax, gender) => {
+            return data_service.migrPercDistributionAgeSex.then(data => {
+                let filteredData = data_service.filterData(data, country,
+                        yearMin, yearMax);
+
+                const genderSuffix = data_service
+                    .getSelectedGenderColumn(gender, "");
+
+                let ageColumns = Object.keys(filteredData[0]).filter((k) => {
+                    if (typeof k === "string") {
+                        return k.includes(genderSuffix);
+                    }
+                });
+
+                // Keep track of corresponding year
+                ageColumns.push("Year");
+
+                filteredData = data_service.filterColumn(
+                        filteredData, ageColumns);
+
+                const ageGroupsAggregation = {
+                    "0-4":   ["0-4" + genderSuffix],
+                    "5-18":  ["5-9", "10-14", "15-19"]
+                        .map(d => d + genderSuffix),
+                    "19-34": ["20-24", "25-29", "30-34"]
+                        .map(d => d + genderSuffix),
+                    "35-54": ["35-39", "40-44", "45-49", "50-54"]
+                        .map(d => d + genderSuffix),
+                    "55-74": ["55-59", "60-64", "65-69", "70-74"]
+                        .map(d => d + genderSuffix),
+                    "75+":   ["75+" + genderSuffix]
+                };
+
+                return filteredData.map(d => {
+                    let aggregatedRow = {};
+
+                    const ageGroups = Object.keys(ageGroupsAggregation);
+                    ageGroups.forEach(a => {
+                        const oldCols = ageGroupsAggregation[a];
+
+                        const ageGroupData = Object.values(
+                                data_service.filterColumn([d], oldCols)[0]);
+
+                        const aggregatedVal = ageGroupData.reduce(
+                                (sum, curr) => sum + +curr, 0);
+
+                        aggregatedRow[a] = +aggregatedVal.toFixed(1);
+                    });
+
+                    aggregatedRow["Total"] = 100.0;
+                    aggregatedRow["Year"]  = +d.Year;
+
+                    return aggregatedRow;
+                });
+            });
+        };
+
+        /**
          * Function that return the average age of the migrants
          * @param {string} selectedCountry
          * @param {number} yearMin
