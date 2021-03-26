@@ -9,6 +9,7 @@
 ## World page
 
 - Create the mapping from TopoJSON's countries short name to our full name in the CVS files.
+- Insert the countries data into the TopoJSON properties
 
 ## Country page
 

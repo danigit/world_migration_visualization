@@ -163,17 +163,28 @@
                     <div class="width-90">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                             ng-model="selectedTopCountryValue" countries="top5InwardCountries"
-                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
-                            top-countries-icon-path="'app/img/home/inward.png'"></top-countries>
+                            show-hint="showTopCountryHint(flagValue, event, 'Send')"
+                            hide-hint="hideTopCountryHint(event, 'in')"
+                            top-countries-icon-path="'app/img/home/inward.png'">
+                        </top-countries>
                         <hr class="menu-divider" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
                             ng-model="selectedTopCountryValue" countries="top5OutwardCountries"
-                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
-                            top-countries-icon-path="'app/img/home/outward.png'"></top-countries>
+                            show-hint="showTopCountryHint(flagValue, event, 'Receive')"
+                            hide-hint="hideTopCountryHint('in')" top-countries-icon-path="'app/img/home/outward.png'">
+                        </top-countries>
                     </div>
                 </div>
-                <div layout="column" id="top-flags-tooltip">
-                    <div>{{selectedTopFlag[0].visName}}<br>{{selectedTopFlag[1]}} people</div>
+                <div id="top-flags-tooltip" class="display-none display-block">
+                    <div class="width-150-px">
+                        <div class="color-darkcyan">{{selectedTopFlag[0].visName}}</div>
+                        <hr class="menu-divider background-darkcyan margin-top-10-px margin-bottom-10-px width-100" />
+                        <div class="font-size-small">{{sendReceiveTopCountries}} <span id="tooltip-text"
+                                class="margin-top-10-px">{{selectedTopFlag[1]}}</span>
+                            people {{sendReceiveTopCountries == "Send" ? 'to' : 'from'}}
+                            {{selectedCountryController.visName}}</div>
+
+                    </div>
                 </div>
             </div>
         </div>

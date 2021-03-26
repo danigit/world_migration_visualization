@@ -312,7 +312,6 @@
          * @returns {promise}
          */
         data_service.getTotMigrantsByOriginAndDestination = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            console.log(selectedCountry);
             return data_service.getOriginAndDestinationByGender(selectedGender).then((data) => {
                 let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 return filteredData.reduce((sum, curr) => sum + +curr.Total, 0) / filteredData.length;
@@ -351,15 +350,15 @@
 
         /**
          * Extract the immigration by age groups for a given country, year range, and gender.
-         * 
+         *
          * The age groups are all 5-years apart and will be aggregated into:
          * 0-4, 5-18, 19-34, 35-54, 55-74, 75+
-         * 
+         *
          * @param {string} country The country of interest.
          * @param {number} yearMin The lower bound of the year range.
          * @param {number} yearMax The upper bound of the year range.
          * @param {string} gender  The gender of interest. 'mf' for both.
-         * 
+         *
          * @return {promise}       The loaded data waiting to be resolved.
          */
         data_service.getImmigrationByAgeGroups = (country, yearMin, yearMax, gender) => {

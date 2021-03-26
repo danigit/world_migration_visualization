@@ -37,7 +37,7 @@
                 .enter()
                 .append("path")
                 .attr("d", path)
-                .attr("class", "countries")
+                .attr("class", "countries-home")
                 .attr("id", (d) => d.id)
                 .on("click", (e, d) => {
                     console.log(e);

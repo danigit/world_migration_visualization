@@ -53,6 +53,9 @@
                 .on("click", (e, d) => {
                     console.log(e);
                     console.log(d);
+                })
+                .on("mouseover", (e, d) => {
+                    console.log(d);
                 });
 
             svgMap.call(zoom);

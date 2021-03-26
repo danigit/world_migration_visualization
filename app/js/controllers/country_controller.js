@@ -15,7 +15,7 @@
         $scope.selectedTopCountry = "";
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
-
+        $scope.sendReceiveTopCountries = "";
         dataService.countries.then((data) => {
             $scope.countries = data;
 
@@ -274,7 +274,7 @@
             let svgContainer = d3.select("#" + container);
             svgWidth = svgContainer.node().getBoundingClientRect().width;
             svgHeight = svgContainer.node().getBoundingClientRect().height;
-            radius = Math.min(svgWidth, svgHeight) / 2 - 20;
+            radius = Math.min(svgWidth, svgHeight) / 2;
 
             let svg = svgContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
             // .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
@@ -360,15 +360,15 @@
                 .attr("y", 0)
                 .attr("rx", 0)
                 .attr("ry", 0)
-                .attr("width", 12)
-                .attr("height", 12)
+                .attr("width", 10)
+                .attr("height", 10)
                 .attr("stroke", "#FFFFFF")
                 .attr("fill", (d, i) => colors(i))
                 .attr("class", type + "-legend-rect")
                 .attr("transform", (d, i) => {
-                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - 25 * (i + 1)})`;
+                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - 20 * (i + 1)})`;
                     else {
-                        return `translate(${svgWidth / 4 - 55}, ${svgHeight / 2 - 25 * (legendIndex++ + 1)})`;
+                        return `translate(${svgWidth / 4 - 55}, ${svgHeight / 2 - 20 * (legendIndex++ + 1)})`;
                     }
                 });
 
@@ -389,9 +389,9 @@
                 .attr("class", "label-text")
                 .attr("transform", (d, i) => {
                     if (i < dataLength / 2) {
-                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - 25 * (i + 1)})`;
+                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - 20 * (i + 1)})`;
                     } else {
-                        return `translate(${svgWidth / 4 - 35}, ${svgHeight / 2 - 25 * (legendIndex++ + 1)})`;
+                        return `translate(${svgWidth / 4 - 35}, ${svgHeight / 2 - 20 * (legendIndex++ + 1)})`;
                     }
                 })
                 .text((d) => d.data.type);
@@ -469,6 +469,7 @@
                     let x = Math.cos(midAngle) * (radius - 45);
                     return x > 0 ? "start" : "end";
                 })
+                .attr("font-size", "small")
                 .text((d) => {
                     return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
                 });
@@ -743,8 +744,18 @@
          */
         $scope.showTopCountryHint = function (value, event, type) {
             $scope.selectedTopFlag = value;
+            $scope.sendReceiveTopCountries = type;
             let tooltip = document.getElementById("top-flags-tooltip");
-            tooltip.classList.remove("hide");
+            let tooltip_text = document.getElementById("tooltip-text");
+            if (type == "Send") {
+                tooltip_text.classList.remove("color-red");
+                tooltip_text.classList.add("color-green");
+            } else {
+                tooltip_text.classList.remove("color-green");
+                tooltip_text.classList.add("color-red");
+            }
+            tooltip.classList.remove("display-none");
+            tooltip.classList.add("display-block");
             tooltip.style.top = event.clientY - 50 + "px";
             tooltip.style.left = event.clientX + "px";
             tooltip.style.zIndex = 100;
@@ -754,9 +765,11 @@
          * Function that handles the mouse out on the top countries flags
          * @param {string} value
          */
-        $scope.hideTopCountryHint = function (type) {
+        $scope.hideTopCountryHint = function (event, type) {
             let tooltip = document.getElementById("top-flags-tooltip");
-            tooltip.style.zIndex = -100;
+            console.log("mouse leave");
+            tooltip.classList.remove("display-block");
+            tooltip.classList.add("display-none");
         };
 
         /**

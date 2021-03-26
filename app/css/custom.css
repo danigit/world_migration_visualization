@@ -7,7 +7,7 @@ DISPLAY
 }
 
 .display-none {
-    display: none;
+    display: none !important;
     -webkit-animation: slide-down 0.5s ease-out;
     -moz-animation: slide-down 0.5s ease-out;
 }
@@ -518,10 +518,10 @@ POSITION
 
 #top-flags-tooltip {
     position: fixed;
+    pointer-events: none;
     padding: 10px;
     background-color: #2d2e2e;
     color: #ffffff;
-    z-index: -100;
 }
 
 /******************************************************************
