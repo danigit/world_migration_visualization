@@ -599,3 +599,13 @@ Navbar
     stroke: white;
     opacity: 0.1 !important;
 }
+
+.left-line-chart-class {
+    stroke: #1f78b4;
+    stroke-width: 2.5;
+}
+
+.right-line-chart-class {
+    stroke: #a6cee3;
+    stroke-width: 2.5;
+}

@@ -76,6 +76,7 @@
                 d.year = parseDate(d.year);
             });
 
+            console.log(data)
             // creating the x axis generator
             let x = d3
                 .scaleTime()

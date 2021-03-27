@@ -23,7 +23,9 @@
         $scope.rightSendToLeft;
         let commonStructure;
         let firsCommonStructureCall = true;
+        let firstLineChartStructureCall = true;
         let color;
+        let lineChartStructure;
 
         $scope.countryLeftStatisticsValues = {
             totalImmigrations: "",
@@ -71,12 +73,12 @@
         let sliderMin = 1990;
         let sliderMax = 2019;
         let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019];
+        let parseDate = d3.timeParse("%Y");
 
         /**
          * Function that updates the statistics
          */
         $scope.updateStatisticsLeft = () => {
-            console.log("updating statistics left");
             // getting the total migrants by origin and destination
             dataService
                 .getTotMigrantsByOriginAndDestination($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
@@ -182,6 +184,28 @@
                     }
                     drawBarChart(data, commonStructure);
                 });
+
+            dataService.getRateOfChange($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
+                data = preprocessRateOfChange(data);
+                data.forEach(function (d, i) {
+                    d.label = parseDate(d.label.split("-")[1]);
+                });
+                dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
+                    if (firstLineChartStructureCall) {
+                        lineChartStructure = initializeLineChart(data, minMax, "change-rate-container");
+                        firstLineChartStructureCall = false;
+                    }
+                    drawLineChart(data, "left-line-chart", "left-line-chart-class");
+                });
+            });
+        };
+
+        let preprocessRateOfChange = (data) => {
+            let xLabels = Object.keys(data);
+            const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
+            xLabels = xLabels.map((label) => label.replace(reg, ""));
+            let yValues = Object.values(data).map((value) => +value);
+            return xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
         };
 
         $scope.updateStatisticsRight = () => {
@@ -278,9 +302,23 @@
                         commonStructure = createCommonMigrationStructure(data);
                         firsCommonStructureCall = false;
                     }
-                    console.log("updating the data");
                     drawBarChart(data, commonStructure);
                 });
+
+            dataService.getRateOfChange($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
+                data = preprocessRateOfChange(data);
+                data.forEach(function (d, i) {
+                    d.label = parseDate(d.label.split("-")[1]);
+                });
+
+                dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
+                    if (firstLineChartStructureCall) {
+                        lineChartStructure = initializeLineChart(data, minMax, "change-rate-container");
+                        firstLineChartStructureCall = false;
+                    }
+                    drawLineChart(data, "right-line-chart", "right-line-chart-class");
+                });
+            });
         };
 
         let createCommonMigrationStructure = (data) => {
@@ -425,6 +463,121 @@
                 );
         };
 
+        /**
+         * Function that initialize the svg containing the rate of change lineChart for the selected country
+         * @param {string} container
+         * @param {object} margin
+         * @param {string} lineChartId
+         * @returns
+         */
+
+        let margin = { top: 20, bottom: 60, left: 20, right: 20 };
+        let initializeLineChart = (data, minMax, container) => {
+            let lineChartContainer = d3.select("#" + container);
+
+            let width = 500 - margin.left - margin.right;
+            let height = 350 - margin.top - margin.bottom;
+
+            let svg = lineChartContainer
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+
+            svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("class", "left-line-chart");
+            svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("class", "right-line-chart");
+
+            console.log(data);
+            let xScale = d3
+                .scaleTime()
+                .domain([d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[5].label, +1)])
+                .range([margin.left, width - margin.left - margin.right]);
+
+            let yScale = d3
+                .scaleLinear()
+                .domain([minMax.MinRateOfChange, minMax.MaxRateOfChange])
+                .range([height - margin.bottom - margin.top, 0]);
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left}, ${height - margin.bottom})`)
+                .style("font-size", "12px")
+                .attr("class", "axis-dark-cyan")
+                .call(d3.axisBottom(xScale).ticks(data.length))
+                .selectAll("text")
+                .attr("transform", "rotate(45)")
+                .attr("text-anchor", "start");
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left + margin.right}, ${margin.top})`)
+                .style("font-size", "12px")
+                .attr("class", "grid-lines y-axis")
+                .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0));
+
+            let legend = svg
+                .selectAll(".legend")
+                .data([$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName])
+                .enter()
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", function (d, i) {
+                    return `translate(${-width + margin.left + margin.right + i * 200}, ${height - 13} )`;
+                });
+
+            let colors = ["#1f78b4", "#a6cee3"];
+
+            legend
+                .append("rect")
+                .attr("x", width + 10)
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", (d, i) => colors[i]);
+
+            legend
+                .append("text")
+                .attr("x", width + 40)
+                .attr("y", 10)
+                .attr("font-size", "small")
+                .style("text-anchor", "start")
+                .text(function (d) {
+                    return d;
+                });
+
+            return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
+        };
+
+        let drawLineChart = (data, structure, lineClass) => {
+            console.log(data);
+            let lineGenerator = d3
+                .line()
+                .x((d) => lineChartStructure.xScale(d.label))
+                .y((d) => lineChartStructure.yScale(d.value));
+
+            lineChartStructure.lineChartStructure
+                .select("." + structure)
+                .selectAll("path")
+                .data([data])
+                .join(
+                    (enter) =>
+                        enter
+                            .append("path")
+                            .attr("class", lineClass)
+                            .call((enter) =>
+                                enter
+                                    .transition()
+                                    .duration(1000)
+                                    .attr("d", (d) => lineGenerator(d))
+                            ),
+                    //.call(enter => { return isChartDefined ? enter : lineInitialTransition(enter);}),
+                    (update) =>
+                        update.call((update) =>
+                            update
+                                .transition()
+                                .duration(1000)
+                                .attr("d", (d) => lineGenerator(d))
+                        ),
+                    (exit) => exit.remove()
+                );
+        };
         $scope.comparisonWinner = (field, left) => {
             if (left) {
                 return $scope.globalRankCountryLeftStatisticsValues[field] < $scope.globalRankCountryRightStatisticsValues[field];
