@@ -180,7 +180,6 @@
                         commonStructure = createCommonMigrationStructure(data);
                         firsCommonStructureCall = false;
                     }
-                    console.log("updating the data");
                     drawBarChart(data, commonStructure);
                 });
         };
@@ -286,15 +285,16 @@
 
         let createCommonMigrationStructure = (data) => {
             let container = d3.select("#common-migration");
-            let margins = { top: 20, right: 20, bottom: 40, left: 20 };
+            let margins = { top: 20, right: 20, bottom: 60, left: 20 };
             let commonWidth = 500 - margins.left - margins.right;
-            let commonHeight = 300 - margins.top - margins.bottom;
+            let commonHeight = 350 - margins.top - margins.bottom;
 
             let svg = container
                 .append("svg")
                 .attr("width", commonWidth)
                 .attr("height", commonHeight)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+
             svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
 
             let subgroups = ["first", "second"];
@@ -320,7 +320,7 @@
 
             svg.append("g")
                 .attr("class", "axis-dark-cyan")
-                .attr("transform", `translate(${margins.left}, ${commonHeight - margins.top - margins.bottom})`)
+                .attr("transform", `translate(${margins.left}, ${commonHeight - margins.bottom})`)
                 .call(d3.axisBottom(x))
                 .selectAll("text")
                 .style("text-anchor", "start")
@@ -328,9 +328,9 @@
                 .attr("transform", "rotate(45)");
 
             svg.append("g")
-                .attr("class", "axis-dark-cyan")
-                .attr("transform", `translate(${margins.left + margins.right}, 0)`)
-                .call(d3.axisLeft(y).tickFormat(d3.format(".2s")));
+                .attr("class", "grid-lines y-axis")
+                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .call(d3.axisLeft(y).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             let svgGroups = svg
                 .select(".main-group")
@@ -338,17 +338,17 @@
                 .data(data)
                 .enter()
                 .append("g")
-                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, ${-margins.top})`)
+                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, ${0})`)
                 .attr("class", "groups");
 
             let legend = svg
                 .selectAll(".legend")
-                .data(["Left country", "Right country"])
+                .data([$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName])
                 .enter()
                 .append("g")
                 .attr("class", "legend")
                 .attr("transform", function (d, i) {
-                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - margins.bottom + 25} )`;
+                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - 13} )`;
                 });
 
             legend
@@ -374,6 +374,7 @@
                 x: x,
                 y: y,
                 height: commonHeight,
+                width: commonWidth,
                 subgroups: subgroups,
                 xSubgroup: xSubGroup,
                 margins: margins,
@@ -389,19 +390,22 @@
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.xSubgroup.bandwidth())
                 .attr("height", 0);
-            // .transition()
-            // .duration(1000)
-            // .attr("y", (d) => svgElement.y(d.val) - svgElement.margins.top - svgElement.margins.bottom)
-            // .attr("height", (d) => svgElement.height - svgElement.y(d.val));
         };
 
-        let handleUpdate = (update, svgElement) => {
+        let handleUpdate = (update, data, svgElement) => {
+            console.log(data);
+            let y = svgElement.y.domain([0, d3.max(data, (d) => Math.max(d.value.first, d.value.second))]);
+            svgElement.svgElement
+                .select("g.grid-lines.y-axis")
+                .transition()
+                .duration(1000)
+                .call(d3.axisLeft(y).tickSize(-svgElement.width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+
             update
                 .transition()
                 .duration(1000)
-                .attr("fill", "red")
-                .attr("y", (d) => svgElement.y(d.val) - svgElement.margins.top - svgElement.margins.bottom)
-                .attr("height", (d) => svgElement.height - svgElement.y(d.val));
+                .attr("y", (d) => svgElement.y(d.val))
+                .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
         };
 
         let drawBarChart = (data, svgElement) => {
@@ -416,7 +420,7 @@
                 })
                 .join(
                     (enter) => handleEnter(enter, svgElement),
-                    (update) => handleUpdate(update, svgElement),
+                    (update) => handleUpdate(update, data, svgElement),
                     (exit) => exit.remove()
                 );
         };
