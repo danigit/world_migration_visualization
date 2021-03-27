@@ -21,7 +21,9 @@
         $scope.genreButtons = dataService.genreButtons;
         $scope.leftSendToRight;
         $scope.rightSendToLeft;
-        let mutualMigrationInformation;
+        let commonStructure;
+        let firsCommonStructureCall = true;
+        let color;
 
         $scope.countryLeftStatisticsValues = {
             totalImmigrations: "",
@@ -166,10 +168,21 @@
                 });
 
             dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
-                $scope.leftSendToRight = data.countryOneSend;
-                $scope.rightSendToLeft = data.countryTwoSend;
+                $scope.leftSendToRight = transformNumberFormat(data.countryOneSend);
+                $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
                 $scope.$apply();
             });
+
+            dataService
+                .getMutualCommonMigrationDestinations($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .then((data) => {
+                    if (firsCommonStructureCall) {
+                        commonStructure = createCommonMigrationStructure(data);
+                        firsCommonStructureCall = false;
+                    }
+                    console.log("updating the data");
+                    drawBarChart(data, commonStructure);
+                });
         };
 
         $scope.updateStatisticsRight = () => {
@@ -258,6 +271,154 @@
                 $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
                 $scope.$apply();
             });
+
+            dataService
+                .getMutualCommonMigrationDestinations($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .then((data) => {
+                    if (firsCommonStructureCall) {
+                        commonStructure = createCommonMigrationStructure(data);
+                        firsCommonStructureCall = false;
+                    }
+                    console.log("updating the data");
+                    drawBarChart(data, commonStructure);
+                });
+        };
+
+        let createCommonMigrationStructure = (data) => {
+            let container = d3.select("#common-migration");
+            let margins = { top: 20, right: 20, bottom: 40, left: 20 };
+            let commonWidth = 500 - margins.left - margins.right;
+            let commonHeight = 300 - margins.top - margins.bottom;
+
+            let svg = container
+                .append("svg")
+                .attr("width", commonWidth)
+                .attr("height", commonHeight)
+                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
+
+            let subgroups = ["first", "second"];
+            let groups = data.map((d) => d.label);
+
+            let x = d3
+                .scaleBand()
+                .range([margins.left, commonWidth - margins.right])
+                .domain(groups);
+
+            let y = d3
+                .scaleLinear()
+                .domain([0, d3.max(data, (d) => Math.max(d.value.first, d.value.second))])
+                .range([commonHeight - margins.top - margins.bottom, 0]);
+
+            let xSubGroup = d3
+                .scaleBand()
+                .domain(subgroups)
+                .range([margins.left + margins.right, x.bandwidth()])
+                .padding(0.1);
+
+            color = d3.scaleOrdinal(d3.schemePaired);
+
+            svg.append("g")
+                .attr("class", "axis-dark-cyan")
+                .attr("transform", `translate(${margins.left}, ${commonHeight - margins.top - margins.bottom})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "start")
+                .attr("font-weight", 100)
+                .attr("transform", "rotate(45)");
+
+            svg.append("g")
+                .attr("class", "axis-dark-cyan")
+                .attr("transform", `translate(${margins.left + margins.right}, 0)`)
+                .call(d3.axisLeft(y).tickFormat(d3.format(".2s")));
+
+            let svgGroups = svg
+                .select(".main-group")
+                .selectAll("g")
+                .data(data)
+                .enter()
+                .append("g")
+                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, ${-margins.top})`)
+                .attr("class", "groups");
+
+            let legend = svg
+                .selectAll(".legend")
+                .data(["Left country", "Right country"])
+                .enter()
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", function (d, i) {
+                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - margins.bottom + 25} )`;
+                });
+
+            legend
+                .append("rect")
+                .attr("x", commonWidth + 10)
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", (d, i) => color(i));
+
+            legend
+                .append("text")
+                .attr("x", commonWidth + 40)
+                .attr("y", 10)
+                .attr("font-size", "small")
+                .style("text-anchor", "start")
+                .text(function (d) {
+                    return d;
+                });
+
+            return {
+                svgElement: svg,
+                groups: svgGroups,
+                x: x,
+                y: y,
+                height: commonHeight,
+                subgroups: subgroups,
+                xSubgroup: xSubGroup,
+                margins: margins,
+            };
+        };
+
+        let handleEnter = (enter, svgElement) => {
+            console.log("calling enter", enter);
+            enter
+                .append("rect")
+                .style("fill", (d, i) => color(i))
+                .attr("x", (d) => svgElement.xSubgroup(d.key))
+                .attr("y", svgElement.y(0))
+                .attr("width", svgElement.xSubgroup.bandwidth())
+                .attr("height", 0);
+            // .transition()
+            // .duration(1000)
+            // .attr("y", (d) => svgElement.y(d.val) - svgElement.margins.top - svgElement.margins.bottom)
+            // .attr("height", (d) => svgElement.height - svgElement.y(d.val));
+        };
+
+        let handleUpdate = (update, svgElement) => {
+            update
+                .transition()
+                .duration(1000)
+                .attr("fill", "red")
+                .attr("y", (d) => svgElement.y(d.val) - svgElement.margins.top - svgElement.margins.bottom)
+                .attr("height", (d) => svgElement.height - svgElement.y(d.val));
+        };
+
+        let drawBarChart = (data, svgElement) => {
+            svgElement.svgElement
+                .selectAll(".groups")
+                .data(data)
+                .selectAll("rect")
+                .data(function (d) {
+                    return svgElement.subgroups.map(function (k) {
+                        return { key: k, val: d.value[k] };
+                    });
+                })
+                .join(
+                    (enter) => handleEnter(enter, svgElement),
+                    (update) => handleUpdate(update, svgElement),
+                    (exit) => exit.remove()
+                );
         };
 
         $scope.comparisonWinner = (field, left) => {

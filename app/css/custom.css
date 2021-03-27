@@ -496,6 +496,10 @@ BACKGROUND
     background-color: #2d2e2e !important;
 }
 
+.background-gray-transparent {
+    background-color: #2d2e2e1c !important;
+}
+
 .background-darkgray {
     background-color: #0a0a0a !important;
 }

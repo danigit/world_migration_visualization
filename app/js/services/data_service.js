@@ -471,7 +471,6 @@
          * @returns {promise}
          */
         data_service.getGlobalRankStatistics = (selectedCountry, yearMin, yearMax, selectedGender) => {
-            console.log(selectedCountry);
             return data_service.countries.then((data) => {
                 let consideredYears = data_service.getActiveYears(yearMin, yearMax);
                 let globalRankStatisticsArray = [];
@@ -648,16 +647,49 @@
 
                 let countryTwoToCountryOne = countryOne.reduce((sum, val) => {
                     let value = val[country_two] !== "" ? +val[country_two] : 0;
-                    console.log(val[country_two]);
                     return (sum += value);
                 }, 0);
-                console.log(countryTwoToCountryOne);
                 let countryOneToCountryTwo = countryTwo.reduce((sum, val) => {
                     let value = val[country_one] !== "" ? +val[country_one] : 0;
                     return (sum += value);
                 }, 0);
 
                 return { countryOneSend: countryOneToCountryTwo, countryTwoSend: countryTwoToCountryOne };
+            });
+        };
+
+        let groupBy = function (xs, key) {
+            return xs.reduce(function (rv, x) {
+                (rv[x[key]] = rv[x[key]] || []).push(x);
+                return rv;
+            }, {});
+        };
+
+        data_service.getMutualCommonMigrationDestinations = (country_one, country_two) => {
+            let countryData = [];
+            return data_service.totMigrByOriginDest.then((data) => {
+                return data_service.loadJson(world_countries_hierarchy).then((regionsData) => {
+                    const geoRegions = regionsData["WORLD"]["Geographic regions"];
+                    let regions = data.filter((row) => geoRegions.some((gr) => row.Destination === gr));
+                    let groupedRegions = groupBy(regions, "Destination");
+
+                    Object.values(groupedRegions).forEach((reg, i) => {
+                        let label = "";
+
+                        if (reg[0].Destination === "Northern America") label = "N. A.";
+                        else if (reg[0].Destination === "Latin America and the Caribbean") label = "L. A. C.";
+                        else label = reg[0].Destination;
+
+                        countryData.push({
+                            label: label,
+                            value: { first: reg.reduce((sum, val) => (sum += +val[country_one]), 0) },
+                        });
+
+                        countryData[i].value["second"] = reg.reduce((sum, val) => (sum += +val[country_two]), 0);
+                    });
+
+                    return countryData;
+                });
             });
         };
 
