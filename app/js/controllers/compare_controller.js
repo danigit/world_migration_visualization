@@ -176,7 +176,11 @@
             });
 
             dataService
-                .getMutualCommonMigrationDestinations($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .getMutualCommonMigrationDestinations(
+                    $scope.selectedCountry.left.name,
+                    $scope.selectedCountry.right.name,
+                    $scope.genreFilterValue
+                )
                 .then((data) => {
                     if (firsCommonStructureCall) {
                         commonStructure = createCommonMigrationStructure(data);
@@ -296,7 +300,11 @@
             });
 
             dataService
-                .getMutualCommonMigrationDestinations($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .getMutualCommonMigrationDestinations(
+                    $scope.selectedCountry.left.name,
+                    $scope.selectedCountry.right.name,
+                    $scope.genreFilterValue
+                )
                 .then((data) => {
                     if (firsCommonStructureCall) {
                         commonStructure = createCommonMigrationStructure(data);
@@ -345,7 +353,7 @@
 
             let y = d3
                 .scaleLinear()
-                .domain([0, d3.max(data, (d) => Math.max(d.value.first, d.value.second))])
+                .domain([0, d3.max(data, (d) => Math.max(d.value.first[0], d.value.second[0]))])
                 .range([commonHeight - margins.top - margins.bottom, 0]);
 
             let xSubGroup = d3
@@ -430,9 +438,34 @@
                 .attr("height", 0);
         };
 
+        let handleLabelsEnter = (enter, svgElement) => {
+            enter
+                .append("text")
+                .attr("stroke", "#FFFFFF")
+                .attr("font-size", "10px")
+                .attr("x", (d) => svgElement.xSubgroup(d.key))
+                .attr("y", svgElement.y(0))
+                .text((d) => {
+                    console.log(d.percentage);
+                    return d.percentage !== "0.00" ? d.percentage : "";
+                });
+            // .attr("width", svgElement.xSubgroup.bandwidth())
+            // .attr("height", 0);
+        };
+
+        let handleLabelsUpdate = (update, svgElement) => {
+            update
+                .transition()
+                .duration(1000)
+                .attr("y", (d) => svgElement.y(d.val))
+                .attr("transform", "rotate(-45, " + svgElement.xSubgroup(d.key) + ", " + svgElement.y(d.val) + ")")
+                .attr("text-anchor", "middle")
+                .attr("domain-baseline", "central");
+        };
+
         let handleUpdate = (update, data, svgElement) => {
             console.log(data);
-            let y = svgElement.y.domain([0, d3.max(data, (d) => Math.max(d.value.first, d.value.second))]);
+            let y = svgElement.y.domain([0, d3.max(data, (d) => Math.max(d.value.first[0], d.value.second[0]))]);
             svgElement.svgElement
                 .select("g.grid-lines.y-axis")
                 .transition()
@@ -453,7 +486,7 @@
                 .selectAll("rect")
                 .data(function (d) {
                     return svgElement.subgroups.map(function (k) {
-                        return { key: k, val: d.value[k] };
+                        return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
                     });
                 })
                 .join(
@@ -461,6 +494,21 @@
                     (update) => handleUpdate(update, data, svgElement),
                     (exit) => exit.remove()
                 );
+
+            // TODO - decide what information to show as labels for the bars
+            svgElement.svgElement
+                .selectAll(".groups")
+                .data(data)
+                .selectAll("text")
+                .data(function (d) {
+                    return svgElement.subgroups.map(function (k) {
+                        return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
+                    });
+                })
+                .join
+                // (enter) => handleLabelsEnter(enter, svgElement),
+                // (update) => handleLabelsUpdate(update, svgElement)
+                ();
         };
 
         /**

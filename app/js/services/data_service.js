@@ -665,9 +665,9 @@
             }, {});
         };
 
-        data_service.getMutualCommonMigrationDestinations = (country_one, country_two) => {
+        data_service.getMutualCommonMigrationDestinations = (country_one, country_two, selectedGender) => {
             let countryData = [];
-            return data_service.totMigrByOriginDest.then((data) => {
+            return data_service.getOriginAndDestinationByGender(selectedGender).then((data) => {
                 return data_service.loadJson(world_countries_hierarchy).then((regionsData) => {
                     const geoRegions = regionsData["WORLD"]["Geographic regions"];
                     let regions = data.filter((row) => geoRegions.some((gr) => row.Destination === gr));
@@ -682,10 +682,17 @@
 
                         countryData.push({
                             label: label,
-                            value: { first: reg.reduce((sum, val) => (sum += +val[country_one]), 0) },
+                            value: { first: [reg.reduce((sum, val) => (sum += +val[country_one]), 0)] },
                         });
 
-                        countryData[i].value["second"] = reg.reduce((sum, val) => (sum += +val[country_two]), 0);
+                        countryData[i].value["second"] = [reg.reduce((sum, val) => (sum += +val[country_two]), 0)];
+                    });
+
+                    let firstPercentages = data_service.computePercentage(countryData.map((d) => d.value.first[0]));
+                    let secondPercentages = data_service.computePercentage(countryData.map((d) => d.value.second[0]));
+                    countryData.forEach((elem, i) => {
+                        countryData[i].value["first"].push(firstPercentages[i].toFixed(0));
+                        countryData[i].value["second"].push(secondPercentages[i].toFixed(0));
                     });
 
                     return countryData;
