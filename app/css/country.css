@@ -28,6 +28,8 @@
 
 .country-linechart {
     fill:white !important;
+    width:100% !important;
+    height:100% !important;
 }
 
 .country-linechart-path {

@@ -16,7 +16,7 @@
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
 
-        let margin = {top:30, bottom:30, left:30, right:30};
+        let margin = {top:40, bottom:30, left:30, right:30};
         $scope.sendReceiveTopCountries = "";
         dataService.countries.then((data) => {
             $scope.countries = data;
@@ -306,37 +306,33 @@
 
             let svg =  rateOfChangeLineChartContainer
                 .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+                .attr("width", width + 2*(margin.left + margin.right))
+                .attr("height", height + 2*(margin.top + margin.bottom))
                 .attr("id", lineChartId + "-svg");
             
             let lineChartStructure = svg.append("g")
                 .attr("id", lineChartId)
                 .attr("class", "country-linechart");
 
-
             d3.select("#" + lineChartId + "-svg").append("g")
-                .attr("transform", "translate(0," + height + margin.bottom + ")")
+                .attr("transform", "translate(0," + (height + margin.bottom/1.1)  + ")")
                 .attr("color", "white")
                 .style("font-size","12px")
                 .attr("id", lineChartId + "-xaxis")
-                /* .call(d3.axisBottom(xScale)) */
                 .append("text")
                 .classed("legend", true)
                 .attr("transform", "translate(" + 410 + "," + 40 + ")")
                 .style("text-anchor", "end")
                 .text("Time Span");
             
-            // d3.select()
             d3.select("#" + lineChartId + "-svg").append("g")
                 .attr("color", "white")
-                .attr("transform", "translate(" + (margin.left + margin.right) + "," + margin.bottom + ")")
+                .attr("transform", "translate(" + (margin.left + margin.right) + "," + (margin.top/3) + ")")
                 .style("font-size","12px")
                 .attr("id", lineChartId + "-yaxis")
-                // .call(d3.axisLeft(yScale))
                 .append("text")
                 .classed("legend", true)
-                .attr("transform", "rotate(-90) translate(" + 0 + "," + -35 +  ")")
+                .attr("transform", "rotate(-90) translate(" + -40 + "," + -35 +  ")")
                 .style("text-anchor", "end")
                 .text("Rate Of Change, Migrant Stock");
 
@@ -789,22 +785,10 @@
 
             let yScale = d3.scaleLinear()
                 .domain([globalMinY, globalMaxY])
-                .range([lineChartHeight, 0]);
+                .range([lineChartHeight + margin.top/3, 0]);
             
             let updateTransitionDuration = 1500;
             let enterTransitionDuration = 1500;
-
-            /* d3.select("#" + lineChartId + "-svg").append("g")
-                .attr("transform", "translate(0," + lineChartHeight + margin.bottom + ")")
-                .attr("color", "white")
-                .style("font-size","12px")
-                .attr("id", lineChartId + "-xaxis")
-                .call(d3.axisBottom(xScale))
-                .append("text")
-                .classed("legend", true)
-                .attr("transform", "translate(" + 410 + "," + 40 + ")")
-                .style("text-anchor", "end")
-                .text("Time Span"); */
 
             d3.select("#" + lineChartId + "-xaxis")
                 .transition()
@@ -815,37 +799,6 @@
                 .transition()
                 .duration(updateTransitionDuration)
                 .call(d3.axisLeft(yScale));
-            
-            // d3.select()
-            /* d3.select("#" + lineChartId + "-svg").append("g")
-                .attr("color", "white")
-                .attr("transform", "translate(" + (margin.left + margin.right) + ",0)")
-                .style("font-size","12px")
-                .attr("id", lineChartId + "-yaxis")
-                .call(d3.axisLeft(yScale))
-                .append("text")
-                .classed("legend", true)
-                .attr("transform", "rotate(-90) translate(0, " + -35 +  ")")
-                .style("text-anchor", "end")
-                .text("Rate Of Change, Migrant Stock"); */
-
-            /* d3.select("#" + lineChartId + "xaxis")
-                //.transition().duration(updateTransitionDuration)
-                .call(d3.axisBottom(xScale))
-                .append("text")
-                .classed("legend", true)
-                .attr("transform", "translate(" + 410 + "," + 40 + ")")
-                .style("text-anchor", "end")
-                .text("Time Span");
-
-            d3.select("#" + lineChartId + "yaxis")
-                //.transition().duration(updateTransitionDuration)
-                .call(d3.axisLeft(yScale))
-                .append("text")
-                .classed("legend", true)
-                .attr("transform", "rotate(-90) translate(0, " + -35 +  ")")
-                .style("text-anchor", "end")
-                .text("Rate Of Change, Migrant Stock"); */
 
             let lineGenerator = d3.line()
                 .x(function (d) {
@@ -868,7 +821,9 @@
                         .transition()
                         .duration(updateTransitionDuration)
                         .attr("d",(d) => lineGenerator(d))),
-                (exit) => exit.remove()    
+                (exit) => exit.call(exit => exit
+                    .transition()
+                    .duration(updateTransitionDuration).remove())    
             ); 
         }
 

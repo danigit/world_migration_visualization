@@ -745,7 +745,7 @@
                 for (let key in filteredData[0]) {
                     if (filteredDataColumns.includes(key)) countryRateOfChange[key] = filteredData[0][key];
                 }
-                // countryRateOfChange["GlobalMin":M]
+                
                 return countryRateOfChange;
             });
         };
