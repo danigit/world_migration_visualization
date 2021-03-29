@@ -445,6 +445,29 @@
         };
 
         /**
+         * Function that adds the name of the country to the TopoJson data
+         * @returns
+         */
+        data_service.mapDataInfoToMapInfo = () => {
+            return data_service.loadJson("../../../app/data/json/world_map_full.json").then((map) => {
+                data_service.loadCsv("../../../app/data/csv/country_name_code.csv").then((codes) => {
+                    Object.values(map.objects.countries.geometries).forEach((elem, i) => {
+                        codes.forEach((code) => {
+                            if (elem.id === code.code) {
+                                map.objects.countries.geometries[i]["name"] = code.name;
+                            }
+                        });
+                    });
+                });
+                return map;
+            });
+        };
+
+        data_service.mapDataInfoToMapInfo().then((data) => {
+            console.log(data);
+        });
+
+        /**
          * Extract the immigration by age groups for a given country, year range, and gender.
          *
          * The age groups are all 5-years apart and will be aggregated into:
