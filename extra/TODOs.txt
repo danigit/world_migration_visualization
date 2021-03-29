@@ -2,18 +2,42 @@
 
 - Ensure pan-and-zoom actions do not cut information out of the dynamic map
 
-## Statistics pages
-
-- Clarify whether plots/info/data are inward or outward material
-
 ## World page
 
 - Create the mapping from TopoJSON's countries short name to our full name in the CVS files.
 - Insert the countries data into the TopoJSON properties
 
+- Barchart in the bottom-left corner with a single metric across the timespan (1995-2019):
+    + Each bar will represent the average of that metric for a given year across all world countries
+    + Selecting a bar should restrict the information to the corresponding year only,
+        change the top label to show the correct year-metric pair, and update the choropleth map accordingly
+
+- A color legend should be precomputed for each metric, conveying the minimum and the maximum possible value
+    in the outer rect ticks in order to keep the colors consistent on data changes
+
+- Top 5 and Flop 5 countries for the selected metric should have their flags displayed
+    in the bottom right corner with appropriate labels
+
+- Hovering over a country should highlight its outline on the map and fill the bottom center section
+    with its name, its individual metric and other relevant info
+
+- Clicking onto a country, either on the map or on its flag, should navigate to its Country page
+
+- Fill the blank space atop the barchart with info on the current metric:
+    + What it stands for
+    + How it has been calculated
+
 ## Country page
 
-- Add descriptive labels to flags, idioms and country
+-- Add descriptive labels to flags, idioms and country
+
+- Clearly separate inward from outward idioms
+    + Inward idioms:
+        * Annual rate of change line chart;
+        * Immigration by age groups stacked barchart.
+
+    + Outward idioms:
+        * Migratory patterns pie charts.
 
 ## Compare page
 
@@ -22,9 +46,23 @@
 -- Keep gender information female/male/all
 -- Stacked barchart with common/most frequent migration regions/countries
 -- Line chart with mutual annual rates of change
-- Suitable idioms with migratory patterns comparison
-- Suitable idioms for a specific age range (0-4, or 18-35)
-- Possible textual comparison summary
+-- Suitable idioms with migratory patterns comparison
+
+- Highlight the central block with green/red colors on whose the better country
+- Add relevant timespan (1995-2019) label in the center of the page
+- Push selectors to the sides closer to country flags
+
+- Textual snippets for specific age ranges nearby country flags:
+    + Enfants, 0-4;
+    + Students and early workers, 19-34;
+    + Mature adulthood, 35+.
+
+- Clearly indicate the inward/outward nature of the plots at the bottom:
+    + Inward idioms:
+        * Annual rate of change line chart;
+
+    + Outward idioms:
+        * Migratory regions side-by-side barchart.
 
 ## FIXMEs
 
