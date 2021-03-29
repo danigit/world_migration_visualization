@@ -1,6 +1,14 @@
+Please note: Fix display resolution to 1080p!
+
 ## Map page
 
 - Ensure pan-and-zoom actions do not cut information out of the dynamic map
+
+- Implement filters logic
+- Clarify magnitude filter functionality
+- Implement Top 5 inward/outward carousel
+- Add a 'How to read' section in the bottom-left blank space
+- Implement vertical bar to control current visualization 
 
 ## World page
 
@@ -19,7 +27,7 @@
     in the bottom right corner with appropriate labels
 
 - Hovering over a country should highlight its outline on the map and fill the bottom center section
-    with its name, its individual metric and other relevant info
+    with its name, its individual metric and other relevant info. Otherwise, just show a placeholder.
 
 - Clicking onto a country, either on the map or on its flag, should navigate to its Country page
 
