@@ -24,8 +24,10 @@
         let commonStructure;
         let firsCommonStructureCall = true;
         let firstLineChartStructureCall = true;
+        let firstStackedChartStructureCall = true;
         let color;
         let lineChartStructure;
+        let stackedStructure;
 
         $scope.countryLeftStatisticsValues = {
             totalImmigrations: "",
@@ -327,12 +329,22 @@
                     drawLineChart(data, "right-line-chart", "right-line-chart-class");
                 });
             });
+
+            dataService
+                .getImmigrationByAgeComparison($scope.selectedCountry.left.name, $scope.selectedCountry.right.name, $scope.genreFilterValue)
+                .then((data) => {
+                    if (firstStackedChartStructureCall) {
+                        stackedStructure = initializeStackChartStructure(data);
+                    }
+
+                    drawStackedBarChart(data, stackedStructure);
+                });
         };
 
         let createCommonMigrationStructure = (data) => {
             let container = d3.select("#common-migration");
             let margins = { top: 20, right: 20, bottom: 60, left: 20 };
-            let commonWidth = 500 - margins.left - margins.right;
+            let commonWidth = container.node().getBoundingClientRect().width - margins.left - margins.right;
             let commonHeight = 350 - margins.top - margins.bottom;
 
             let svg = container
@@ -428,7 +440,6 @@
         };
 
         let handleEnter = (enter, svgElement) => {
-            console.log("calling enter", enter);
             enter
                 .append("rect")
                 .style("fill", (d, i) => color(i))
@@ -442,15 +453,13 @@
             enter
                 .append("text")
                 .attr("stroke", "#FFFFFF")
-                .attr("font-size", "10px")
+                .attr("stroke-width", 0.5)
+                .attr("font-size", "8px")
                 .attr("x", (d) => svgElement.xSubgroup(d.key))
                 .attr("y", svgElement.y(0))
                 .text((d) => {
-                    console.log(d.percentage);
-                    return d.percentage !== "0.00" ? d.percentage : "";
+                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
                 });
-            // .attr("width", svgElement.xSubgroup.bandwidth())
-            // .attr("height", 0);
         };
 
         let handleLabelsUpdate = (update, svgElement) => {
@@ -458,13 +467,11 @@
                 .transition()
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("transform", "rotate(-45, " + svgElement.xSubgroup(d.key) + ", " + svgElement.y(d.val) + ")")
-                .attr("text-anchor", "middle")
-                .attr("domain-baseline", "central");
+                .attr("transform", (d) => "rotate(-45, " + svgElement.xSubgroup(d.key) + ", " + (svgElement.y(d.val) - 8) + ")")
+                .attr("text-anchor", "start");
         };
 
         let handleUpdate = (update, data, svgElement) => {
-            console.log(data);
             let y = svgElement.y.domain([0, d3.max(data, (d) => Math.max(d.value.first[0], d.value.second[0]))]);
             svgElement.svgElement
                 .select("g.grid-lines.y-axis")
@@ -505,10 +512,10 @@
                         return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
                     });
                 })
-                .join
-                // (enter) => handleLabelsEnter(enter, svgElement),
-                // (update) => handleLabelsUpdate(update, svgElement)
-                ();
+                .join(
+                    (enter) => handleLabelsEnter(enter, svgElement),
+                    (update) => handleLabelsUpdate(update, svgElement)
+                );
         };
 
         /**
@@ -519,12 +526,12 @@
          * @returns
          */
 
-        let margin = { top: 20, bottom: 60, left: 20, right: 20 };
+        let margins = { top: 20, bottom: 60, left: 20, right: 20 };
         let initializeLineChart = (data, minMax, container) => {
             let lineChartContainer = d3.select("#" + container);
 
-            let width = 500 - margin.left - margin.right;
-            let height = 350 - margin.top - margin.bottom;
+            let width = lineChartContainer.node().getBoundingClientRect().width - margins.left - margins.right;
+            let height = 350 - margins.top - margins.bottom;
 
             let svg = lineChartContainer
                 .append("svg")
@@ -532,22 +539,21 @@
                 .attr("height", height)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
 
-            svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("class", "left-line-chart");
-            svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("class", "right-line-chart");
+            svg.append("g").attr("transform", `translate(${margins.left}, 0)`).attr("class", "left-line-chart");
+            svg.append("g").attr("transform", `translate(${margins.left}, 0)`).attr("class", "right-line-chart");
 
-            console.log(data);
             let xScale = d3
                 .scaleTime()
                 .domain([d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[5].label, +1)])
-                .range([margin.left, width - margin.left - margin.right]);
+                .range([margins.left, width - margins.left - margins.right]);
 
             let yScale = d3
                 .scaleLinear()
                 .domain([minMax.MinRateOfChange, minMax.MaxRateOfChange])
-                .range([height - margin.bottom - margin.top, 0]);
+                .range([height - margins.bottom - margins.top, 0]);
 
             svg.append("g")
-                .attr("transform", `translate(${margin.left}, ${height - margin.bottom})`)
+                .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
                 .style("font-size", "12px")
                 .attr("class", "axis-dark-cyan")
                 .call(d3.axisBottom(xScale).ticks(data.length))
@@ -556,7 +562,7 @@
                 .attr("text-anchor", "start");
 
             svg.append("g")
-                .attr("transform", `translate(${margin.left + margin.right}, ${margin.top})`)
+                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
                 .style("font-size", "12px")
                 .attr("class", "grid-lines y-axis")
                 .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0));
@@ -568,7 +574,7 @@
                 .append("g")
                 .attr("class", "legend")
                 .attr("transform", function (d, i) {
-                    return `translate(${-width + margin.left + margin.right + i * 200}, ${height - 13} )`;
+                    return `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`;
                 });
 
             let colors = ["#1f78b4", "#a6cee3"];
@@ -594,7 +600,6 @@
         };
 
         let drawLineChart = (data, structure, lineClass) => {
-            console.log(data);
             let lineGenerator = d3
                 .line()
                 .x((d) => lineChartStructure.xScale(d.label))
@@ -622,15 +627,177 @@
                                 .transition()
                                 .duration(1000)
                                 .attr("d", (d) => lineGenerator(d))
-                        ),
-                    (exit) => exit.remove()
+                        )
                 );
         };
-        $scope.comparisonWinner = (field, left) => {
+
+        let initializeStackChartStructure = (data) => {
+            let container = d3.select("#age-migration-container");
+            let commonWidth = container.node().getBoundingClientRect().width - margins.left - margins.right;
+            let commonHeight = 350 - margins.top - margins.bottom;
+            console.log(data);
+            let svg = container
+                .append("svg")
+                .attr("width", commonWidth)
+                .attr("height", commonHeight)
+                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+
+            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
+            let subgroups = Object.keys(data[0]).slice(1);
+            let groups = d3.map(data, (d) => d.group);
+            console.log(groups);
+
+            let x = d3
+                .scaleBand()
+                .range([margins.left, commonWidth - margins.right])
+                .domain(groups)
+                .padding(0.4);
+
+            let y = d3
+                .scaleLinear()
+                .domain([0, 100])
+                .range([commonHeight - margins.top - margins.bottom, 0]);
+
+            // let xSubGroup = d3
+            //     .scaleBand()
+            //     .domain(subgroups)
+            //     .range([margins.left + margins.right, x.bandwidth()])
+            //     .padding(0.1);
+
+            color = d3.scaleOrdinal(d3.schemePaired);
+
+            svg.append("g")
+                .attr("class", "axis-dark-cyan")
+                .attr("transform", `translate(${margins.left}, ${commonHeight - margins.bottom})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "start")
+                .attr("font-weight", 100)
+                .attr("transform", "rotate(45)");
+
+            svg.append("g")
+                .attr("class", "grid-lines y-axis")
+                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .call(d3.axisLeft(y).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+
+            let svgGroups = svg
+                .select(".main-group")
+                .selectAll("g")
+                .data(data)
+                .enter()
+                .append("g")
+                .attr("transform", (d) => `translate(${x(d.group) - margins.left}, ${0})`)
+                .attr("class", "groups");
+
+            let legend = svg
+                .selectAll(".legend")
+                .data([$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName])
+                .enter()
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", function (d, i) {
+                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - 13} )`;
+                });
+
+            legend
+                .append("rect")
+                .attr("x", commonWidth + 10)
+                .attr("width", 10)
+                .attr("height", 10)
+                .style("fill", (d, i) => color(i));
+
+            legend
+                .append("text")
+                .attr("x", commonWidth + 40)
+                .attr("y", 10)
+                .attr("font-size", "small")
+                .style("text-anchor", "start")
+                .text(function (d) {
+                    return d;
+                });
+
+            return {
+                svgElement: svg,
+                groups: svgGroups,
+                x: x,
+                y: y,
+                height: commonHeight,
+                width: commonWidth,
+                subgroups: subgroups,
+                margins: margins,
+            };
+        };
+
+        let drawStackedBarChart = (data, svgElement) => {
+            console.log(svgElement.subgroups);
+            let stackedGenerator = d3.stack().keys(svgElement.subgroups)(data);
+            console.log(stackedGenerator);
+            svgElement.svgElement
+                .append("g")
+                .selectAll("g")
+                .data(stackedGenerator)
+                .enter()
+                .append("g")
+                .attr("transform", `translate(${margins.left + 2}, ${margins.top - 2})`)
+                .attr("fill", (d, i) => color(i))
+                .selectAll("rect")
+                // enter a second time = loop subgroup per subgroup to add all rectangles
+                .data((d) => d)
+                .enter()
+                .append("rect")
+                .attr("x", (d) => {
+                    console.log(d);
+                    return svgElement.x(d.data.group);
+                })
+                .attr("y", function (d) {
+                    return svgElement.y(d[1]);
+                })
+                .attr("height", function (d) {
+                    return svgElement.y(d[0]) - svgElement.y(d[1]);
+                })
+                .attr("width", svgElement.x.bandwidth());
+            //     .selectAll(".groups")
+            //     .data(data)
+            //     .selectAll("rect")
+            //     .data(function (d) {
+            //         return svgElement.subgroups.map(function (k) {
+            //             return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
+            //         });
+            //     })
+            //     .join(
+            //         (enter) => handleEnter(enter, svgElement),
+            //         (update) => handleUpdate(update, data, svgElement),
+            //         (exit) => exit.remove()
+            //     );
+
+            // // TODO - decide what information to show as labels for the bars
+            // svgElement.svgElement
+            //     .selectAll(".groups")
+            //     .data(data)
+            //     .selectAll("text")
+            //     .data(function (d) {
+            //         return svgElement.subgroups.map(function (k) {
+            //             return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
+            //         });
+            //     })
+            //     .join(
+            //         (enter) => handleLabelsEnter(enter, svgElement),
+            //         (update) => handleLabelsUpdate(update, svgElement)
+            //     );
+        };
+
+        // TODO find a way to synchronize this after the data is load
+        $scope.comparisonWinner = (field, left, type) => {
             if (left) {
-                return $scope.globalRankCountryLeftStatisticsValues[field] < $scope.globalRankCountryRightStatisticsValues[field];
+                if (type == "rank")
+                    return $scope.globalRankCountryLeftStatisticsValues[field] < $scope.globalRankCountryRightStatisticsValues[field];
+                else {
+                    return $scope.countryLeftStatisticsValues[field] < $scope.countryRightStatisticsValues[field];
+                }
             } else {
-                return $scope.globalRankCountryRightStatisticsValues[field] < $scope.globalRankCountryLeftStatisticsValues[field];
+                if (type == "rank")
+                    return $scope.globalRankCountryRightStatisticsValues[field] < $scope.globalRankCountryLeftStatisticsValues[field];
+                else return $scope.countryRightStatisticsValues[field] < $scope.countryLeftStatisticsValues[field];
             }
         };
 

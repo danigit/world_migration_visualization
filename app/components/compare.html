@@ -22,7 +22,7 @@
                                     <div class="width-45-px text-right">Send</div>
                                     <div class="color-green width-80-px">
                                         {{leftSendToRight}}</div>
-                                    <div class="width-30-px text-left margin-right-10-px">to</div>
+                                    <div class="width-30-px text-left margin-right-20-px">to</div>
                                     <div class="color-darkcyan">
                                         {{selectedCountry.right.visName}}</div>
                                 </div>
@@ -30,7 +30,7 @@
                                     <div class="width-45-px">Receive</div>
                                     <div class="color-red width-80-px">
                                         {{rightSendToLeft}}</div>
-                                    <div class="width-30-px margin-right-10-px">from</div>
+                                    <div class="width-30-px text-left margin-right-20-px">from</div>
                                     <div class="color-darkcyan">
                                         {{selectedCountry.right.visName}}</div>
                                 </div>
@@ -105,52 +105,52 @@
                                 <div layout="row">
                                     <div class="color-white margin-top-20-px margin-right-50-px">
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrationsGlobalRank', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalImmigrationsGlobalRank', true, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrations', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalImmigrations', true, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryLeftStatisticsValues.totalImmigrations}}
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulationGlobalRank', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalPopulationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulation', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalPopulation', true, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryLeftStatisticsValues.totalPopulation}}
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulation', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationVsPopulation', true, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryLeftStatisticsValues.immigrationVsPopulation}} %
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', true, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAge', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationAverageAge', true, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryLeftStatisticsValues.immigrationAverageAge}} years
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigration', true) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('refugeeVsImmigration', true, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryLeftStatisticsValues.refugeeVsImmigration}} %
                                             </span>
                                         </div>
@@ -182,52 +182,52 @@
                                     </div>
                                     <div class="color-white margin-top-20-px margin-left-50-px">
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrationsGlobalRank', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalImmigrationsGlobalRank', false, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrations', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalImmigrations', false, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryRightStatisticsValues.totalImmigrations}}
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulationGlobalRank', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalPopulationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryRightStatisticsValues.totalPopulationGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulation', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('totalPopulation', false, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryRightStatisticsValues.totalPopulation}}
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulation', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationVsPopulation', false, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryRightStatisticsValues.immigrationVsPopulation}} %
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', false, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAge', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('immigrationAverageAge', false, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryRightStatisticsValues.immigrationAverageAge}} years
                                             </span>
                                         </div>
                                         <div class="width-100 padding-top-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'"> -->
                                                 {{globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank}}
                                             </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigration', false) ? 'color-green' : 'color-red'">
+                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small">
+                                                <!-- ng-class="comparisonWinner('refugeeVsImmigration', false, 'value') ? 'color-green' : 'color-red'"> -->
                                                 {{countryRightStatisticsValues.refugeeVsImmigration}} %
                                             </span>
                                         </div>
@@ -254,7 +254,7 @@
                                         <div class="width-45-px text-right">Send</div>
                                         <div class="color-green width-80-px">
                                             {{rightSendToLeft}}</div>
-                                        <div class="width-30-px text-left margin-right-10-px">to</div>
+                                        <div class="width-30-px text-left margin-right-20-px">to</div>
                                         <div class="color-darkcyan">
                                             {{selectedCountry.left.visName}}</div>
                                     </div>
@@ -262,7 +262,7 @@
                                         <div class="width-45-px">Receive</div>
                                         <div class="color-red width-80-px">
                                             {{leftSendToRight}}</div>
-                                        <div class="width-30-px margin-right-10-px">from</div>
+                                        <div class="width-30-px margin-right-20-px">from</div>
                                         <div class="color-darkcyan">
                                             {{selectedCountry.left.visName}}</div>
                                     </div>
@@ -286,14 +286,25 @@
                         </div>
                     </div>
                 </div>
-                <div layout="column" class="width-50">
+
+                <div layout="column" class="width-50 height-100">
                     <div class="margin-lr-40-px margin-top-100-px height-100">
                         <div class="color-orange padding-10-px">Annual Rate of Change</div>
                         <div id="change-rate-container" class="height-100"></div>
                     </div>
                 </div>
+
+            </div>
+            <div layout="row">
+                <div layout="column" class="width-50 height-100">
+                    <div class="margin-lr-40-px margin-top-100-px height-100">
+                        <div class="color-orange padding-10-px">Age Migration</div>
+                        <div id="age-migration-container" class="height-100"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <!-- end map container-->
+</div>
+<!-- end map container-->
 </div>

@@ -17,11 +17,11 @@
 
 ## Compare page
 
-- Mutual migration information between the two countries
-- No timespan (that is, full 1990-2019 range)
-- Keep gender information female/male/all
-- Stacked barchart with common/most frequent migration regions/countries
-- Line chart with mutual annual rates of change
+-- Mutual migration information between the two countries
+-- No timespan (that is, full 1990-2019 range)
+-- Keep gender information female/male/all
+-- Stacked barchart with common/most frequent migration regions/countries
+-- Line chart with mutual annual rates of change
 - Suitable idioms with migratory patterns comparison
 - Suitable idioms for a specific age range (0-4, or 18-35)
 - Possible textual comparison summary

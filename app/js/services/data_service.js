@@ -349,6 +349,101 @@
             });
         };
 
+        data_service.getImmigrationByAgeComparison = (firstCountry, secondCountry, selectedGender) => {
+            return data_service.migrPercDistributionAgeSex.then((data) => {
+                let countryOneData = data_service.filterData(data, firstCountry, 1990, 2019);
+                let countryTwoData = data_service.filterData(data, secondCountry, 1990, 2019);
+
+                const genderSuffix = data_service.getSelectedGenderColumn(selectedGender, "");
+
+                let ageColumns = Object.keys(countryOneData[0]).filter((k) => {
+                    if (typeof k === "string") {
+                        return k.includes(genderSuffix);
+                    }
+                });
+
+                countryOneData = data_service.filterColumn(countryOneData, ageColumns);
+                countryTwoData = data_service.filterColumn(countryTwoData, ageColumns);
+
+                console.log(countryOneData);
+                const ageGroupsAggregation = {
+                    "0-4": ["0-4" + genderSuffix],
+                    "5-18": ["5-9", "10-14", "15-19"].map((d) => d + genderSuffix),
+                    "19-34": ["20-24", "25-29", "30-34"].map((d) => d + genderSuffix),
+                    "35-54": ["35-39", "40-44", "45-49", "50-54"].map((d) => d + genderSuffix),
+                    "55-74": ["55-59", "60-64", "65-69", "70-74"].map((d) => d + genderSuffix),
+                    "75+": ["75+" + genderSuffix],
+                };
+
+                let aggregatedOneData = countryOneData.map((d) => {
+                    let aggregatedRow = {};
+
+                    const ageGroups = Object.keys(ageGroupsAggregation);
+                    ageGroups.forEach((a) => {
+                        const oldCols = ageGroupsAggregation[a];
+
+                        const ageGroupData = Object.values(data_service.filterColumn([d], oldCols)[0]);
+
+                        const aggregatedVal = ageGroupData.reduce((sum, curr) => sum + +curr, 0);
+
+                        aggregatedRow[a] = +aggregatedVal.toFixed(1);
+                    });
+
+                    return aggregatedRow;
+                });
+
+                let aggregatedTwoData = countryTwoData.map((d) => {
+                    let aggregatedRow = {};
+
+                    const ageGroups = Object.keys(ageGroupsAggregation);
+                    ageGroups.forEach((a) => {
+                        const oldCols = ageGroupsAggregation[a];
+
+                        const ageGroupData = Object.values(data_service.filterColumn([d], oldCols)[0]);
+
+                        const aggregatedVal = ageGroupData.reduce((sum, curr) => sum + +curr, 0);
+
+                        aggregatedRow[a] = +aggregatedVal.toFixed(1);
+                    });
+
+                    return aggregatedRow;
+                });
+
+                var aggregatedOneMean = {};
+                var aggregatedTwoMean = {};
+
+                let keys = Object.keys(aggregatedOneData[0]);
+                aggregatedOneData.forEach(function (d) {
+                    keys.forEach((key) => {
+                        if (aggregatedOneMean.hasOwnProperty(key)) {
+                            aggregatedOneMean[key] = (+aggregatedOneMean[key] + +d[key] / aggregatedOneData.length).toFixed(1);
+                        } else {
+                            aggregatedOneMean[key] = +d[key].toFixed(1) / aggregatedOneData.length;
+                        }
+                    });
+                });
+
+                aggregatedTwoData.forEach(function (d) {
+                    keys.forEach((key) => {
+                        if (aggregatedTwoMean.hasOwnProperty(key)) {
+                            aggregatedTwoMean[key] = (+aggregatedTwoMean[key] + +d[key] / aggregatedTwoData.length).toFixed(1);
+                        } else {
+                            aggregatedTwoMean[key] = +d[key].toFixed(1) / aggregatedTwoData.length;
+                        }
+                    });
+                });
+
+                let finalData = [];
+                Object.values(aggregatedOneMean).forEach((elem, i) => {
+                    console.log(elem);
+                    let percentage = data_service.computePercentage([elem, aggregatedTwoMean[keys[i]]]);
+                    finalData.push({ group: keys[i], left: +percentage[0].toFixed(0), right: +percentage[1].toFixed(0) });
+                });
+
+                return finalData;
+            });
+        };
+
         /**
          * Extract the immigration by age groups for a given country, year range, and gender.
          *
@@ -745,7 +840,7 @@
                 for (let key in filteredData[0]) {
                     if (filteredDataColumns.includes(key)) countryRateOfChange[key] = filteredData[0][key];
                 }
-                
+
                 return countryRateOfChange;
             });
         };
