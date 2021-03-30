@@ -12,7 +12,7 @@ Please note: Fix display resolution to 1080p!
 
 ## World page
 
-- Create the mapping from TopoJSON's countries short name to our full name in the CVS files.
+- Create the mapping from TopoJSON's countries short name to our full name in the CSV files.
 - Insert the countries data into the TopoJSON properties
 
 - Barchart in the bottom-left corner with a single metric across the timespan (1995-2019):
@@ -75,3 +75,8 @@ Please note: Fix display resolution to 1080p!
 ## FIXMEs
 
 - Collapsing timespan when closing nav menu in Map page
+- Show "Not available" template messages when data is NaN
+- Scale down the whole view to fit 1080p
+- Steal metrics labels from Daniel's resources
+- Move year label to the left column in Country and World pages
+- Move year label in between the two country selectors in Compare page
