@@ -19,10 +19,6 @@
         $scope.topFlags = dataService.topFlags;
         $scope.selectedTopFlag = "";
 
-        dataService.loadWorldMap().then((data) => {
-            drawMap(data);
-        });
-
         let svgGroup;
         let colors = d3.scaleOrdinal(d3.schemeBlues[7]);
 
@@ -35,6 +31,13 @@
                 .scale(170)
                 .translate([svgWidth / 2, svgHeight / 2]);
             let path = d3.geoPath().projection(projection);
+
+            let zoom = d3
+                .zoom()
+                .scaleExtent([1, 10])
+                .on("zoom", (event) => {
+                    svgGroup.attr("transform", event.transform);
+                });
 
             let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
             svgGroup = svgMap.append("g");
@@ -62,12 +65,14 @@
             svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
         };
 
-        let zoom = d3
-            .zoom()
-            .scaleExtent([1, 10])
-            .on("zoom", (event) => {
-                svgGroup.attr("transform", event.transform);
-            });
+        dataService.loadWorldMap().then((data) => {
+            drawMap(data);
+        });
+
+        
+        dataService.getWorldStatistics().then(data => {
+            // drawBarChart(data, selectedMetric);
+        });
 
         /**
          * Function that handles the click on the secondary menu buttons
