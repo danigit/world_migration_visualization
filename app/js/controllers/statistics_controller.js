@@ -17,6 +17,16 @@
         $scope.visualizationTypes = dataService.visualizationTypes;
         $scope.topFlags = dataService.topFlags;
         $scope.selectedTopFlag = "";
+        $scope.countriesData = null;
+        
+        $scope.$watch('countriesData', function(_new, _old) {
+            if(_new !==_old) {
+                dataService.loadWorldMap()
+                    .then((data) => drawMap(data, _new));
+            }
+        });
+
+        const BAD_COUNTRY_COLOR = '#b53737';
 
         let svgGroup;
         let colors = d3.scaleOrdinal(d3.schemeBlues[7]);
@@ -25,14 +35,19 @@
             return !props || !(props instanceof Country)
         };
 
-        let drawMap = (data) => {
+        let drawMap = (data, statistics) => {
+            // TODO: Enter - update - exit pattern
             let mapContainer = d3.select("#map");
+            mapContainer.html('');
+
             let svgWidth = mapContainer.node().getBoundingClientRect().width;
             let svgHeight = mapContainer.node().getBoundingClientRect().height;
+
             let projection = d3
                 .geoMercator()
                 .scale(170)
                 .translate([svgWidth / 2, svgHeight / 2]);
+
             let path = d3.geoPath().projection(projection);
 
             let zoomMap = d3.zoom()
@@ -43,7 +58,7 @@
             let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
             svgGroup = svgMap.append("g");
 
-            let geoJson = topojson.feature(data, data.objects.countries).features;
+            let geoJson = data;
 
             geoJson.forEach(d => {
                 if (isBadCountry(d.properties))
@@ -61,10 +76,19 @@
                 .attr("class", "countries")
                 .attr("id", d => d.id)
                 .attr("fill", d => {
+                    if (isBadCountry(d.properties)) {
+                        return BAD_COUNTRY_COLOR;
+                    }
+
+                    const statsFiltered = statistics.filter(s =>
+                            s.Destination === d.properties.name);
+
+                    const statAvg = statsFiltered.reduce((sum, curr) =>
+                            sum + +curr.Total, 0) / statsFiltered.length;
+
                     // TODO: Change the fill attribute following
                     // the color scale on the current metric
-                    return colors(d3.sum(d.id.split(""),
-                            (c) => c.charCodeAt(c)));
+                    return colors(statAvg);
                 })
                 .on("click", (_, d) => {
                     if (isBadCountry(d.properties)) {
@@ -99,7 +123,7 @@
                     }
 
                     // TODO: Fill the bottom-center section with
-                    // relevant info on the hovered country.
+                    // a general template of insertion.
 
                     d3.select(this).transition()
                         .duration(1).style('fill',
@@ -113,27 +137,30 @@
             geoCentroids.enter().append('circle')
                     .attr('cx', d => d.properties.props.C[0])
                     .attr('cy', d => d.properties.props.C[1])
-                    .attr('r',  4)
-                .on('mouseover', function() {
+                    .attr('r',  2)
+                .on('mouseover', function(_, d) {
                     d3.select(this).transition()
-                        .duration(1).attr('r', 6)})
+                        .duration(1).attr('r', 4);
+                    
+                    console.log(d)})
                 .on('mouseout',  function() {
                     d3.select(this).transition()
-                        .duration(1).attr('r', 4)});
+                        .duration(1).attr('r', 2)});
 
             svgMap.call(zoomMap);
             svgMap.call(zoomMap.transform,
                     () => d3.zoomIdentity.scale(1));
         };
-
-        dataService.loadWorldMap().then((data) => {
-            drawMap(data);
-        });
-
         
         dataService.getWorldStatistics().then(data => {
             // drawBarChart(data, selectedMetric);
         });
+
+        $scope.changeMetric = () => {
+            dataService.getCountriesStatistics(
+                    $scope.visualizationType)
+                .then(a => $scope.countriesData = a);
+        }
 
         /**
          * Function that handles the click on the secondary menu buttons

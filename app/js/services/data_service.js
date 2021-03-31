@@ -103,7 +103,11 @@
 
         data_service.loadWorldMap = () => {
             return data_service.countries.then((countries) => {
-                return data_service.loadJson(WORLD_MAP).then((map) => addCountriesToMap(countries, map));
+                return data_service.loadJson(WORLD_MAP).then((map) => {
+                    let countriesMap = addCountriesToMap(countries, map);
+                    return topojson.feature(countriesMap,
+                            countriesMap.objects.countries).features;
+                });
             });
         };
 
@@ -847,6 +851,75 @@
         data_service.getActiveYears = (yearMin, yearMax) => {
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
+
+        let getCountries_totMigrByOriginDest = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_totPopulationByAgeSex = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_migrAsPercOfPopulationAgeSex = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_totMigrByAgeSex = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_estimatedRefugees = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        data_service.getCountriesStatistics = (metric) => {
+            return data_service.countries.then(countries => {
+                switch (metric) {
+                    case 'total_immigration':
+                        return getCountries_totMigrByOriginDest(countries);
+    
+                    case 'total_population':
+                        return getCountries_totPopulationByAgeSex(countries);
+    
+                    case 'immigration_vs_population':
+                        return getCountries_migrAsPercOfPopulationAgeSex(countries);
+    
+                    case 'immigrants_avg_age':
+                        return getCountries_totMigrByAgeSex(countries);
+    
+                    case 'refugees_vs_immigrants':
+                        return getCountries_estimatedRefugees(countries);
+    
+                    default:
+                        throw `Invalid statistics metric: ${metric}`;
+                }
+            });
+        }
 
         data_service.getWorldStatistics = () => {
             return data_service.countries.then((countries) => {
