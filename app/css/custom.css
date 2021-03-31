@@ -316,6 +316,10 @@ MARGINS
     margin-bottom: 10px !important;
 }
 
+.margin-bottom-20-px {
+    margin-bottom: 20px !important;
+}
+
 .margin-top-bottom-5-px {
     margin-top: 5px !important;
     margin-bottom: 5px !important;
