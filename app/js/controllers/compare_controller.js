@@ -11,8 +11,7 @@
     compareController.$inject = ["$scope", "$state", "dataService"];
 
     function compareController($scope, $state, dataService) {
-        $scope.secondaryMenuSelectedValue =
-            dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "compare";
+        $scope.secondaryMenuSelectedValue = "compare";
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.searchSource = "";
         $scope.continents = dataService.continents;

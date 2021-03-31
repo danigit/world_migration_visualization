@@ -13,7 +13,7 @@
                     <md-input-container id="compare-selector-right" class="width-100 display-block margin-none">
                         <label>Select country...</label>
                         <md-select ng-model="selectedCountryController" md-on-close="clearSearch()"
-                            ng-change="updateStatistics()">
+                            ng-change="updateView()">
                             <md-select-header class="select-header-search-box background-white zindex-100">
                                 <input ng-model="searchSource" aria-label="Source filter" type="search"
                                     placeholder="Search a country..."
@@ -76,7 +76,7 @@
             <div layout="column" class="width-25">
                 <div class="margin-top-60-px width-100">
                     <img class="display-block height-200-px width-200-px margin-lr-auto"
-                        src="../../app/img/countries/outlines/{{selectedCountryController.visName}}.svg" />
+                        src="{{selectedCountryController.outlinePath}}" />
                 </div>
                 <div layout="row">
                     <div class="box-shadow-dark-gray country-image-thumbnail"><img class="country-image-thumbnail"
@@ -167,14 +167,14 @@
                     <div class="width-90">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                             ng-model="selectedTopCountryValue" countries="top5InwardCountries"
-                            show-hint="showTopCountryHint(flagValue, event, 'Send')"
+                            show-hint="showTopCountryHint(flagValue, event, 'Sent')"
                             hide-hint="hideTopCountryHint(event, 'in')"
                             top-countries-icon-path="'app/img/home/inward.png'">
                         </top-countries>
                         <hr class="menu-divider" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
                             ng-model="selectedTopCountryValue" countries="top5OutwardCountries"
-                            show-hint="showTopCountryHint(flagValue, event, 'Receive')"
+                            show-hint="showTopCountryHint(flagValue, event, 'Received')"
                             hide-hint="hideTopCountryHint('in')" top-countries-icon-path="'app/img/home/outward.png'">
                         </top-countries>
                     </div>
@@ -185,7 +185,7 @@
                         <hr class="menu-divider background-darkcyan margin-top-10-px margin-bottom-10-px width-100" />
                         <div class="font-size-small">{{sendReceiveTopCountries}} <span id="tooltip-text"
                                 class="margin-top-10-px">{{selectedTopFlag[1]}}</span>
-                            people {{sendReceiveTopCountries == "Send" ? 'to' : 'from'}}
+                            people {{sendReceiveTopCountries == "Sent" ? 'to' : 'from'}}
                             {{selectedCountryController.visName}}</div>
 
                     </div>

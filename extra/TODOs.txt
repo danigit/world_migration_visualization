@@ -12,9 +12,6 @@ Please note: Fix display resolution to 1080p!
 
 ## World page
 
-- Create the mapping from TopoJSON's countries short name to our full name in the CSV files.
-- Insert the countries data into the TopoJSON properties
-
 - Barchart in the bottom-left corner with a single metric across the timespan (1995-2019):
     + Each bar will represent the average of that metric for a given year across all world countries
     + Selecting a bar should restrict the information to the corresponding year only,
@@ -29,7 +26,7 @@ Please note: Fix display resolution to 1080p!
 - Hovering over a country should highlight its outline on the map and fill the bottom center section
     with its name, its individual metric and other relevant info. Otherwise, just show a placeholder.
 
-- Clicking onto a country, either on the map or on its flag, should navigate to its Country page
+- Clicking onto a country flag should navigate to its Country page
 
 - Fill the blank space atop the barchart with info on the current metric:
     + What it stands for
