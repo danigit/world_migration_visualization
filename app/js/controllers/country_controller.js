@@ -16,23 +16,65 @@
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
 
-        let margin = { top: 40, bottom: 30, left: 30, right: 30 };
+        this.uiOnParamsChanged = (newParams) =>
+                fetchData(newParams.countryName);
+
+        let fetchData = (countryName) => {
+            if (countryName === null) {
+                dataService.selectedCountryController = "";
+            } else {
+                let selectedCountry = $scope.countries.find((c) =>
+                    slugify(countryName) === slugify(c.visName));
+
+                if (selectedCountry) {
+                    dataService.selectedCountryController = selectedCountry;
+                } else {
+                    console.log('Invalid country name:',
+                            capitalize(countryName));
+
+                    $state.go($state.current, { countryName: null });
+                }
+            }
+
+            // Update the statistics
+            $scope.selectedCountryController = dataService.selectedCountryController == ""
+                ? $scope.countries[0]
+                : dataService.selectedCountryController;
+
+            $scope.updateStatistics();
+        }
+
+        $scope.updateView = () => {
+            const _countryName = $scope.selectedCountryController.visName;
+            $state.go($state.current, { countryName: slugify(_countryName) });
+        };
+
+        let margin = {top:40, bottom:30, left:30, right:30};
         $scope.sendReceiveTopCountries = "";
         dataService.countries.then((data) => {
             $scope.countries = data;
 
-            let countryName = $stateParams.name;
-            let selectedCountry = data.find((c) => countryName === c.visName.toLowerCase());
+            let countryName = $stateParams.countryName;
 
-            if (selectedCountry) {
-                dataService.selectedCountryController = selectedCountry;
-            } else {
+            if (countryName === null) {
                 dataService.selectedCountryController = "";
-                $state.go($state.current, { name: null });
+            } else {
+                let selectedCountry = data.find((c) =>
+                    slugify(countryName) === slugify(c.visName));
+
+                if (selectedCountry) {
+                    dataService.selectedCountryController = selectedCountry;
+                } else {
+                    console.log('Invalid country name:',
+                            capitalize(countryName));
+
+                    $state.go($state.current, { countryName: null });
+                }
             }
 
-            $scope.selectedCountryController =
-                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
+            $scope.selectedCountryController = dataService.selectedCountryController == ""
+                ? $scope.countries[0]
+                : dataService.selectedCountryController;
 
             $scope.genreFilterValue = "menu-all";
 
@@ -40,10 +82,11 @@
             $scope.updateStatistics();
             developmentStructure = createPieStructure("development-piechart", "development");
             incomeStructure = createPieStructure("income-piechart", "income");
+
+            $scope.updateStatistics();
         });
 
-        $scope.secondaryMenuSelectedValue =
-            dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "country";
+        $scope.secondaryMenuSelectedValue = "country";
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.genreButtons = dataService.genreButtons;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
@@ -870,9 +913,9 @@
          * @param {string} value
          */
         $scope.handleTopCountryClick = function (value, type) {
-            $scope.selectedTopCountry = value;
+            // $scope.selectedTopCountry = value;
             $scope.selectedCountryController = value;
-            $scope.updateStatistics();
+            $scope.updateView();
         };
 
         /**
@@ -904,7 +947,6 @@
          */
         $scope.hideTopCountryHint = function (event, type) {
             let tooltip = document.getElementById("top-flags-tooltip");
-            console.log("mouse leave");
             tooltip.classList.remove("display-block");
             tooltip.classList.add("display-none");
         };

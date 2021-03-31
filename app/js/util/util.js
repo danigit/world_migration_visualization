@@ -64,3 +64,13 @@ function transformNumberFormat(number, order=false, decimals = 2) {
             return number + "th";
     }
 }
+
+const slugify = (text) => {
+    return text.trim().split(' ')
+        .join('-').toLowerCase();
+};
+
+const capitalize = (text) => {
+    return text.charAt(0)
+        .toUpperCase() + text.slice(1);
+}
