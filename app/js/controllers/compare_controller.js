@@ -355,8 +355,8 @@
         let createCommonMigrationStructure = (data) => {
             let container = d3.select("#common-migration");
             let margins = { top: 20, right: 20, bottom: 60, left: 20 };
-            let commonWidth = container.node().getBoundingClientRect().width - margins.left - margins.right;
-            let commonHeight = 350 - margins.top - margins.bottom;
+            let commonWidth = 500 - margins.left - margins.right;
+            let commonHeight = 300 - margins.top - margins.bottom;
 
             let svg = container
                 .append("svg")
@@ -541,8 +541,8 @@
         let initializeLineChart = (data, minMax, container) => {
             let lineChartContainer = d3.select("#" + container);
 
-            let width = lineChartContainer.node().getBoundingClientRect().width - margins.left - margins.right;
-            let height = 350 - margins.top - margins.bottom;
+            let width = 500 - margins.left - margins.right;
+            let height = 300 - margins.top - margins.bottom;
 
             let svg = lineChartContainer
                 .append("svg")
