@@ -11,8 +11,7 @@
     compareController.$inject = ["$scope", "$state", "dataService"];
 
     function compareController($scope, $state, dataService) {
-        $scope.secondaryMenuSelectedValue =
-            dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "compare";
+        $scope.secondaryMenuSelectedValue = "compare";
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
@@ -204,6 +203,16 @@
                     drawLineChart(data, "left-line-chart", "left-line-chart-class");
                 });
             });
+
+            dataService
+                .getChildBrainDrainStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .then((data) => {
+                    $scope.childLeftStatistics = transformNumberFormat(data["0-14"], false, 0);
+                    $scope.brainDrainLeftStatistics = transformNumberFormat(data["20-34"], false, 0);
+                    $scope.totalLeftMigrants = transformNumberFormat(data["Total"], false, 0);
+                    $scope.childrenLeftPercentage = transformNumberFormat((data["0-14"] / data["Total"]) * 100, false, 0);
+                    $scope.drainBrainLeftPercentage = transformNumberFormat((data["20-34"] / data["Total"]) * 100, false, 0);
+                });
         };
 
         let preprocessRateOfChange = (data) => {
@@ -331,13 +340,14 @@
             });
 
             dataService
-                .getImmigrationByAgeComparison($scope.selectedCountry.left.name, $scope.selectedCountry.right.name, $scope.genreFilterValue)
+                .getChildBrainDrainStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
-                    if (firstStackedChartStructureCall) {
-                        stackedStructure = initializeStackChartStructure(data);
-                    }
-
-                    drawStackedBarChart(data, stackedStructure);
+                    console.log(data);
+                    $scope.childRightStatistics = transformNumberFormat(data["0-14"], false, 0);
+                    $scope.brainDrainRightStatistics = transformNumberFormat(data["20-34"], false, 0);
+                    $scope.totalRightMigrants = transformNumberFormat(data["Total"], false, 0);
+                    $scope.childrenRightPercentage = transformNumberFormat((data["0-14"] / data["Total"]) * 100, false, 0);
+                    $scope.drainBrainRightPercentage = transformNumberFormat((data["20-34"] / data["Total"]) * 100, false, 0);
                 });
         };
 
@@ -629,161 +639,6 @@
                                 .attr("d", (d) => lineGenerator(d))
                         )
                 );
-        };
-
-        let initializeStackChartStructure = (data) => {
-            let container = d3.select("#age-migration-container");
-            let commonWidth = container.node().getBoundingClientRect().width - margins.left - margins.right;
-            let commonHeight = 350 - margins.top - margins.bottom;
-            console.log(data);
-            let svg = container
-                .append("svg")
-                .attr("width", commonWidth)
-                .attr("height", commonHeight)
-                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
-
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
-            let subgroups = Object.keys(data[0]).slice(1);
-            let groups = d3.map(data, (d) => d.group);
-            console.log(groups);
-
-            let x = d3
-                .scaleBand()
-                .range([margins.left, commonWidth - margins.right])
-                .domain(groups)
-                .padding(0.4);
-
-            let y = d3
-                .scaleLinear()
-                .domain([0, 100])
-                .range([commonHeight - margins.top - margins.bottom, 0]);
-
-            // let xSubGroup = d3
-            //     .scaleBand()
-            //     .domain(subgroups)
-            //     .range([margins.left + margins.right, x.bandwidth()])
-            //     .padding(0.1);
-
-            color = d3.scaleOrdinal(d3.schemePaired);
-
-            svg.append("g")
-                .attr("class", "axis-dark-cyan")
-                .attr("transform", `translate(${margins.left}, ${commonHeight - margins.bottom})`)
-                .call(d3.axisBottom(x))
-                .selectAll("text")
-                .style("text-anchor", "start")
-                .attr("font-weight", 100)
-                .attr("transform", "rotate(45)");
-
-            svg.append("g")
-                .attr("class", "grid-lines y-axis")
-                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
-                .call(d3.axisLeft(y).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
-
-            let svgGroups = svg
-                .select(".main-group")
-                .selectAll("g")
-                .data(data)
-                .enter()
-                .append("g")
-                .attr("transform", (d) => `translate(${x(d.group) - margins.left}, ${0})`)
-                .attr("class", "groups");
-
-            let legend = svg
-                .selectAll(".legend")
-                .data([$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName])
-                .enter()
-                .append("g")
-                .attr("class", "legend")
-                .attr("transform", function (d, i) {
-                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - 13} )`;
-                });
-
-            legend
-                .append("rect")
-                .attr("x", commonWidth + 10)
-                .attr("width", 10)
-                .attr("height", 10)
-                .style("fill", (d, i) => color(i));
-
-            legend
-                .append("text")
-                .attr("x", commonWidth + 40)
-                .attr("y", 10)
-                .attr("font-size", "small")
-                .style("text-anchor", "start")
-                .text(function (d) {
-                    return d;
-                });
-
-            return {
-                svgElement: svg,
-                groups: svgGroups,
-                x: x,
-                y: y,
-                height: commonHeight,
-                width: commonWidth,
-                subgroups: subgroups,
-                margins: margins,
-            };
-        };
-
-        let drawStackedBarChart = (data, svgElement) => {
-            console.log(svgElement.subgroups);
-            let stackedGenerator = d3.stack().keys(svgElement.subgroups)(data);
-            console.log(stackedGenerator);
-            svgElement.svgElement
-                .append("g")
-                .selectAll("g")
-                .data(stackedGenerator)
-                .enter()
-                .append("g")
-                .attr("transform", `translate(${margins.left + 2}, ${margins.top - 2})`)
-                .attr("fill", (d, i) => color(i))
-                .selectAll("rect")
-                // enter a second time = loop subgroup per subgroup to add all rectangles
-                .data((d) => d)
-                .enter()
-                .append("rect")
-                .attr("x", (d) => {
-                    console.log(d);
-                    return svgElement.x(d.data.group);
-                })
-                .attr("y", function (d) {
-                    return svgElement.y(d[1]);
-                })
-                .attr("height", function (d) {
-                    return svgElement.y(d[0]) - svgElement.y(d[1]);
-                })
-                .attr("width", svgElement.x.bandwidth());
-            //     .selectAll(".groups")
-            //     .data(data)
-            //     .selectAll("rect")
-            //     .data(function (d) {
-            //         return svgElement.subgroups.map(function (k) {
-            //             return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
-            //         });
-            //     })
-            //     .join(
-            //         (enter) => handleEnter(enter, svgElement),
-            //         (update) => handleUpdate(update, data, svgElement),
-            //         (exit) => exit.remove()
-            //     );
-
-            // // TODO - decide what information to show as labels for the bars
-            // svgElement.svgElement
-            //     .selectAll(".groups")
-            //     .data(data)
-            //     .selectAll("text")
-            //     .data(function (d) {
-            //         return svgElement.subgroups.map(function (k) {
-            //             return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
-            //         });
-            //     })
-            //     .join(
-            //         (enter) => handleLabelsEnter(enter, svgElement),
-            //         (update) => handleLabelsUpdate(update, svgElement)
-            //     );
         };
 
         // TODO find a way to synchronize this after the data is load

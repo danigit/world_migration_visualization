@@ -16,6 +16,9 @@ const data_json_folder = data_folder + '/json';
 const world_countries_hierarchy = data_json_folder + '/world_countries_hierarchy.json';
 const world_countries_vis_name  = data_json_folder + '/world_countries_vis_name.json';
 
+// Path to TopoJSON world map
+const WORLD_MAP = data_json_folder + '/world_map.json'
+
 // Path to image folders
 const image_folder = "app/img/";
 
@@ -37,6 +40,7 @@ const migrants_as_percentage_of_total_population_by_age_and_sex = 'app/data/csv/
 
 // path for countries classes table
 const countries_classes_by_region = 'app/data/csv/countries_class_by_region.csv';
+const COUNTRY_CODES_ALPHA_3 = data_csv_folder + 'country_codes_alpha_3.csv';
 
 // path for estimated refugee stock table
 const estimated_refugees = 'app/data/csv/est_refugee_stock.csv';

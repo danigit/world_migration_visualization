@@ -12,8 +12,7 @@
     function statisticsController($scope, $state, dataService) {
         $scope.visualizationType = "";
         $scope.selectedTopCountryValue = "";
-        console.log("|" + dataService.secondaryMenuSelectedValue + "|");
-        $scope.secondaryMenuSelectedValue = dataService.secondaryMenuSelectedValue != "" ? dataService.secondaryMenuSelectedValue : "world";
+        $scope.secondaryMenuSelectedValue = "world";
         $scope.statisticsButtons = dataService.menuButtons;
         $scope.visualizationTypes = dataService.visualizationTypes;
         $scope.topFlags = dataService.topFlags;
@@ -21,6 +20,10 @@
 
         let svgGroup;
         let colors = d3.scaleOrdinal(d3.schemeBlues[7]);
+
+        let isBadCountry = (props) => {
+            return !props || !(props instanceof Country)
+        };
 
         let drawMap = (data) => {
             let mapContainer = d3.select("#map");
@@ -32,37 +35,95 @@
                 .translate([svgWidth / 2, svgHeight / 2]);
             let path = d3.geoPath().projection(projection);
 
-            let zoom = d3
-                .zoom()
-                .scaleExtent([1, 10])
-                .on("zoom", (event) => {
-                    svgGroup.attr("transform", event.transform);
-                });
+            let zoomMap = d3.zoom()
+            .scaleExtent([1, 10])
+            .on("zoom", (e) =>
+                svgGroup.attr("transform", e.transform));
 
             let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
             svgGroup = svgMap.append("g");
+
+            let geoJson = topojson.feature(data, data.objects.countries).features;
+
+            geoJson.forEach(d => {
+                if (isBadCountry(d.properties))
+                    return;
+
+                d.properties.props['C'] = projection(d3.geoCentroid(d))
+            });
+
             svgGroup
                 .selectAll("path")
-                .data(topojson.feature(data, data.objects.countries).features)
+                .data(geoJson)
                 .enter()
                 .append("path")
                 .attr("d", path)
                 .attr("class", "countries")
-                .attr("id", (d) => d.id)
-                .attr("fill", (d) => {
-                    let chars = d.id.split("");
-                    return colors(d3.sum(chars, (c) => c.charCodeAt(c)));
+                .attr("id", d => d.id)
+                .attr("fill", d => {
+                    // TODO: Change the fill attribute following
+                    // the color scale on the current metric
+                    return colors(d3.sum(d.id.split(""),
+                            (c) => c.charCodeAt(c)));
                 })
-                .on("click", (e, d) => {
-                    console.log(e);
-                    console.log(d);
+                .on("click", (_, d) => {
+                    if (isBadCountry(d.properties)) {
+                        console.log('Unknown country:', d.id);
+                        return;
+                    }
+                    
+                    $state.go('country', { countryName:
+                            slugify(d.properties.visName) });
                 })
-                .on("mouseover", (e, d) => {
-                    console.log(d);
+                .on("mouseover", function(_, d) {
+                    if (isBadCountry(d.properties)) {
+                        console.log('Unknown country:', d.id);
+                        return;
+                    }
+
+                    console.log('Hovering over:', d.properties.visName);
+
+                    // TODO: Extract the current metric value
+                    // solely for the hovered country.
+
+                    // TODO: Fill the bottom-center section with
+                    // relevant info on the hovered country.
+
+                    d3.select(this).transition()
+                        .duration(1).style('fill', '#800080')
+                })
+                .on('mouseout',  function(_, d) {
+                    if (isBadCountry(d.properties)) {
+                        console.log('Unknown country:', d.id);
+                        return;
+                    }
+
+                    // TODO: Fill the bottom-center section with
+                    // relevant info on the hovered country.
+
+                    d3.select(this).transition()
+                        .duration(1).style('fill',
+                                colors(d3.sum(d.id.split(''), (c) => c.charCodeAt(c))))
                 });
 
-            svgMap.call(zoom);
-            svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
+            // Centroids
+            const geoCentroids = svgGroup.selectAll('circle')
+                .data(geoJson.filter(d => !isBadCountry(d.properties)));
+
+            geoCentroids.enter().append('circle')
+                    .attr('cx', d => d.properties.props.C[0])
+                    .attr('cy', d => d.properties.props.C[1])
+                    .attr('r',  4)
+                .on('mouseover', function() {
+                    d3.select(this).transition()
+                        .duration(1).attr('r', 6)})
+                .on('mouseout',  function() {
+                    d3.select(this).transition()
+                        .duration(1).attr('r', 4)});
+
+            svgMap.call(zoomMap);
+            svgMap.call(zoomMap.transform,
+                    () => d3.zoomIdentity.scale(1));
         };
 
         dataService.loadWorldMap().then((data) => {

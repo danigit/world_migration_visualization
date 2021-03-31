@@ -19,4 +19,9 @@ class Country {
         this.flagPath    = IMAGE_COUNTIRES_FLAGS_FOLDER    + '/' + visName + '.svg';
         this.outlinePath = IMAGE_COUNTRIES_OUTLINES_FOLDER + '/' + visName + '.svg';
     }
+
+    isEqual(other) {
+        return (other instanceof Country)
+            ? this.name === other.name : false;
+    }
 }
