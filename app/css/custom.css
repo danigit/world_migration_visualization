@@ -113,6 +113,10 @@ DISPLAY
     width: 70%;
 }
 
+.width-40 {
+    width: 40%;
+}
+
 .width-30 {
     width: 30%;
 }
@@ -127,6 +131,10 @@ DISPLAY
 
 .width-340-px {
     width: 340px !important;
+}
+
+.width-250-px {
+    width: 250px;
 }
 
 .width-200-px {
@@ -151,6 +159,10 @@ DISPLAY
 
 .height-300-px {
     height: 300px;
+}
+
+.height-250-px {
+    height: 250px;
 }
 
 .height-200-px {
@@ -320,6 +332,10 @@ MARGINS
     margin-left: 25px !important;
 }
 
+.margin-left-40-px {
+    margin-left: 40px !important;
+}
+
 .margin-left-50-px {
     margin-left: 50px !important;
 }
@@ -393,6 +409,10 @@ COLOR
 
 .color-orange {
     color: #ff9316 !important;
+}
+
+.color-violet {
+    color: #8338ec;
 }
 
 .color-green {

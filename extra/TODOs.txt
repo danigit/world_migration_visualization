@@ -8,7 +8,7 @@ Please note: Fix display resolution to 1080p!
 - Clarify magnitude filter functionality
 - Implement Top 5 inward/outward carousel
 - Add a 'How to read' section in the bottom-left blank space
-- Implement vertical bar to control current visualization 
+- Implement vertical bar to control current visualization
 
 ## World page
 
@@ -54,8 +54,8 @@ Please note: Fix display resolution to 1080p!
 -- Suitable idioms with migratory patterns comparison
 
 - Highlight the central block with green/red colors on whose the better country
-- Add relevant timespan (1995-2019) label in the center of the page
-- Push selectors to the sides closer to country flags
+-- Add relevant timespan (1995-2019) label in the center of the page
+-- Push selectors to the sides closer to country flags
 
 - Textual snippets for specific age ranges nearby country flags:
     + Enfants, 0-4;
