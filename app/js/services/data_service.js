@@ -973,23 +973,17 @@
                     return values[0].map((yearData, idx) => {
                         return {
                             year:yearData.year,
-                            statistics: [
-                                {
-                                    world_avg_tot_migr:values[0][idx].world_avg_tot_migr
-                                },
-                                {
-                                    world_avg_tot_population:values[1][idx].world_avg_tot_population
-                                },
-                                {
-                                    world_avg_migr_perc_tot_population:values[2][idx].world_avg_migr_perc_tot_population
-                                },
-                                {
-                                    world_avg_age_migr:values[3][idx].world_avg_age_migr
-                                },
-                                {
-                                    world_avg_perc_estimated_refugees:values[4][idx].world_avg_perc_estimated_refugees
-                                }
-                            ]
+                            statistics: {
+                                world_avg_tot_migr:values[0][idx].world_avg_tot_migr
+                                ,
+                                world_avg_tot_population:values[1][idx].world_avg_tot_population
+                                ,
+                                world_avg_migr_perc_tot_population:values[2][idx].world_avg_migr_perc_tot_population
+                                ,
+                                world_avg_age_migr:values[3][idx].world_avg_age_migr
+                                ,
+                                world_avg_perc_estimated_refugees:values[4][idx].world_avg_perc_estimated_refugees
+                            }
                         }
                     });
                 });
