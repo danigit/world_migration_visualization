@@ -19,6 +19,7 @@
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
         
+
         $scope.$watch('countriesData', function(_new, _old) {
             if(_new !==_old) {
                 dataService.loadWorldMap()
@@ -34,6 +35,7 @@
         $scope.globalStatistics = {
         };
 
+        let selectedYear = 1990;
         let barChartSvgElement;
         let svgGroup;
         let colors = d3.scaleOrdinal(d3.schemeBlues[7]);
@@ -216,7 +218,7 @@
         let handleEnter = (enter, svgElement) => {
             enter
                 .append("rect")
-                .style("fill", (d, i) => colors(i))
+                .attr("fill", (d, i) => colors(d.label))
                 .attr("x", (d) => svgElement.x(d.label))
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.x.bandwidth())
@@ -225,7 +227,27 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
-        };
+
+            enter.selectAll("rect")
+                .on("click", function(e, d) {
+                    if (selectedYear!==-1) {
+                        d3.select("#global-statistics").selectAll("g rect.selected")
+                            .classed("selected", false)
+                            .transition()
+                            .duration(100) 
+                            .attr("fill", (datum, i) => {
+                                return colors(datum.label);
+                            });
+                    }
+                    selectedYear=d.label;
+                    d3.select(this)
+                        .classed("selected", true)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", "#ff9316");
+                    // updateMap();
+                });
+            };
 
         let handleLabelsEnter = (enter, svgElement) => {
             enter
@@ -260,6 +282,7 @@
                 (d) => d.val
             );
             let y = svgElement.y.domain([0, maxY]);
+
             svgElement.svgElement
                 .select("g.grid-lines.y-axis")
                 .transition()
@@ -270,7 +293,28 @@
                 .transition()
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
+                .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
+                .attr("fill", (d, i) => colors(d.label));
+            
+            update.selectAll("rect")
+                .on("click", function(e, d) {
+                    if (selectedYear!==-1) {
+                        d3.select("#global-statistics").selectAll("g rect.selected")
+                            .classed("selected", false)
+                            .transition()
+                            .duration(100) 
+                            .attr("fill", (datum, i) => {
+                                return colors(datum.label);
+                            });
+                    }
+                    selectedYear=d.label;
+                    d3.select(this)
+                        .classed("selected", true)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", "#ff9316");
+                    // updateMap();
+                });
         };
 
         let drawBarChart = (data, svgElement) => {
