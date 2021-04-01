@@ -74,3 +74,39 @@ const capitalize = (text) => {
     return text.charAt(0)
         .toUpperCase() + text.slice(1);
 }
+
+const map = (obj, callable) => {
+    return Object.fromEntries(
+        d3.map(obj, r => [r[0], callable(r[1])]));
+}
+
+/**
+* Check whether two arrays are equal sets.
+
+* @param {array} a    The first array.
+* @param {array} b    The second array.
+*/
+const equals = (a, b) => {
+    if (Array.isArray(a) && Array.isArray(b)
+        && a.length == b.length) {
+        a = a.concat().sort()
+        b = b.concat().sort()
+
+        return a.reduce((acc, e, i) =>
+                acc && e === b[i], true)
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Wrapper of `d3.scaleLog` to produce a logarithmic scale from a (min, max) domain.
+ * 
+ * @param {array} data   The original linear data.
+ * @param {array} range  The range on which to project the logarithmic domain.
+ */
+let d3_scaleLogMinMax = (data, range) => {
+    const data_minMax = [d3.min(data), d3.max(data)];
+
+    return d3.scaleLog(data_minMax, range);
+};
