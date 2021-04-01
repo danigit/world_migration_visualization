@@ -22,7 +22,7 @@
                     return data;
                 })
                 .catch((error) => {
-                    alert("Could not load dataset..." + "\nCheck the console for more details!");
+                    // alert("Could not load dataset..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
@@ -34,19 +34,19 @@
                     return data;
                 })
                 .catch((error) => {
-                    alert("Could not load file..." + "\nCheck the console for more details!");
+                    // alert("Could not load file..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
         };
 
-        data_service.loadDsv = (filePath, delimiter=';') => {
+        data_service.loadDsv = (filePath, delimiter = ";") => {
             return d3
                 .dsv(delimiter, filePath, (data) => {
                     return data;
                 })
                 .catch((error) => {
-                    alert("Could not load file..." + "\nCheck the console for more details!");
+                    // alert("Could not load file..." + "\nCheck the console for more details!");
 
                     console.log(error);
                 });
@@ -102,25 +102,26 @@
         };
 
         data_service.loadWorldMap = () => {
-            return data_service.countries.then(countries => {
-                return data_service.loadJson(WORLD_MAP)
-                    .then((map) => addCountriesToMap(countries, map))
+            return data_service.countries.then((countries) => {
+                return data_service.loadJson(WORLD_MAP).then((map) => {
+                    let countriesMap = addCountriesToMap(countries, map);
+                    return topojson.feature(countriesMap,
+                            countriesMap.objects.countries).features;
+                });
             });
-        }
+        };
 
         /**
          * Add Country instances to the TopoJSON map
          */
-         let addCountriesToMap = (countries, map) => {
-            Object.values(map.objects.countries.geometries)
-                .forEach((geoElem) => {
-                    // Find corresponding geometry
-                    const country = countries.find(c =>
-                            c.props['isoAlpha3'] === geoElem.id);
+        let addCountriesToMap = (countries, map) => {
+            Object.values(map.objects.countries.geometries).forEach((geoElem) => {
+                // Find corresponding geometry
+                const country = countries.find((c) => c.props["isoAlpha3"] === geoElem.id);
 
-                    geoElem['properties'] = country ?? null;
+                geoElem["properties"] = country ?? null;
             });
-            
+
             return map;
         };
 
@@ -167,85 +168,81 @@
                 else return country;
             };
 
-            return data_service.loadDsv(COUNTRY_CODES_ALPHA_3)
-                .then((countryCodes) => {
-                    return data_service.worldCountriesHierarchy.then((data) => {
-                        let countries = [];
-        
-                        const geoRegions = data["WORLD"]["Geographic regions"];
-                        const geoRegions_lc = geoRegions.map((region) => region.toLowerCase());
-        
-                        for (const key in data) {
-                            if (key === "WORLD") continue;
-        
-                            let regionId = geoRegions_lc.indexOf(key.toLowerCase());
-        
-                            if (regionId !== -1) {
-                                const continent = geoRegions[regionId];
-        
+            return data_service.loadDsv(COUNTRY_CODES_ALPHA_3).then((countryCodes) => {
+                return data_service.worldCountriesHierarchy.then((data) => {
+                    let countries = [];
+
+                    const geoRegions = data["WORLD"]["Geographic regions"];
+                    const geoRegions_lc = geoRegions.map((region) => region.toLowerCase());
+
+                    for (const key in data) {
+                        if (key === "WORLD") continue;
+
+                        let regionId = geoRegions_lc.indexOf(key.toLowerCase());
+
+                        if (regionId !== -1) {
+                            const continent = geoRegions[regionId];
+
+                            for (const region in data[key]) {
+                                data[key][region].forEach((country) => {
+                                    countries.push(new Country(country, continent, region, getVisName(country)));
+                                });
+                            }
+                        } else {
+                            if (key.startsWith("EUROPE")) {
+                                for (const i in data[key]) {
+                                    if (i === "EUROPE") {
+                                        const continent = "Europe";
+
+                                        for (const region in data[key][i]) {
+                                            data[key][i][region].forEach((country) =>
+                                                countries.push(new Country(country, continent, continent, getVisName(country)))
+                                            );
+                                        }
+                                    } else {
+                                        const continent = "Northern America";
+
+                                        data[key][i].forEach((country) =>
+                                            countries.push(new Country(country, continent, continent, getVisName(country)))
+                                        );
+                                    }
+                                }
+                            } else {
                                 for (const region in data[key]) {
+                                    const continent = geoRegions.find((v) => region.includes(v));
+
                                     data[key][region].forEach((country) => {
                                         countries.push(new Country(country, continent, region, getVisName(country)));
                                     });
                                 }
-                            } else {
-                                if (key.startsWith("EUROPE")) {
-                                    for (const i in data[key]) {
-                                        if (i === "EUROPE") {
-                                            const continent = "Europe";
-        
-                                            for (const region in data[key][i]) {
-                                                data[key][i][region].forEach((country) =>
-                                                    countries.push(new Country(country, continent, continent, getVisName(country)))
-                                                );
-                                            }
-                                        } else {
-                                            const continent = "Northern America";
-        
-                                            data[key][i].forEach((country) =>
-                                                countries.push(new Country(country, continent, continent, getVisName(country)))
-                                            );
-                                        }
-                                    }
-                                } else {
-                                    for (const region in data[key]) {
-                                        const continent = geoRegions.find((v) => region.includes(v));
-        
-                                        data[key][region].forEach((country) => {
-                                            countries.push(new Country(country, continent,
-                                                    region, getVisName(country)));
-                                        });
-                                    }
-                                }
                             }
                         }
+                    }
 
-                        // Add ISO country codes to countries properties
-                        // to later match them with TopoJSON
-                        countries.forEach(c => {
-                            let row = countryCodes.find(cc =>
-                                    c.name == cc.name);
+                    // Add ISO country codes to countries properties
+                    // to later match them with TopoJSON
+                    countries.forEach((c) => {
+                        let row = countryCodes.find((cc) => c.name == cc.name);
 
-                            if (row == undefined) {
-                                console.log("Undefined ISO Alpha-3 code: ", c.name);
-                            } else {
-                                c.props['isoAlpha3'] = row.code;
-                            }
-                        });
-
-                        // Remove the Channel Islands as
-                        // they are not integrated in the TopoJSON
-                        countries = countries.filter(c =>
-                                c.name !== 'Channel Islands');
-
-                        return countries.sort((a, b) =>
-                                (a.visName > b.visName ? 1 : -1));
+                        if (row == undefined) {
+                            console.log("Undefined ISO Alpha-3 code: ", c.name);
+                        } else {
+                            c.props["isoAlpha3"] = row.code;
+                        }
                     });
-                });  
+
+                    // Remove the Channel Islands as
+                    // they are not integrated in the TopoJSON
+                    countries = countries.filter((c) => c.name !== "Channel Islands");
+
+                    return countries.sort((a, b) => (a.visName > b.visName ? 1 : -1));
+                });
+            });
         };
 
-        data_service.countries = data_service.loadJson(world_countries_vis_name)
-            .then((data) => { return getCountries(data); });
+        data_service.countries = data_service.loadJson(world_countries_vis_name).then((data) => {
+            return getCountries(data);
+        });
 
         data_service.continents = ["Africa", "Asia", "Europe", "Latin America and the Caribbean", "Northern America", "Oceania"];
 
@@ -855,23 +852,92 @@
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 
+        let getCountries_totMigrByOriginDest = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_totPopulationByAgeSex = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_migrAsPercOfPopulationAgeSex = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_totMigrByAgeSex = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        let getCountries_estimatedRefugees = (countries) => {
+            return data_service.totMigrByOriginDest
+                .then(data => data_service.filterColumn(
+                        data_service.filterDataMulti(data,
+                                countries.map(c => c.name), 1990, 2019),
+                        ['Year', 'Destination', 'Total'])
+            );
+        };
+
+        data_service.getCountriesStatistics = (metric) => {
+            return data_service.countries.then(countries => {
+                switch (metric) {
+                    case 'total_immigration':
+                        return getCountries_totMigrByOriginDest(countries);
+    
+                    case 'total_population':
+                        return getCountries_totPopulationByAgeSex(countries);
+    
+                    case 'immigration_vs_population':
+                        return getCountries_migrAsPercOfPopulationAgeSex(countries);
+    
+                    case 'immigrants_avg_age':
+                        return getCountries_totMigrByAgeSex(countries);
+    
+                    case 'refugees_vs_immigrants':
+                        return getCountries_estimatedRefugees(countries);
+    
+                    default:
+                        throw `Invalid statistics metric: ${metric}`;
+                }
+            });
+        };
 
         data_service.getWorldStatistics = () => {
+            return data_service.countries.then((countries) => {
 
-            return data_service.countries.then(countries => { 
-                
-                let avgTotalMigrantsGroupByYear = data_service.totMigrByOriginDest.then(data => {
+                let numCountries = countries.length;
 
-                    data = data.filter(countryData => countryData.Destination==="WORLD");
+                let totalMigrantsGroupByYear = data_service.totMigrByOriginDest.then((data) => {
+                    data = data.filter((countryData) => countryData.Destination === "WORLD");
 
                     let groupedByYear = data.map(worldData => ({year:+worldData.Year, total_immigration:+worldData.Total}));
 
                     return groupedByYear;
                 });
 
-                let avgTotalPopulationGroupByYear = data_service.totPopulationByAgeSex.then(data => {
+                let totalPopulationGroupByYear = data_service.totPopulationByAgeSex.then((data) => {
 
-                    data = data.filter(countryData => countryData.Destination==="WORLD");
+                    data = data.filter((countryData) => countryData.Destination === "WORLD");
+
 
                     let groupedByYear = data.map(worldData => (
                         {
@@ -883,8 +949,7 @@
                     return groupedByYear;
                 });
 
-
-                let avgMigrPercTotalPopulationGroupByYear = data_service.migrAsPercOfPopulationAgeSex.then(data => {
+                let migrPercTotalPopulationGroupByYear = data_service.migrAsPercOfPopulationAgeSex.then((data) => {
 
                     data = data.filter(countryData => countryData.Destination==="WORLD");
                     
@@ -898,9 +963,8 @@
                     return groupedByYear;
                 });
 
-                let avgAgeMigrantsGroupByYear = data_service.totMigrByAgeSex.then(data => {
-
-                    data = data.filter(countryData => countryData.Destination==="WORLD");
+                let avgAgeMigrantsGroupByYear = data_service.totMigrByAgeSex.then((data) => {
+                    data = data.filter((countryData) => countryData.Destination === "WORLD");
 
                     let selectedGender = "_(mf)";
 
@@ -914,10 +978,10 @@
                         let colElem = col.split("_")[0];
                         let ages = colElem.split("-");
                         if (col == "75+" + selectedGender) return { key: col, value: 77 };
-                        return { key: col, value: (+ages[0] + +ages[1]) / 2 }; 
+                        return { key: col, value: (+ages[0] + +ages[1]) / 2 };
                     });
 
-                    let groupedByYear = data.map(worldData => {
+                    let groupedByYear = data.map((worldData) => {
                         let yearsSum = 0;
                         columns.forEach((col) => {
                                 yearsSum += col.value * (+worldData[col.key]); 
@@ -932,10 +996,9 @@
 
                     return groupedByYear;
                 });
-                
-                let avgPercEstimatedRefugeesGroupByYear = data_service.estimatedRefugees.then(data => {
 
-                    data = data.filter(countryData => countryData.Destination==="WORLD");
+                let percEstimatedRefugeesGroupByYear = data_service.estimatedRefugees.then((data) => {
+                    data = data.filter((countryData) => countryData.Destination === "WORLD");
 
                     let selectedGender = "pct_(mf)";
 
@@ -947,22 +1010,21 @@
                         }
                     });
 
-                    columns.forEach(col => {
+                    columns.forEach((col) => {
                         let groupedObject = {};
                         groupedObject.refugees_vs_immigrants = (+data[0][col]);
                         groupedObject.year = +col.split("_")[0];
                         groupedByYear.push(groupedObject);
-                        }
-                    );
+                    });
                     return groupedByYear;
                 });
 
                 let promisedResultsList = [
-                    avgTotalMigrantsGroupByYear,
-                    avgTotalPopulationGroupByYear,
-                    avgMigrPercTotalPopulationGroupByYear,
+                    totalMigrantsGroupByYear,
+                    totalPopulationGroupByYear,
+                    migrPercTotalPopulationGroupByYear,
                     avgAgeMigrantsGroupByYear,
-                    avgPercEstimatedRefugeesGroupByYear
+                    percEstimatedRefugeesGroupByYear,
                 ];
 
                 return Promise.all(promisedResultsList).then(values => {
@@ -981,9 +1043,10 @@
                                 refugees_vs_immigrants:values[4][idx].refugees_vs_immigrants
                             }
                         }
-                    });
+                    })
                 });
-            });
+            });  
         };
-    }
-})();
+    };
+})
+();

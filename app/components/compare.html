@@ -10,29 +10,32 @@
         <div layout="column">
             <div layout="row" class="width-100">
                 <div class="width-25" layout="column">
-                    <div class="float-left margin-left-20px margin-top-20-px">
-                        <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
-                            class="height-250-px width-250-px">
-                        <div class="color-white margin-top-20-px font-size-x-large text-center">
-                            {{selectedCountry.left.visName}}</div>
-                        <div
-                            class="color-white border-radius-10px background-darkgray width-80 margin-auto font-size-small text-center padding-10-px margin-top-10-px">
-                            <div layout="column" class="width-100">
-                                <div layout="row" class="width-100">
-                                    <div class="width-45-px text-right">Send</div>
-                                    <div class="color-green width-80-px">
-                                        {{leftSendToRight}}</div>
-                                    <div class="width-30-px text-left margin-right-20-px">to</div>
-                                    <div class="color-darkcyan">
-                                        {{selectedCountry.right.visName}}</div>
-                                </div>
-                                <div layout="row">
-                                    <div class="width-45-px">Receive</div>
-                                    <div class="color-red width-80-px">
-                                        {{rightSendToLeft}}</div>
-                                    <div class="width-30-px text-left margin-right-20-px">from</div>
-                                    <div class="color-darkcyan">
-                                        {{selectedCountry.right.visName}}</div>
+
+                    <div class="width-100">
+                        <div class="float-left margin-left-20px margin-top-20-px">
+                            <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
+                                class="display-block margin-lr-auto box-shadow-dark-gray border-radius-10px height-200-px width-200-px">
+                            <div class="color-white margin-top-20-px font-size-x-large text-center">
+                                {{selectedCountry.left.visName}}</div>
+                            <div
+                                class="color-white border-radius-10px background-darkgray width-80 margin-lr-auto font-size-small text-center padding-10-px margin-top-10-px">
+                                <div layout="column" class="width-100">
+                                    <div layout="row" class="width-100">
+                                        <div class="width-45-px text-right">Send</div>
+                                        <div class="color-green width-80-px">
+                                            {{leftSendToRight}}</div>
+                                        <div class="width-30-px text-left margin-right-20-px">to</div>
+                                        <div class="color-darkcyan">
+                                            {{selectedCountry.right.visName}}</div>
+                                    </div>
+                                    <div layout="row">
+                                        <div class="width-45-px">Receive</div>
+                                        <div class="color-red width-80-px">
+                                            {{rightSendToLeft}}</div>
+                                        <div class="width-30-px text-left margin-right-20-px">from</div>
+                                        <div class="color-darkcyan">
+                                            {{selectedCountry.right.visName}}</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -85,7 +88,7 @@
                             </md-input-container>
                         </div>
                     </div>
-                    <div class="width-50 margin-lr-auto margin-top-40-px height-5">
+                    <div class="width-50 margin-lr-auto margin-top-10-px height-5">
                         <radio-button-group selected-button="genreFilterValue"
                             handle-button="handleGenreClick(buttonValue) " ng-model="genreFilterValue"
                             buttons="genreButtons" radio-buttons-class="'md-button border-1'">
@@ -248,10 +251,9 @@
                 <!-- <div class="vertical-line height-95 margin-top-20-px"></div> -->
                 <div layout="column" class="width-25">
                     <div class="width-100">
-
                         <div class="float-right margin-top-20-px margin-right-50-px">
                             <img src="../../app/img/countries/outlines/{{selectedCountry.right.visName}}.svg"
-                                class="height-250-px width-250-px">
+                                class="display-block margin-lr-auto box-shadow-dark-gray border-radius-10px height-200-px width-200-px">
                             <div class="color-white margin-top-20-px font-size-x-large text-center">
                                 {{selectedCountry.right.visName}}</div>
                             <div
@@ -283,7 +285,7 @@
         <div class="width-100 margin-lr-auto"">
             <div
                 class=" color-white display-inline-block margin-left-40-px border-radius-10px background-darkgray
-            margin-left-20 width-40 font-size-small text-center padding-10-px margin-top-10-px">
+            margin-left-20 width-30 font-size-small text-center padding-10-px margin-top-10-px">
             <div layout="column">
                 <div layout="row"><span class="color-green">Children &ensp;</span> migration is <span
                         class="color-darkcyan">&ensp;{{childLeftStatistics
@@ -305,7 +307,7 @@
             </div>
         </div>
         <div
-            class="color-white display-inline-block float-right margin-right-40-px border-radius-10px background-darkgray width-40 font-size-small text-center padding-10-px margin-top-10-px">
+            class="color-white display-inline-block float-right margin-right-40-px border-radius-10px background-darkgray width-30 font-size-small text-center padding-10-px margin-top-10-px">
             <div layout="column">
                 <div layout="row"><span class="color-green">Children &ensp;</span> migration is <span
                         class="color-darkcyan">&ensp;{{childRightStatistics
@@ -329,9 +331,10 @@
         </div>
     </div>
     <div layout="row">
-        <div layout="column" class="width-50 height-100">
-            <div class="margin-lr-40-px margin-top-100-px height-100">
-                <div class="color-orange padding-10-px">Common Migration Regions</div>
+        <div layout="column" class="width-33 height-100">
+            <div class="margin-lr-40-px margin-top-40-px height-100">
+                <div class="color-orange padding-10-px">Common Migration Regions - <span
+                        class="color-white background-gray padding-5-px border-radius-5-px">Outward</span></div>
                 <div id="common-migration">
                 </div>
                 <div class="color-white margin-top-10-px font-size-small" layout="row">
@@ -342,9 +345,10 @@
             </div>
         </div>
 
-        <div layout="column" class="width-50 height-100">
-            <div class="margin-lr-40-px margin-top-100-px height-100">
-                <div class="color-orange padding-10-px">Annual Rate of Change</div>
+        <div layout="column" class="width-33 height-100">
+            <div class="margin-lr-40-px margin-top-40-px height-100">
+                <div class="color-orange padding-10-px">Trend comparison - <span
+                        class="color-white background-gray padding-5-px border-radius-5-px">Inward</span></div>
                 <div id="change-rate-container" class="height-100"></div>
             </div>
         </div>

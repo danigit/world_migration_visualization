@@ -16,40 +16,36 @@
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
 
-        this.uiOnParamsChanged = (newParams) =>
-                fetchData(newParams.countryName);
+        this.uiOnParamsChanged = (newParams) => fetchData(newParams.countryName);
 
         let fetchData = (countryName) => {
             if (countryName === null) {
                 dataService.selectedCountryController = "";
             } else {
-                let selectedCountry = $scope.countries.find((c) =>
-                    slugify(countryName) === slugify(c.visName));
+                let selectedCountry = $scope.countries.find((c) => slugify(countryName) === slugify(c.visName));
 
                 if (selectedCountry) {
                     dataService.selectedCountryController = selectedCountry;
                 } else {
-                    console.log('Invalid country name:',
-                            capitalize(countryName));
+                    console.log("Invalid country name:", capitalize(countryName));
 
                     $state.go($state.current, { countryName: null });
                 }
             }
 
             // Update the statistics
-            $scope.selectedCountryController = dataService.selectedCountryController == ""
-                ? $scope.countries[0]
-                : dataService.selectedCountryController;
+            $scope.selectedCountryController =
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
 
             $scope.updateStatistics();
-        }
+        };
 
         $scope.updateView = () => {
             const _countryName = $scope.selectedCountryController.visName;
             $state.go($state.current, { countryName: slugify(_countryName) });
         };
 
-        let margin = {top:40, bottom:30, left:30, right:30};
+        let margin = { top: 40, bottom: 30, left: 30, right: 30 };
         $scope.sendReceiveTopCountries = "";
         dataService.countries.then((data) => {
             $scope.countries = data;
@@ -59,26 +55,24 @@
             if (countryName === null) {
                 dataService.selectedCountryController = "";
             } else {
-                let selectedCountry = data.find((c) =>
-                    slugify(countryName) === slugify(c.visName));
+                let selectedCountry = data.find((c) => slugify(countryName) === slugify(c.visName));
 
                 if (selectedCountry) {
                     dataService.selectedCountryController = selectedCountry;
                 } else {
-                    console.log('Invalid country name:',
-                            capitalize(countryName));
+                    console.log("Invalid country name:", capitalize(countryName));
 
                     $state.go($state.current, { countryName: null });
                 }
             }
 
-            $scope.selectedCountryController = dataService.selectedCountryController == ""
-                ? $scope.countries[0]
-                : dataService.selectedCountryController;
+            $scope.selectedCountryController =
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
 
             $scope.genreFilterValue = "menu-all";
-            
-            lineChartStructure = initializeLineChart("roc-linechart-container",margin,"roc-linechart-country")
+
+            lineChartStructure = initializeLineChart("roc-linechart-container", margin, "roc-linechart-country");
+            $scope.updateStatistics();
             developmentStructure = createPieStructure("development-piechart", "development");
             incomeStructure = createPieStructure("income-piechart", "income");
 
@@ -167,27 +161,27 @@
             dataService
                 .getGlobalRankStatistics($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
+                    $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_tot_migrants_global_rank, true);
 
-                    let avgEstRefGlobalRank = "";
-                    if (isNaN(data.average_est_refugees_global_rank)) {
-                        avgEstRefGlobalRank = "Not available";
-                    } else {
-                        avgEstRefGlobalRank = "" + transformNumberFormat(data.average_est_refugees_global_rank, true);
-                    }
+                    $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank = isNaN(data.average_tot_population_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_tot_population_global_rank, true);
 
-                    $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank =
-                        "" + transformNumberFormat(data.average_tot_migrants_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank = isNaN(
+                        data.average_perc_immigration_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_perc_immigration_global_rank, true);
 
-                    $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank =
-                        "" + transformNumberFormat(data.average_tot_population_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank = isNaN(data.average_age_migrants_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_age_migrants_global_rank, true);
 
-                    $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank =
-                        "" + transformNumberFormat(data.average_perc_immigration_global_rank, true);
-
-                    $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank =
-                        "" + transformNumberFormat(data.average_age_migrants_global_rank, true);
-
-                    $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+                    $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = isNaN(data.average_est_refugees_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_est_refugees_global_rank, true);
 
                     $scope.$apply();
                 });
@@ -201,7 +195,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.totalPopulation = "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.totalPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
@@ -214,7 +208,9 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.immigrationVsPopulation = "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.immigrationVsPopulation = isNaN(data)
+                        ? "N. A."
+                        : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
@@ -227,7 +223,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.immigrationAverageAge = "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.immigrationAverageAge = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                 });
 
             // getting the estimated refugees
@@ -238,11 +234,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
                 )
                 .then((data) => {
-                    if (isNaN(data)) {
-                        $scope.countryStatisticsValues.refugeeVsImmigration = "Not available";
-                    } else {
-                        $scope.countryStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
-                    }
+                    $scope.countryStatisticsValues.refugeeVsImmigration = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
@@ -257,7 +249,6 @@
                 .then((data) => {
                     drawPieChart(data, incomeStructure, "income");
                 });
-
 
             const getDummyData = new Promise((resolve, _) => {
                 const dummyData = [
@@ -294,22 +285,28 @@
 
                     $scope.$apply();
                 });
-            
+
             dataService
                 .getRateOfChange($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
                     let xLabels = Object.keys(data);
                     const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
-                    xLabels = xLabels.map(label => label.replace(reg, ''));
-                    let yValues = Object.values(data).map(value => +value);
-                    data = xLabels.map((elem, idx) => ({label:elem, value:yValues[idx]}))
-                    dataService.getGlobalMinMaxRateOfChange()
-                        .then(minMax => {
-                            drawLineChart(data, "roc-linechart-country", minMax.MinRateOfChange, 
-                                minMax.MaxRateOfChange, margin, lineChartStructure.width, lineChartStructure.height);
-                        });
+                    xLabels = xLabels.map((label) => label.replace(reg, ""));
+                    let yValues = Object.values(data).map((value) => +value);
+                    data = xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
+                    dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
+                        drawLineChart(
+                            data,
+                            "roc-linechart-country",
+                            minMax.MinRateOfChange,
+                            minMax.MaxRateOfChange,
+                            margin,
+                            lineChartStructure.width,
+                            lineChartStructure.height
+                        );
+                    });
                 });
-            };
+        };
 
         /**
          * Function that updates the pieChart values for the enter set
@@ -331,14 +328,13 @@
 
         /**
          * Function that initialize the svg containing the rate of change lineChart for the selected country
-         * @param {string} container 
+         * @param {string} container
          * @param {object} margin
          * @param {string} lineChartId
          * @returns
          */
 
-         let initializeLineChart = (container, margin, lineChartId) => {
-            
+        let initializeLineChart = (container, margin, lineChartId) => {
             let rateOfChangeLineChartContainer = d3.select("#" + container);
             rateOfChangeLineChartContainer.html("");
 
@@ -346,40 +342,39 @@
             let width = rateOfChangeLineChartContainerDim.width - margin.left - margin.right;
             let height = rateOfChangeLineChartContainerDim.height - margin.top - margin.bottom;
 
-            let svg =  rateOfChangeLineChartContainer
+            let svg = rateOfChangeLineChartContainer
                 .append("svg")
-                .attr("width", width + 2*(margin.left + margin.right))
-                .attr("height", height + 2*(margin.top + margin.bottom))
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
                 .attr("id", lineChartId + "-svg");
-            
-            let lineChartStructure = svg.append("g")
-                .attr("id", lineChartId)
-                .attr("class", "country-linechart");
 
-            d3.select("#" + lineChartId + "-svg").append("g")
-                .attr("transform", "translate(0," + (height + margin.bottom/1.1)  + ")")
+            let lineChartStructure = svg.append("g").attr("id", lineChartId).attr("class", "country-linechart");
+
+            d3.select("#" + lineChartId + "-svg")
+                .append("g")
+                .attr("transform", "translate(0," + (height + margin.bottom / 1.1) + ")")
                 .attr("color", "white")
-                .style("font-size","12px")
+                .style("font-size", "12px")
                 .attr("id", lineChartId + "-xaxis")
                 .append("text")
                 .classed("legend", true)
                 .attr("transform", "translate(" + 410 + "," + 40 + ")")
                 .style("text-anchor", "end")
                 .text("Time Span");
-            
-            d3.select("#" + lineChartId + "-svg").append("g")
+
+            d3.select("#" + lineChartId + "-svg")
+                .append("g")
                 .attr("color", "white")
-                .attr("transform", "translate(" + (margin.left + margin.right) + "," + (margin.top/3) + ")")
-                .style("font-size","12px")
+                .attr("transform", "translate(" + (margin.left + margin.right) + "," + margin.top / 3 + ")")
+                .style("font-size", "12px")
                 .attr("id", lineChartId + "-yaxis")
                 .append("text")
                 .classed("legend", true)
-                .attr("transform", "rotate(-90) translate(" + -40 + "," + -35 +  ")")
+                .attr("transform", "rotate(-90) translate(" + -40 + "," + -35 + ")")
                 .style("text-anchor", "end")
                 .text("Rate Of Change, Migrant Stock");
 
-            return {"lineChartStructure": lineChartStructure, "width": width, "height": height};
-
+            return { lineChartStructure: lineChartStructure, width: width, height: height };
         };
 
         /**
@@ -398,13 +393,13 @@
             // .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
             svg.append("g")
                 .attr("class", type + "-slices")
-                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 50})`);
+                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
             svg.append("g")
                 .attr("class", type + "-labels")
-                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 50})`);
+                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
             arc = d3
                 .arc()
-                .outerRadius(radius - 70)
+                .outerRadius(radius - 50)
                 .innerRadius(0);
 
             return svg;
@@ -484,9 +479,9 @@
                 .attr("fill", (d, i) => colors(i))
                 .attr("class", type + "-legend-rect")
                 .attr("transform", (d, i) => {
-                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - 20 * (i + 1)})`;
+                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - i * 20})`;
                     else {
-                        return `translate(${svgWidth / 4 - 55}, ${svgHeight / 2 - 20 * (legendIndex++ + 1)})`;
+                        return `translate(0, ${svgHeight / 2 - legendIndex++ * 20})`;
                     }
                 });
 
@@ -507,9 +502,9 @@
                 .attr("class", "label-text")
                 .attr("transform", (d, i) => {
                     if (i < dataLength / 2) {
-                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - 20 * (i + 1)})`;
+                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - i * 20})`;
                     } else {
-                        return `translate(${svgWidth / 4 - 35}, ${svgHeight / 2 - 20 * (legendIndex++ + 1)})`;
+                        return `translate(15, ${svgHeight / 2 - legendIndex++ * 20})`;
                     }
                 })
                 .text((d) => d.data.type);
@@ -607,8 +602,8 @@
             }
             let centroid = arc.centroid(d);
             let midAngle = Math.atan2(centroid[1], centroid[0]);
-            let x = Math.cos(midAngle) * (radius - 55);
-            let y = Math.sin(midAngle) * (radius - 55);
+            let x = Math.cos(midAngle) * (radius - 35);
+            let y = Math.sin(midAngle) * (radius - 35);
 
             if (coord === "x") return x;
             if (coord === "y") return y;
@@ -645,6 +640,7 @@
         };
 
         let drawAgeStackedBarchart = (data, toExclude, containerId) => {
+            // TODO: Enter - update - exit pattern
             const containerElem = d3.select("#" + containerId);
             containerElem.html("");
 
@@ -818,17 +814,18 @@
                 .style("text-anchor", "start")
                 .text((_, i) => subgroups[i] + " years");
         };
- 
-        let drawLineChart = (data, lineChartId, globalMinY, globalMaxY, margin, lineChartWidth, lineChartHeight) => {
 
-            let xScale = d3.scalePoint()
-                .domain(data.map(rateOfChange => rateOfChange.label))
+        let drawLineChart = (data, lineChartId, globalMinY, globalMaxY, margin, lineChartWidth, lineChartHeight) => {
+            let xScale = d3
+                .scalePoint()
+                .domain(data.map((rateOfChange) => rateOfChange.label))
                 .range([margin.left + margin.right, lineChartWidth]);
 
-            let yScale = d3.scaleLinear()
+            let yScale = d3
+                .scaleLinear()
                 .domain([globalMinY, globalMaxY])
-                .range([lineChartHeight + margin.top/3, 0]);
-            
+                .range([lineChartHeight + margin.top / 3, 0]);
+
             let updateTransitionDuration = 1500;
             let enterTransitionDuration = 1500;
 
@@ -842,7 +839,8 @@
                 .duration(updateTransitionDuration)
                 .call(d3.axisLeft(yScale));
 
-            let lineGenerator = d3.line()
+            let lineGenerator = d3
+                .line()
                 .x(function (d) {
                     return xScale(d.label);
                 })
@@ -850,24 +848,31 @@
                     return yScale(d.value);
                 });
 
-            d3.select("#" + lineChartId).selectAll("path").data([data]).join(
-                (enter) => enter.append("path")
-                    .attr("class", "country-linechart-path")
-                    .call(enter => enter
-                        .transition()
-                        .duration(enterTransitionDuration)
-                        .attr("d",(d) => lineGenerator(d))),
+            d3.select("#" + lineChartId)
+                .selectAll("path")
+                .data([data])
+                .join(
+                    (enter) =>
+                        enter
+                            .append("path")
+                            .attr("class", "country-linechart-path")
+                            .call((enter) =>
+                                enter
+                                    .transition()
+                                    .duration(enterTransitionDuration)
+                                    .attr("d", (d) => lineGenerator(d))
+                            ),
                     //.call(enter => { return isChartDefined ? enter : lineInitialTransition(enter);}),
-                (update) => update
-                    .call(update => update
-                        .transition()
-                        .duration(updateTransitionDuration)
-                        .attr("d",(d) => lineGenerator(d))),
-                (exit) => exit.call(exit => exit
-                    .transition()
-                    .duration(updateTransitionDuration).remove())    
-            ); 
-        }
+                    (update) =>
+                        update.call((update) =>
+                            update
+                                .transition()
+                                .duration(updateTransitionDuration)
+                                .attr("d", (d) => lineGenerator(d))
+                        ),
+                    (exit) => exit.call((exit) => exit.transition().duration(updateTransitionDuration).remove())
+                );
+        };
 
         /**
          * Function that handles the click on the genre radio group filter in the menu

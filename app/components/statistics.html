@@ -10,6 +10,14 @@
     </div>
     <div layout="row" class="background-dark height-95">
         <div class="width-20">
+            <div layout="column">
+                <div class="color-white margin-top-15-px margin-left-20px">
+                    <div class="font-size-xx-large text-bold">2001 - 2010</div>
+                    <div class="font-large margin-top-10-px color-darkcyan">Total Immigration
+                    </div>
+                </div>
+                <hr class="menu-divider margin-left-20px">
+            </div>
             <div layout="column" class="color-white margin-top-20">
                 <div class="font-size-small text-bold padding-left-20px">
                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iusto aliquid excepturi unde veritatis
@@ -24,14 +32,7 @@
         </div>
         <div layout="column" class="width-80">
             <div class="height-80 position-relative">
-                <div layout="row">
-                    <div class="color-white margin-top-15-px margin-left-20px">
-                        <div class="font-size-xx-large text-bold">2001 - 2010</div>
-                        <div class="font-large margin-top-10-px color-darkcyan">Total Immigration
-                        </div>
-                    </div>
-                </div>
-                <div id="map" class="height-100 min-height-400-px max-height-700-px overflow-hidden">
+                <div id="map" class="height-100 min-height-400-px max-height-700-px margin-top-10-px overflow-hidden">
                 </div>
                 <div class="position-absolute bottom-0 margin-left-20px">
                     <md-input-container id="visualization-type-container">
@@ -44,16 +45,21 @@
                     </md-input-container>
                 </div>
             </div>
+            <hr class="menu-divider">
             <div layout="row" class="height-20">
                 <div class="width-70 height-100">
-                    <div layout="row" class="color-white margin-top-20-px margin-left-20px font-size-small">
-                        <div class="padding-lr-20-px text-justify">
-                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Esse, a accusamus? Voluptates
-                            recusandae at modi nemo voluptatibus obcaecati minus asperiores. Quia voluptate suscipit
-                            nostrum reprehenderit nihil provident qui consequuntur, doloremque modi necessitatibus
-                            numquam laborum at minus vero, corporis facere iure.
+                    <div layout="row" class="color-white font-size-small">
+                        <div class="padding-lr-20-px width-40">
+                            <div class="font-size-x-large color-darkcyan margin-bottom-20-px">
+                                <!-- change with the controller variable -->
+                                Italy
+                            </div>
+                            <div>
+                                <!-- change with the controller variable -->
+                                Description: 12000
+                            </div>
                         </div>
-                        <div class="padding-lr-20-px margin-right-20-px text-justify">
+                        <div class="padding-lr-20-px margin-right-20-px width-60 text-justify">
                             Lorem ipsum dolor sit amet, consectetur adipisicing elit. Blanditiis repudiandae quidem esse
                             ea illo labore assumenda laborum iste temporibus quasi, quos amet tempora veritatis ex culpa
                             cum voluptatibus accusamus, commodi quaerat? Voluptatibus quibusdam nihil nulla, consequatur
@@ -75,7 +81,7 @@
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
                 </div>
-                <div layout="column" id="top-flags-tooltip">
+                <div layout="column" id="top-flags-tooltip" class="display-none">
                     <div>{{selectedTopFlag}}</div>
                 </div>
             </div>

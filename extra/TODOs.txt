@@ -36,7 +36,7 @@ Please note: Fix display resolution to 1080p!
 
 -- Add descriptive labels to flags, idioms and country
 
-- Clearly separate inward from outward idioms
+-- Clearly separate inward from outward idioms
     + Inward idioms:
         * Annual rate of change line chart;
         * Immigration by age groups stacked barchart.
@@ -57,12 +57,12 @@ Please note: Fix display resolution to 1080p!
 -- Add relevant timespan (1995-2019) label in the center of the page
 -- Push selectors to the sides closer to country flags
 
-- Textual snippets for specific age ranges nearby country flags:
+-- Textual snippets for specific age ranges nearby country flags:
     + Enfants, 0-4;
     + Students and early workers, 19-34;
     + Mature adulthood, 35+.
 
-- Clearly indicate the inward/outward nature of the plots at the bottom:
+-- Clearly indicate the inward/outward nature of the plots at the bottom:
     + Inward idioms:
         * Annual rate of change line chart;
 
@@ -72,8 +72,8 @@ Please note: Fix display resolution to 1080p!
 ## FIXMEs
 
 - Collapsing timespan when closing nav menu in Map page
-- Show "Not available" template messages when data is NaN
-- Scale down the whole view to fit 1080p
+-- Show "Not available" template messages when data is NaN
+-- Scale down the whole view to fit 1080p
 - Steal metrics labels from Daniel's resources
-- Move year label to the left column in Country and World pages
-- Move year label in between the two country selectors in Compare page
+-- Move year label to the left column in Country and World pages
+-- Move year label in between the two country selectors in Compare page
