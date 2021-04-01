@@ -10,7 +10,6 @@
     statisticsController.$inject = ["$scope", "$state", "dataService"];
 
     function statisticsController($scope, $state, dataService) {
-        $scope.visualizationType = "";
         $scope.selectedTopCountryValue = "";
         $scope.secondaryMenuSelectedValue = "world";
         $scope.statisticsButtons = dataService.menuButtons;
@@ -21,16 +20,17 @@
         
         $scope.$watch('countriesData', function(_new, _old) {
             if(_new !==_old) {
-                let years = dataService.getActiveYears();
+                drawMap($scope.geoObject);
+            }
+        });
 
-                dataService.loadWorldMap()
-                    .then((data) => drawMap(data, _new, years));
+        $scope.$watch('activeYears', function(_new, _old) {
+            if(_new !==_old) {
+                drawMap($scope.geoObject, false);
             }
         });
 
         const BAD_COUNTRY_COLOR = '#ff5952';
-
-        let mapProjection;
         
         const colorScheme = d3.schemeBlues[9];
         let colorScale;
@@ -38,6 +38,10 @@
         $scope.globalStatisticsVisName = "Global statistics";
         $scope.selectedMetric = "total_immigration";
         $scope.barChartInitialized = false;
+
+        $scope.geoObject = null;
+        $scope.activeYears = dataService.getActiveYears();
+
         $scope.globalStatistics = {
         };
 
@@ -47,8 +51,7 @@
             return !props || !(props instanceof Country)
         };
 
-        let drawMap = (data, statistics, years) => {
-            // TODO: Enter - update - exit pattern
+        let initMap = (worldData) => {
             let mapContainer = d3.select("#map-container");
             mapContainer.html('');
 
@@ -58,7 +61,7 @@
             let svgPaddings = { top: 128, right: 0,
                     bottom: 0, left: 0 };
 
-            mapProjection = d3
+            let mapProjection = d3
                 .geoMercator()
                 .scale(170)
                 .translate([svgWidth/2, svgHeight/2
@@ -80,7 +83,7 @@
                 .on("zoom", (e) =>
                     svgMap.attr("transform", e.transform));
 
-            let geoJson = data;
+            let geoJson = worldData;
 
             geoJson.forEach(d => {
                 if (isBadCountry(d.properties))
@@ -89,85 +92,187 @@
                 d.properties.props['C'] = mapProjection(d3.geoCentroid(d))
             });
 
-            const statistics_groupByCountry = d3.group(statistics.filter(s =>
-                years.includes(+s.Year)), r => r.Destination);
+            svgMapContainer.call(zoomMap);
+            svgMapContainer.call(zoomMap.transform,
+                    () => d3.zoomIdentity.scale(1));
 
-            const statistics_avgByCountry = map(statistics_groupByCountry,
-                v => Math.round(v.reduce((sum, curr) => sum + +curr.Total, 0)/v.length));
+            return {
+                data: geoJson,
+                element: svgMap,
+                path: geoPath,
+                projection: mapProjection,
+            };
+        };
 
-            const statistics_avgValues = Object.values(statistics_avgByCountry);
+        let drawMap = (geoObject, _statChanged=true) => {
+            let getStatistics_avgByCountry = (activeYears, _reduceFunc) => {
+                let statistics_groupByCountry = d3.group(
+                    $scope.countriesData.filter(s =>
+                        activeYears.includes(+s.Year)),
+                    r => r.Destination);
 
-            colorScale = d3_scaleLogMinMax(statistics_avgValues,
-                    [colorScheme[0], colorScheme[8]]);
-                
-            svgMap
-                .selectAll("path")
-                .data(geoJson)
-                .enter()
-                .append("path")
-                .attr("d", geoPath)
-                .attr("class", "countries")
-                .attr("id", d => d.id)
-                .attr("fill", d => {
-                    if (isBadCountry(d.properties)) {
-                        return BAD_COUNTRY_COLOR;
-                    }
+                let statistics_avgByCountry = map(statistics_groupByCountry,
+                    v => v.reduce(_reduceFunc, 0)/v.length);
 
-                    const v = statistics_avgByCountry[d.properties.name]
+                return statistics_avgByCountry;
+            };
 
-                    // TODO: Change the fill attribute following
-                    // the color scale on the current metric
-                    return colorScale(v);
-                })
-                .on("click", (_, d) => {
-                    if (isBadCountry(d.properties)) {
-                        console.log('Unknown country:', d.id);
-                        return;
-                    }
+            let getReduceFunc = () => {
+                switch($scope.selectedMetric) {
+                    case 'total_immigration':
+                        return (sum, curr) => sum + +curr.Total;
                     
-                    $state.go('country', { countryName:
-                            slugify(d.properties.visName) });
-                })
-                .on("mouseover", function(_, d) {
-                    if (isBadCountry(d.properties)) {
-                        console.log('Unknown country:', d.id);
-                        return;
-                    }
+                    default:
+                }
+            }
 
-                    console.log('Hovering over:', d.properties.visName,
-                            '-', statistics_avgByCountry[d.properties.name]);
+            let _reduceFunc = getReduceFunc();
 
-                    // TODO: Extract the current metric value
-                    // solely for the hovered country.
+            const statistics_avgByCountry = getStatistics_avgByCountry(
+                    $scope.activeYears, _reduceFunc);
 
-                    // TODO: Fill the bottom-center section with
-                    // relevant info on the hovered country.
+            if (_statChanged) {
+                let statistics_avgValues = null;
 
-                    d3.select(this).transition()
-                        .duration(1).style('fill', '#800080')
-                })
-                .on('mouseout',  function(_, d) {
-                    if (isBadCountry(d.properties)) {
-                        console.log('Unknown country:', d.id);
-                        return;
-                    }
+                if (equals($scope.activeYears,
+                            dataService.getActiveYears())) {
+                    statistics_avgValues = Object.values(
+                            statistics_avgByCountry);
+                } else {
+                    let statistics_all_avgByCountry = getStatistics_avgByCountry(
+                        dataService.getActiveYears(), _reduceFunc);
 
-                    // TODO: Fill the bottom-center section with
-                    // a general template of insertion.
+                    statistics_avgValues = Object.values(
+                            statistics_all_avgByCountry);
+                }
 
-                    const v = statistics_avgByCountry[d.properties.name]
+                colorScale = d3_scaleLogMinMax(statistics_avgValues,
+                    [colorScheme[0], colorScheme[8]]);
+            }
 
-                    // TODO: Change the fill attribute following
-                    // the color scale on the current metric
+            // console.log(colorScale.range(), colorScale.domain());
 
-                    d3.select(this).transition()
-                        .duration(1).style('fill',
-                        colorScale(v));
-                });
+            let _handleMapEnter = (_enter, _path, _statistics) => {
+                _enter.append("path")
+                        .attr("d", _path)
+                        .attr("class", "countries")
+                        .attr("id", d => d.id)
+                        .attr("fill", d => {
+                            if (isBadCountry(d.properties)) {
+                                return BAD_COUNTRY_COLOR;
+                            }
 
+                            const v = _statistics[d.properties.name];
+
+                            if (isNaN(v)) {
+                                return BAD_COUNTRY_COLOR;
+                            }
+
+                            // TODO: Change the fill attribute following
+                            // the color scale on the current metric
+                            return colorScale(v);
+                        })
+                    .on("click", (_, d) => {
+                        if (isBadCountry(d.properties)) {
+                            console.log('Unknown country:', d.id);
+                            return;
+                        }
+                        
+                        $state.go('country', { countryName:
+                                slugify(d.properties.visName) });
+                    })
+                    .on("mouseover", function(_, d) {
+                        d3.select(this).transition()
+                            .duration(100).style('fill', '#800080')
+
+                        if (isBadCountry(d.properties)) {
+                            console.log('Unknown country:', d.id);
+                            return;
+                        }
+                        
+                        let v = _statistics[d.properties.name];
+
+                        if (isNaN(v)) {
+                            console.log('Data not available:', d.id);
+                            return;
+                        }
+
+                        console.log('Hovering over:',
+                            d.properties.visName, '-', v);
+
+                        // TODO: Extract the current metric value
+                        // solely for the hovered country.
+
+                        // TODO: Fill the bottom-center section with
+                        // relevant info on the hovered country.
+                    })
+                    .on('mouseout',  function(_, d) {
+                        let fillColor = null;
+
+                        if (isBadCountry(d.properties)) {
+                            fillColor = BAD_COUNTRY_COLOR;
+                        } else {
+                            // TODO: Fill the bottom-center section with
+                            // a general template of insertion.
+
+                            const v = _statistics[d.properties.name];
+
+                            if (isNaN(v)) {
+                                fillColor = BAD_COUNTRY_COLOR;
+                            } else {
+                                fillColor = colorScale(v);
+                            }
+                        }
+
+                        // TODO: Change the fill attribute following
+                        // the color scale on the current metric
+
+                        d3.select(this).transition()
+                            .duration(100)
+                            .style('fill', fillColor);
+                    });
+            };
+
+            let _handleMapUpdate = (_update, _statistics) => {
+                _update
+                    .transition()
+                    .duration(1000)
+                        .attr("fill", d => {
+                            if (isBadCountry(d.properties)) {
+                                return BAD_COUNTRY_COLOR;
+                            }
+
+                            const v = _statistics[d.properties.name];
+
+                            if (isNaN(v)) {
+                                return BAD_COUNTRY_COLOR;
+                            }
+
+                            // TODO: Change the fill attribute following
+                            // the color scale on the current metric
+                            return colorScale(v);
+                        })
+            };
+
+            geoObject.element.selectAll("path")
+                .data(geoObject.data)
+                .join(
+                    enter  => _handleMapEnter(enter, geoObject.path,
+                            statistics_avgByCountry),
+
+                    update => _handleMapUpdate(update,
+                            statistics_avgByCountry),
+
+                    exit   => exit.remove()
+                );
+        }
+
+        let drawCentroids = (geoObject) => {
             // Centroids
-            const geoCentroids = svgMap.selectAll('circle')
-                .data(geoJson.filter(d => !isBadCountry(d.properties)));
+            const geoCentroids = geoObject.element
+                .selectAll('circle')
+                .data(geoObject.data.filter(d =>
+                        !isBadCountry(d.properties)));
 
             geoCentroids.enter().append('circle')
                     .attr('cx', d => d.properties.props.C[0])
@@ -175,25 +280,12 @@
                     .attr('r',  2)
                 .on('mouseover', function(_, d) {
                     d3.select(this).transition()
-                        .duration(1).attr('r', 4);
+                        .duration(100).attr('r', 4);
                     
                     console.log(d)})
                 .on('mouseout',  function() {
                     d3.select(this).transition()
-                        .duration(1).attr('r', 2)});
-
-            // // TODO: Keep the graticule?
-            // let geoGraticule = d3.geoGraticule();
-
-            // // Display lat and lon grids on the map.
-            // svgGraticule.append("path")
-            //     .datum(geoGraticule)
-            //     .classed("graticule", true)
-            //     .attr("d", geoPath)
-
-            svgMapContainer.call(zoomMap);
-            svgMapContainer.call(zoomMap.transform,
-                    () => d3.zoomIdentity.scale(1));
+                        .duration(100).attr('r', 2)});
         };
         
         let createGlobalStatisticsStructure = (data) => {
@@ -321,6 +413,7 @@
                     (exit) => exit.remove()
                 );
 
+            // Barchart labels
             svgElement.mainGroup
                 .selectAll("text")
                 .data(data)
@@ -330,28 +423,18 @@
                 );
         }; 
 
-        dataService.getWorldStatistics().then(data => {
-            $scope.globalStatistics=data;
-
-            let dataToBePlotted = $scope.globalStatistics.map((d) => ({label:d.year, val:d.statistics[$scope.selectedMetric]})); 
-
-            
-            if (!$scope.barChartInitialized) {
-                barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
-                $scope.barChartInitialized = true;
-            }
-            drawBarChart(dataToBePlotted, barChartSvgElement);
-            
-        });
-
-
         $scope.handleBarChartMetricChange = function() {
             if ($scope.barChartInitialized) {
-                let dataToBePlotted = $scope.globalStatistics.map((d) => ({label:d.year, val:d.statistics[$scope.selectedMetric]})); 
-                drawBarChart(dataToBePlotted, barChartSvgElement);
+                // Update map
                 dataService.getCountriesStatistics(
-                    $scope.selectedMetric)
-                .then(data => $scope.countriesData = data);
+                        $scope.selectedMetric)
+                    .then(data => $scope.countriesData = data);
+
+                // Update barchart
+                let dataToBePlotted = $scope.globalStatistics.map((d) =>
+                        ({label: d.year, val: d.statistics[$scope.selectedMetric]}));
+
+                drawBarChart(dataToBePlotted, barChartSvgElement);
             }
         };
 
@@ -397,5 +480,34 @@
             let tooltip = document.getElementById("top-flags-tooltip");
             tooltip.style.zIndex = -100;
         };
+
+        /*
+         * Initialization functions
+         */
+        dataService.loadWorldMap()
+            .then((worldData) => {
+                $scope.geoObject = initMap(worldData);
+                
+                dataService.getCountriesStatistics(
+                        $scope.selectedMetric)
+                    .then(data => {
+                        $scope.countriesData = data;
+                        $scope.$apply() });
+            });
+
+        dataService.getWorldStatistics()
+            .then(data => {
+                $scope.globalStatistics = data;
+
+                let dataToBePlotted = $scope.globalStatistics.map((d) =>
+                    ({label: d.year, val: d.statistics[$scope.selectedMetric]})); 
+                
+                if (!$scope.barChartInitialized) {
+                    barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
+                    $scope.barChartInitialized = true;
+                }
+
+                drawBarChart(dataToBePlotted, barChartSvgElement);
+        });
     }
 })();

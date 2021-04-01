@@ -81,6 +81,25 @@ const map = (obj, callable) => {
 }
 
 /**
+* Check whether two arrays are equal sets.
+
+* @param {array} a    The first array.
+* @param {array} b    The second array.
+*/
+const equals = (a, b) => {
+    if (Array.isArray(a) && Array.isArray(b)
+        && a.length == b.length) {
+        a = a.concat().sort()
+        b = b.concat().sort()
+
+        return a.reduce((acc, e, i) =>
+                acc && e === b[i], true)
+    } else {
+        return false;
+    }
+}
+
+/**
  * Wrapper of `d3.scaleLog` to produce a logarithmic scale from a (min, max) domain.
  * 
  * @param {array} data   The original linear data.
