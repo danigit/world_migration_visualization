@@ -18,88 +18,89 @@
         $scope.topFlags = dataService.topFlags;
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
-        
-        $scope.$watch('countriesData', function(_new, _old) {
-            if(_new !==_old) {
+
+        $scope.$watch("countriesData", function (_new, _old) {
+            if (_new !== _old) {
                 let years = dataService.getActiveYears();
 
-                dataService.loadWorldMap()
-                    .then((data) => drawMap(data, _new, years));
+                dataService.loadWorldMap().then((data) => drawMap(data, _new, years));
             }
         });
 
-        const BAD_COUNTRY_COLOR = '#ff5952';
+        const BAD_COUNTRY_COLOR = "#ff5952";
 
         let mapProjection;
-        
+
         const colorScheme = d3.schemeBlues[9];
         let colorScale;
 
         $scope.globalStatisticsVisName = "Global statistics";
         $scope.selectedMetric = "total_immigration";
         $scope.barChartInitialized = false;
-        $scope.globalStatistics = {
-        };
+        $scope.globalStatistics = {};
 
         let barChartSvgElement;
 
         let isBadCountry = (props) => {
-            return !props || !(props instanceof Country)
+            return !props || !(props instanceof Country);
         };
 
         let drawMap = (data, statistics, years) => {
             // TODO: Enter - update - exit pattern
             let mapContainer = d3.select("#map-container");
-            mapContainer.html('');
+            mapContainer.html("");
 
             let svgWidth = mapContainer.node().getBoundingClientRect().width;
             let svgHeight = mapContainer.node().getBoundingClientRect().height;
 
-            let svgPaddings = { top: 128, right: 0,
-                    bottom: 0, left: 0 };
+            let svgPaddings = { top: 128, right: 0, bottom: 0, left: 0 };
 
             mapProjection = d3
                 .geoMercator()
                 .scale(170)
-                .translate([svgWidth/2, svgHeight/2
-                        + svgPaddings.top]);
+                .translate([svgWidth / 2, svgHeight / 2 + svgPaddings.top]);
 
             let geoPath = d3.geoPath().projection(mapProjection);
 
-            let svgMapContainer = mapContainer.append("svg")
-                    .attr("width", svgWidth)
-                    .attr("height", svgHeight);
+            let svgMapContainer = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
 
-            let svgMap = svgMapContainer.append("g")
-                    .attr('id', 'map');
+            let svgMap = svgMapContainer.append("g").attr("id", "map");
             // let svgGraticule = svgMapContainer.append("g")
             //         .attr('id', 'graticule');
 
-            let zoomMap = d3.zoom()
+            let zoomMap = d3
+                .zoom()
                 .scaleExtent([1, 10])
-                .on("zoom", (e) =>
-                    svgMap.attr("transform", e.transform));
+                .on("zoom", (e) => svgMap.attr("transform", e.transform));
 
             let geoJson = data;
 
-            geoJson.forEach(d => {
-                if (isBadCountry(d.properties))
-                    return;
+            geoJson.forEach((d) => {
+                if (isBadCountry(d.properties)) return;
 
-                d.properties.props['C'] = mapProjection(d3.geoCentroid(d))
+                d.properties.props["C"] = mapProjection(d3.geoCentroid(d));
             });
 
-            const statistics_groupByCountry = d3.group(statistics.filter(s =>
-                years.includes(+s.Year)), r => r.Destination);
+            const statistics_groupByCountry = d3.group(
+                statistics.filter((s) => years.includes(+s.Year)),
+                (r) => r.Destination
+            );
 
-            const statistics_avgByCountry = map(statistics_groupByCountry,
-                v => Math.round(v.reduce((sum, curr) => sum + +curr.Total, 0)/v.length));
+            const statistics_avgByCountry = map(statistics_groupByCountry, (v) =>
+                Math.round(v.reduce((sum, curr) => sum + +curr.Total, 0) / v.length)
+            );
 
             const statistics_avgValues = Object.values(statistics_avgByCountry);
 
-            colorScale = d3_scaleLogMinMax(statistics_avgValues,
-                    [colorScheme[0], colorScheme[8]]);
-                
+            colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
+
+            console.log(colorScale);
+
+            svgMap
+                .append("g")
+                .attr("transform", "translate(610,20)")
+                .append(() => legend({ color: colorScale, title: "antani", ticks: 8, tickFormat: ".0s", width: 260 }));
+
             svgMap
                 .selectAll("path")
                 .data(geoJson)
@@ -107,13 +108,13 @@
                 .append("path")
                 .attr("d", geoPath)
                 .attr("class", "countries")
-                .attr("id", d => d.id)
-                .attr("fill", d => {
+                .attr("id", (d) => d.id)
+                .attr("fill", (d) => {
                     if (isBadCountry(d.properties)) {
                         return BAD_COUNTRY_COLOR;
                     }
 
-                    const v = statistics_avgByCountry[d.properties.name]
+                    const v = statistics_avgByCountry[d.properties.name];
 
                     // TODO: Change the fill attribute following
                     // the color scale on the current metric
@@ -121,21 +122,19 @@
                 })
                 .on("click", (_, d) => {
                     if (isBadCountry(d.properties)) {
-                        console.log('Unknown country:', d.id);
-                        return;
-                    }
-                    
-                    $state.go('country', { countryName:
-                            slugify(d.properties.visName) });
-                })
-                .on("mouseover", function(_, d) {
-                    if (isBadCountry(d.properties)) {
-                        console.log('Unknown country:', d.id);
+                        console.log("Unknown country:", d.id);
                         return;
                     }
 
-                    console.log('Hovering over:', d.properties.visName,
-                            '-', statistics_avgByCountry[d.properties.name]);
+                    $state.go("country", { countryName: slugify(d.properties.visName) });
+                })
+                .on("mouseover", function (_, d) {
+                    if (isBadCountry(d.properties)) {
+                        console.log("Unknown country:", d.id);
+                        return;
+                    }
+
+                    console.log("Hovering over:", d.properties.visName, "-", statistics_avgByCountry[d.properties.name]);
 
                     // TODO: Extract the current metric value
                     // solely for the hovered country.
@@ -143,44 +142,42 @@
                     // TODO: Fill the bottom-center section with
                     // relevant info on the hovered country.
 
-                    d3.select(this).transition()
-                        .duration(1).style('fill', '#800080')
+                    d3.select(this).transition().duration(1).style("fill", "#800080");
                 })
-                .on('mouseout',  function(_, d) {
+                .on("mouseout", function (_, d) {
                     if (isBadCountry(d.properties)) {
-                        console.log('Unknown country:', d.id);
+                        console.log("Unknown country:", d.id);
                         return;
                     }
 
                     // TODO: Fill the bottom-center section with
                     // a general template of insertion.
 
-                    const v = statistics_avgByCountry[d.properties.name]
+                    const v = statistics_avgByCountry[d.properties.name];
 
                     // TODO: Change the fill attribute following
                     // the color scale on the current metric
 
-                    d3.select(this).transition()
-                        .duration(1).style('fill',
-                        colorScale(v));
+                    d3.select(this).transition().duration(1).style("fill", colorScale(v));
                 });
 
             // Centroids
-            const geoCentroids = svgMap.selectAll('circle')
-                .data(geoJson.filter(d => !isBadCountry(d.properties)));
+            const geoCentroids = svgMap.selectAll("circle").data(geoJson.filter((d) => !isBadCountry(d.properties)));
 
-            geoCentroids.enter().append('circle')
-                    .attr('cx', d => d.properties.props.C[0])
-                    .attr('cy', d => d.properties.props.C[1])
-                    .attr('r',  2)
-                .on('mouseover', function(_, d) {
-                    d3.select(this).transition()
-                        .duration(1).attr('r', 4);
-                    
-                    console.log(d)})
-                .on('mouseout',  function() {
-                    d3.select(this).transition()
-                        .duration(1).attr('r', 2)});
+            geoCentroids
+                .enter()
+                .append("circle")
+                .attr("cx", (d) => d.properties.props.C[0])
+                .attr("cy", (d) => d.properties.props.C[1])
+                .attr("r", 2)
+                .on("mouseover", function (_, d) {
+                    d3.select(this).transition().duration(1).attr("r", 4);
+
+                    console.log(d);
+                })
+                .on("mouseout", function () {
+                    d3.select(this).transition().duration(1).attr("r", 2);
+                });
 
             // // TODO: Keep the graticule?
             // let geoGraticule = d3.geoGraticule();
@@ -192,10 +189,9 @@
             //     .attr("d", geoPath)
 
             svgMapContainer.call(zoomMap);
-            svgMapContainer.call(zoomMap.transform,
-                    () => d3.zoomIdentity.scale(1));
+            svgMapContainer.call(zoomMap.transform, () => d3.zoomIdentity.scale(1));
         };
-        
+
         let createGlobalStatisticsStructure = (data) => {
             let container = d3.select("#global-statistics");
             let margins = { top: 20, right: 20, bottom: 60, left: 20 };
@@ -210,20 +206,18 @@
 
             let mainGroup = svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
 
-            let xLabels = data.map((d) => d.label); 
-            let maxY = d3.max(data,
-                (d) => d.val
-            );
+            let xLabels = data.map((d) => d.label);
+            let maxY = d3.max(data, (d) => d.val);
 
             let x = d3
                 .scaleBand()
                 .range([margins.left, commonWidth - margins.right])
                 .padding(0.1)
-                .domain(xLabels); 
+                .domain(xLabels);
 
             let y = d3
                 .scaleLinear()
-                .domain([0, maxY]) 
+                .domain([0, maxY])
                 .range([commonHeight - margins.top - margins.bottom, 0]);
 
             svg.append("g")
@@ -289,14 +283,12 @@
                 .text((d) => {
                     return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
                 });
-                // .attr("transform", (d) => "rotate(-45, " + svgElement.x(d.label) + ", " + (svgElement.y(d.val) - 8) + ")")
-                //.attr("text-anchor", "start");
+            // .attr("transform", (d) => "rotate(-45, " + svgElement.x(d.label) + ", " + (svgElement.y(d.val) - 8) + ")")
+            //.attr("text-anchor", "start");
         };
 
         let handleUpdate = (update, data, svgElement) => {
-            let maxY = d3.max(data,
-                (d) => d.val
-            );
+            let maxY = d3.max(data, (d) => d.val);
             let y = svgElement.y.domain([0, maxY]);
             svgElement.svgElement
                 .select("g.grid-lines.y-axis")
@@ -328,30 +320,25 @@
                     (enter) => handleLabelsEnter(enter, svgElement),
                     (update) => handleLabelsUpdate(update, svgElement)
                 );
-        }; 
+        };
 
-        dataService.getWorldStatistics().then(data => {
-            $scope.globalStatistics=data;
+        dataService.getWorldStatistics().then((data) => {
+            $scope.globalStatistics = data;
 
-            let dataToBePlotted = $scope.globalStatistics.map((d) => ({label:d.year, val:d.statistics[$scope.selectedMetric]})); 
+            let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
 
-            
             if (!$scope.barChartInitialized) {
                 barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
                 $scope.barChartInitialized = true;
             }
             drawBarChart(dataToBePlotted, barChartSvgElement);
-            
         });
 
-
-        $scope.handleBarChartMetricChange = function() {
+        $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
-                let dataToBePlotted = $scope.globalStatistics.map((d) => ({label:d.year, val:d.statistics[$scope.selectedMetric]})); 
+                let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
                 drawBarChart(dataToBePlotted, barChartSvgElement);
-                dataService.getCountriesStatistics(
-                    $scope.selectedMetric)
-                .then(data => $scope.countriesData = data);
+                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => ($scope.countriesData = data));
             }
         };
 
