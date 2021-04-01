@@ -35,6 +35,7 @@
         
         const colorScheme = d3.schemeBlues[9];
         let colorScale;
+        let colorScaleBarChart;
 
         $scope.globalStatisticsVisName = "Global statistics";
         $scope.selectedMetric = "total_immigration";
@@ -308,7 +309,7 @@
             let maxY = d3.max(data,
                 (d) => d.val
             );
-
+            
             let x = d3
                 .scaleBand()
                 .range([margins.left, commonWidth - margins.right])
@@ -348,7 +349,7 @@
         let handleEnter = (enter, svgElement) => {
             enter
                 .append("rect")
-                .attr("fill", (d, i) => colors(d.label))
+                .attr("fill", (d, i) => colorScaleBarChart(d.val))
                 .attr("x", (d) => svgElement.x(d.label))
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.x.bandwidth())
@@ -366,7 +367,7 @@
                             .transition()
                             .duration(100) 
                             .attr("fill", (datum, i) => {
-                                return colors(datum.label);
+                                return colorScaleBarChart(datum.val);
                             });
                     }
                     selectedYear=d.label;
@@ -403,8 +404,6 @@
                 .text((d) => {
                     return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
                 });
-                // .attr("transform", (d) => "rotate(-45, " + svgElement.x(d.label) + ", " + (svgElement.y(d.val) - 8) + ")")
-                //.attr("text-anchor", "start");
         };
 
         let handleUpdate = (update, data, svgElement) => {
@@ -424,7 +423,7 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
-                .attr("fill", (d, i) => colors(d.label));
+                .attr("fill", (datum, i) => colorScaleBarChart(datum.val));
             
             update.selectAll("rect")
                 .on("click", function(e, d) {
@@ -434,7 +433,7 @@
                             .transition()
                             .duration(100) 
                             .attr("fill", (datum, i) => {
-                                return colors(datum.label);
+                                return colorScaleBarChart(datum.val);
                             });
                     }
                     selectedYear=d.label;
@@ -466,21 +465,6 @@
                     (update) => handleLabelsUpdate(update, svgElement)
                 );
         }; 
-
-        $scope.handleBarChartMetricChange = function() {
-            if ($scope.barChartInitialized) {
-                // Update map
-                dataService.getCountriesStatistics(
-                        $scope.selectedMetric)
-                    .then(data => $scope.countriesData = data);
-
-                // Update barchart
-                let dataToBePlotted = $scope.globalStatistics.map((d) =>
-                        ({label: d.year, val: d.statistics[$scope.selectedMetric]}));
-
-                drawBarChart(dataToBePlotted, barChartSvgElement);
-            }
-        };
 
         /**
          * Function that handles the click on the secondary menu buttons
@@ -525,6 +509,22 @@
             tooltip.style.zIndex = -100;
         };
 
+        $scope.handleBarChartMetricChange = function() {
+            if ($scope.barChartInitialized) {
+                // Update map
+                dataService.getCountriesStatistics(
+                        $scope.selectedMetric)
+                    .then(data => $scope.countriesData = data);
+
+                // Update barchart
+                let dataToBePlotted = $scope.globalStatistics.map((d) =>
+                        ({label: d.year, val: d.statistics[$scope.selectedMetric]}));
+
+                colorScaleBarChart = d3_scaleLogMinMax(dataToBePlotted.map(d => d.val),[colorScheme[0], colorScheme[8]]);
+
+                drawBarChart(dataToBePlotted, barChartSvgElement);
+            }
+        };
         /*
          * Initialization functions
          */
@@ -550,6 +550,8 @@
                     barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
                     $scope.barChartInitialized = true;
                 }
+
+                colorScaleBarChart = d3_scaleLogMinMax(dataToBePlotted.map(d => d.val),[colorScheme[0], colorScheme[8]]);
 
                 drawBarChart(dataToBePlotted, barChartSvgElement);
         });
