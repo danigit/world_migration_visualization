@@ -640,6 +640,7 @@
         };
 
         let drawAgeStackedBarchart = (data, toExclude, containerId) => {
+            // TODO: Enter - update - exit pattern
             const containerElem = d3.select("#" + containerId);
             containerElem.html("");
 
