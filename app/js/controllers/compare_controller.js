@@ -92,26 +92,31 @@
             dataService
                 .getGlobalRankStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
-                    let avgEstRefGlobalRank = "";
-                    if (isNaN(data.average_est_refugees_global_rank)) {
-                        avgEstRefGlobalRank = "Not available";
-                    } else {
-                        avgEstRefGlobalRank = "" + transformNumberFormat(data.average_est_refugees_global_rank, true);
-                    }
+                    $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_tot_migrants_global_rank, true);
 
-                    $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank =
-                        "" + transformNumberFormat(data.average_tot_migrants_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank = isNaN(data.average_tot_population_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_tot_population_global_rank, true);
 
-                    $scope.globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank =
-                        "" + transformNumberFormat(data.average_tot_population_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank = isNaN(
+                        data.average_perc_immigration_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_perc_immigration_global_rank, true);
 
-                    $scope.globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank =
-                        "" + transformNumberFormat(data.average_perc_immigration_global_rank, true);
+                    $scope.globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank = isNaN(
+                        data.average_age_migrants_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_age_migrants_global_rank, true);
 
-                    $scope.globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank =
-                        "" + transformNumberFormat(data.average_age_migrants_global_rank, true);
-
-                    $scope.globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+                    $scope.globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank = isNaN(
+                        data.average_est_refugees_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_est_refugees_global_rank, true);
 
                     $scope.$apply();
                 });
@@ -125,7 +130,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.totalPopulation = "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.totalPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
@@ -138,7 +143,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.immigrationVsPopulation = "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.immigrationVsPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
@@ -151,7 +156,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.immigrationAverageAge = "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.immigrationAverageAge = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                 });
 
             // getting the estimated refugees
@@ -162,11 +167,7 @@
                     dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
                 )
                 .then((data) => {
-                    if (isNaN(data)) {
-                        $scope.countryLeftStatisticsValues.refugeeVsImmigration = "Not available";
-                    } else {
-                        $scope.countryLeftStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
-                    }
+                    $scope.countryLeftStatisticsValues.refugeeVsImmigration = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
@@ -228,21 +229,32 @@
             dataService
                 .getGlobalRankStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue)
                 .then((data) => {
-                    let avgEstRefGlobalRank = "";
-                    if (isNaN(data.average_est_refugees_global_rank)) {
-                        avgEstRefGlobalRank = "Not available";
-                    } else {
-                        avgEstRefGlobalRank = "" + transformNumberFormat(data.average_est_refugees_global_rank, true);
-                    }
-                    $scope.globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank =
-                        "" + transformNumberFormat(data.average_tot_migrants_global_rank, true);
-                    $scope.globalRankCountryRightStatisticsValues.totalPopulationGlobalRank =
-                        "" + transformNumberFormat(data.average_tot_population_global_rank, true);
-                    $scope.globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank =
-                        "" + transformNumberFormat(data.average_perc_immigration_global_rank, true);
-                    $scope.globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank =
-                        "" + transformNumberFormat(data.average_age_migrants_global_rank, true);
-                    $scope.globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank = avgEstRefGlobalRank;
+                    $scope.globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_tot_migrants_global_rank, true);
+
+                    $scope.globalRankCountryRightStatisticsValues.totalPopulationGlobalRank = isNaN(data.average_tot_population_global_rank)
+                        ? "N. A."
+                        : transformNumberFormat(data.average_tot_population_global_rank, true);
+
+                    $scope.globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank = isNaN(
+                        data.average_perc_immigration_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_perc_immigration_global_rank, true);
+
+                    $scope.globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank = isNaN(
+                        data.average_age_migrants_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_age_migrants_global_rank, true);
+
+                    $scope.globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank = isNaN(
+                        data.average_est_refugees_global_rank
+                    )
+                        ? "N. A."
+                        : transformNumberFormat(data.average_est_refugees_global_rank, true);
+
                     $scope.$apply();
                 });
 
@@ -297,7 +309,7 @@
                 )
                 .then((data) => {
                     if (isNaN(data)) {
-                        $scope.countryRightStatisticsValues.refugeeVsImmigration = "Not available";
+                        $scope.countryRightStatisticsValues.refugeeVsImmigration = "N. A.";
                     } else {
                         $scope.countryRightStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
                     }

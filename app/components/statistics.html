@@ -24,7 +24,8 @@
                     nulla, dolore voluptate minus, libero natus architecto illo enim aliquam. Accusamus odit
                     voluptatibus velit modi at neque placeat similique recusandae voluptate ut.
                 </div>
-                <div class="margin-top-20">
+                <div id="global-statistics" class="margin-top-20">
+                    <div class="color-orange padding-10-px">World Estimates</div>
                     <!-- <img src="../../sketch/Mask_Group_2.png"> -->
                 </div>
             </div>
@@ -36,7 +37,7 @@
                 <div class="position-absolute bottom-0 margin-left-20px">
                     <md-input-container id="visualization-type-container">
                         <label>Visualization type</label>
-                        <md-select ng-model="visualizationType" ng-change="changeMetric()">
+                        <md-select ng-model="selectedMetric" ng-change="handleBarChartMetricChange()">
                             <md-option ng-repeat="type in visualizationTypes" ng-value="type.value">
                                 {{type.text}}
                             </md-option>
