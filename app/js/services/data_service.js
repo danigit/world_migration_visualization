@@ -420,7 +420,6 @@
                 });
 
                 filteredData = data_service.filterColumn(filteredData, ageColumns);
-                console.log(filteredData);
 
                 let filteredCategories = filteredData.map((d) => {
                     let aggregatedRow = {};
@@ -848,7 +847,7 @@
             });
         };
 
-        data_service.getActiveYears = (yearMin, yearMax) => {
+        data_service.getActiveYears = (yearMin=1990, yearMax=2019) => {
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 

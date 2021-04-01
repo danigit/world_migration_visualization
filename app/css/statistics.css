@@ -11,3 +11,8 @@
     fill: #b0b0b0;
 }
 
+.graticule {
+    stroke: #b0b0b0;
+    stroke-width: 0.33px;
+    fill: none;
+}
