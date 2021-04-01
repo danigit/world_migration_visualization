@@ -61,6 +61,10 @@ DISPLAY
     min-height: 400px;
 }
 
+.min-height-55-px {
+    min-height: 55px !important;
+}
+
 .max-height-700-px {
     max-height: 700px;
 }
