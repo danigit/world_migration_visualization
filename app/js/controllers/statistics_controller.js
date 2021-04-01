@@ -19,7 +19,7 @@
         $scope.selectedTopFlag = "";
 
         $scope.globalStatisticsVisName = "Global statistics";
-        $scope.selectedMetric = "world_avg_tot_migr";
+        $scope.selectedMetric = "total_immigration";
         $scope.barChartInitialized = false;
         $scope.globalStatistics = {
         };
@@ -152,7 +152,7 @@
 
             let mainGroup = svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
 
-            let xLabels = data.map((d) => d.label); // extract the distinct years from the "data" array
+            let xLabels = data.map((d) => d.label); 
             let maxY = d3.max(data,
                 (d) => d.val
             );
@@ -160,11 +160,11 @@
             let x = d3
                 .scaleBand()
                 .range([margins.left, commonWidth - margins.right])
-                .domain(xLabels); // distinct years as the domain of the bar chart
+                .domain(xLabels); 
 
             let y = d3
                 .scaleLinear()
-                .domain([0, maxY]) // must be the maximum of current metric
+                .domain([0, maxY]) 
                 .range([commonHeight - margins.top - margins.bottom, 0]);
 
             svg.append("g")
@@ -180,43 +180,6 @@
                 .attr("class", "grid-lines y-axis")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
                 .call(d3.axisLeft(y).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
-/* 
-            let svgGroups = svg
-                .select(".main-group")
-                .selectAll("g")
-                .data($scope.globalStatistics.map(
-                    (d) => d.statistics[selectedMetric]))
-                .enter()
-                .append("g")
-                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, ${0})`)
-                .attr("class", "groups"); */
-
-            /* let legend = svg
-                .selectAll(".legend")
-                .data([$scope.globalStatisticsVisName])
-                .enter()
-                .append("g")
-                .attr("class", "legend")
-                .attr("transform", function (d, i) {
-                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - 13} )`;
-                }); */
-
-            /* legend
-                .append("rect")
-                .attr("x", commonWidth + 10)
-                .attr("width", 10)
-                .attr("height", 10)
-                .style("fill", (d, i) => color(i)); 
-
-            legend
-                .append("text")
-                .attr("x", commonWidth + 40)
-                .attr("y", 10)
-                .attr("font-size", "small")
-                .style("text-anchor", "start")
-                .text(function (d) {
-                    return d;
-                }); */
 
             return {
                 svgElement: svg,
@@ -236,15 +199,11 @@
                 .attr("x", (d) => svgElement.x(d.label))
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.x.bandwidth())
-                .attr("y", 0)
+                .attr("y", svgElement.y(0))
                 .transition()
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
-                /* .attr("height", 0)
-                .transition()
-                .duration(1000)
-                .attr("height", (d)=> svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val)); */
         };
 
         let handleLabelsEnter = (enter, svgElement) => {
@@ -255,6 +214,9 @@
                 .attr("font-size", "8px")
                 .attr("x", (d) => svgElement.x(d.label))
                 .attr("y", svgElement.y(0))
+                .transition()
+                .duration(1000)
+                .attr("y", (d) => svgElement.y(d.val))
                 .text((d) => {
                     return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
                 });
@@ -265,8 +227,11 @@
                 .transition()
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("transform", (d) => "rotate(-45, " + svgElement.x(d.label) + ", " + (svgElement.y(d.val) - 8) + ")")
-                .attr("text-anchor", "start");
+                .text((d) => {
+                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
+                });
+                // .attr("transform", (d) => "rotate(-45, " + svgElement.x(d.label) + ", " + (svgElement.y(d.val) - 8) + ")")
+                //.attr("text-anchor", "start");
         };
 
         let handleUpdate = (update, data, svgElement) => {
@@ -311,7 +276,7 @@
 
             let dataToBePlotted = $scope.globalStatistics.map((d) => ({label:d.year, val:d.statistics[$scope.selectedMetric]})); 
 
-            // passare direttamente i dati selezionati secondo la metrica appropriata!
+            
             if (!$scope.barChartInitialized) {
                 barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
                 $scope.barChartInitialized = true;
@@ -319,6 +284,14 @@
             drawBarChart(dataToBePlotted, barChartSvgElement);
             
         });
+
+
+        $scope.handleBarChartMetricChange = function() {
+            if ($scope.barChartInitialized) {
+                let dataToBePlotted = $scope.globalStatistics.map((d) => ({label:d.year, val:d.statistics[$scope.selectedMetric]})); 
+                drawBarChart(dataToBePlotted, barChartSvgElement);
+            }
+        }
 
         /**
          * Function that handles the click on the secondary menu buttons

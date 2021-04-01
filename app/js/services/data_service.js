@@ -859,14 +859,12 @@
         data_service.getWorldStatistics = () => {
 
             return data_service.countries.then(countries => { 
-
-                let numCountries = countries.length;
                 
                 let avgTotalMigrantsGroupByYear = data_service.totMigrByOriginDest.then(data => {
 
                     data = data.filter(countryData => countryData.Destination==="WORLD");
 
-                    let groupedByYear = data.map(worldData => ({year:+worldData.Year, world_avg_tot_migr:(+worldData.Total)/numCountries}));
+                    let groupedByYear = data.map(worldData => ({year:+worldData.Year, total_immigration:+worldData.Total}));
 
                     return groupedByYear;
                 });
@@ -878,7 +876,7 @@
                     let groupedByYear = data.map(worldData => (
                         {
                             year:+worldData.Year, 
-                            world_avg_tot_population:(+worldData["Total_(mf)"]*1000)/numCountries
+                            total_population:+worldData["Total_(mf)"]*1000
                         })
                     );
 
@@ -893,7 +891,7 @@
                     let groupedByYear = data.map(worldData => (
                         {
                             year:+worldData.Year, 
-                            world_avg_migr_perc_tot_population:(+worldData["Total_(mf)"])/numCountries
+                            immigration_vs_population:+worldData["Total_(mf)"]
                         })
                     );
 
@@ -922,13 +920,13 @@
                     let groupedByYear = data.map(worldData => {
                         let yearsSum = 0;
                         columns.forEach((col) => {
-                                yearsSum += col.value * (+worldData[col.key]/numCountries); 
+                                yearsSum += col.value * (+worldData[col.key]); 
                         });
-                        let yearsAverage = yearsSum / (+worldData["Total" + selectedGender]/numCountries);
+                        let yearsAverage = yearsSum / (+worldData["Total" + selectedGender]);
                          
                         return {
                             year:+worldData.Year, 
-                            world_avg_age_migr:yearsAverage
+                            immigrants_avg_age:yearsAverage
                         }
                     });
 
@@ -951,7 +949,7 @@
 
                     columns.forEach(col => {
                         let groupedObject = {};
-                        groupedObject.world_avg_perc_estimated_refugees = (+data[0][col])/numCountries;
+                        groupedObject.refugees_vs_immigrants = (+data[0][col]);
                         groupedObject.year = +col.split("_")[0];
                         groupedByYear.push(groupedObject);
                         }
@@ -968,21 +966,19 @@
                 ];
 
                 return Promise.all(promisedResultsList).then(values => {
-
-                    // return values[0].concat(values[1], values[2], values[3], values[4]);
                     return values[0].map((yearData, idx) => {
                         return {
                             year:yearData.year,
                             statistics: {
-                                world_avg_tot_migr:values[0][idx].world_avg_tot_migr
+                                total_immigration:values[0][idx].total_immigration
                                 ,
-                                world_avg_tot_population:values[1][idx].world_avg_tot_population
+                                total_population:values[1][idx].total_population
                                 ,
-                                world_avg_migr_perc_tot_population:values[2][idx].world_avg_migr_perc_tot_population
+                                immigration_vs_population:values[2][idx].immigration_vs_population
                                 ,
-                                world_avg_age_migr:values[3][idx].world_avg_age_migr
+                                immigrants_avg_age:values[3][idx].immigrants_avg_age
                                 ,
-                                world_avg_perc_estimated_refugees:values[4][idx].world_avg_perc_estimated_refugees
+                                refugees_vs_immigrants:values[4][idx].refugees_vs_immigrants
                             }
                         }
                     });

@@ -36,7 +36,7 @@
                 <div class="position-absolute bottom-0 margin-left-20px">
                     <md-input-container id="visualization-type-container">
                         <label>Visualization type</label>
-                        <md-select ng-model="visualizationType">
+                        <md-select ng-model="selectedMetric" ng-change="handleBarChartMetricChange()">
                             <md-option ng-repeat="type in visualizationTypes" ng-value="type.value">
                                 {{type.text}}
                             </md-option>

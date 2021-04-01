@@ -61,7 +61,7 @@
         ];
 
         statistics_service.visualizationTypes = [
-            { value: "total_immigrations", text: "Total immigrations" },
+            { value: "total_immigration", text: "Total immigrations" },
             { value: "total_population", text: "Total population" },
             {
                 value: "immigration_vs_population",
