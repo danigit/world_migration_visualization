@@ -349,7 +349,7 @@
         let handleEnter = (enter, svgElement) => {
             enter
                 .append("rect")
-                .attr("fill", (d, i) => colorScaleBarChart(d.val))
+                .attr("fill", (d, i) => colorScheme[4])
                 .attr("x", (d) => svgElement.x(d.label))
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.x.bandwidth())
@@ -367,7 +367,7 @@
                             .transition()
                             .duration(100) 
                             .attr("fill", (datum, i) => {
-                                return colorScaleBarChart(datum.val);
+                                return colorScheme[4];
                             });
                     }
                     selectedYear=d.label;
@@ -423,7 +423,7 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
-                .attr("fill", (datum, i) => colorScaleBarChart(datum.val));
+                .attr("fill", (datum, i) => colorScheme[4]);
             
             update.selectAll("rect")
                 .on("click", function(e, d) {
@@ -433,7 +433,7 @@
                             .transition()
                             .duration(100) 
                             .attr("fill", (datum, i) => {
-                                return colorScaleBarChart(datum.val);
+                                return colorScheme[4];
                             });
                     }
                     selectedYear=d.label;
