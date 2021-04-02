@@ -38,7 +38,6 @@
 
         const colorScheme = d3.schemeBlues[9];
         let colorScale;
-        let colorScaleBarChart;
 
         $scope.globalStatisticsVisName = "Global statistics";
         $scope.selectedMetric = "total_immigration";
@@ -55,26 +54,29 @@
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
         };
+        let svgMapWidth;
+        let svgMapHeight;
 
         let initMap = (worldData) => {
             let mapContainer = d3.select("#map-container");
             mapContainer.html("");
 
-            let svgWidth = mapContainer.node().getBoundingClientRect().width;
-            let svgHeight = mapContainer.node().getBoundingClientRect().height;
+            svgMapWidth = mapContainer.node().getBoundingClientRect().width;
+            svgMapHeight = mapContainer.node().getBoundingClientRect().height;
 
             let svgPaddings = { top: 128, right: 0, bottom: 0, left: 0 };
 
             let mapProjection = d3
                 .geoMercator()
                 .scale(170)
-                .translate([svgWidth / 2, svgHeight / 2 + svgPaddings.top]);
+                .translate([svgMapWidth / 2, svgMapHeight / 2 + svgPaddings.top]);
 
             let geoPath = d3.geoPath().projection(mapProjection);
 
-            let svgMapContainer = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
+            let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map");
+            svgMap.append("g").attr("class", "legends");
             // let svgGraticule = svgMapContainer.append("g")
             //         .attr('id', 'graticule');
 
@@ -117,9 +119,6 @@
             let _reduceFunc = (sum, curr) => sum + +curr.Total;
 
             const statistics_avgByCountry = getStatistics_avgByCountry($scope.activeYears, _reduceFunc);
-
-            console.log($scope.countriesData.filter((c) => c.Destination === "Russian Federation"));
-            console.log(statistics_avgByCountry["Russian Federation"]);
 
             if (_statChanged) {
                 let statistics_avgValues = null;
@@ -277,6 +276,14 @@
                         // the color scale on the current metric
                         return colorScale(v);
                     });
+
+                _update
+                    .select(".legends")
+                    .selectAll(".legend")
+                    .data(colorScale.ticks)
+                    .attr("fill", (d, i) => {
+                        return colorScale(d);
+                    });
             };
 
             geoObject.element
@@ -288,6 +295,31 @@
                     (update) => _handleMapUpdate(update, statistics_avgByCountry),
 
                     (exit) => exit.remove()
+                );
+
+            let colorTicks = colorScale.ticks(10);
+
+            geoObject.element
+                .select(".legends")
+                .selectAll(".legend")
+                .data(colorTicks)
+                .join(
+                    (enter) => {
+                        console.log(enter);
+                        enter
+                            .append("g")
+                            .classed("legend", true)
+                            .attr("transform", (d, i) => "translate(" + (svgMapWidth - 200 + i * 25) + ", " + (svgMapHeight - 25) + ")")
+                            .append("rect")
+                            .attr("width", 25)
+                            .attr("height", 20)
+                            .attr("fill", (d, i) => {
+                                return colorScale(d);
+                            });
+                    },
+                    (update) => {
+                        update.selectAll("rect").attr("fill", (d, i) => colorScale(d));
+                    }
                 );
         };
 
@@ -561,10 +593,10 @@
                 // Update barchart
                 let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
 
-                colorScaleBarChart = d3_scaleLogMinMax(
-                    dataToBePlotted.map((d) => d.val),
-                    [colorScheme[0], colorScheme[8]]
-                );
+                // colorScaleBarChart = d3_scaleLogMinMax(
+                //     dataToBePlotted.map((d) => d.val),
+                //     [colorScheme[0], colorScheme[8]]
+                // );
 
                 drawBarChart(dataToBePlotted, barChartSvgElement);
             }
