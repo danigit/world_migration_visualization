@@ -14,27 +14,26 @@
         $scope.secondaryMenuSelectedValue = "world";
         $scope.statisticsButtons = dataService.menuButtons;
         $scope.visualizationTypes = dataService.visualizationTypes;
-        $scope.topFlags = dataService.topFlags;
+        $scope.top5Countries  = [];
+        $scope.flop5Countries = [];
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
 
         $scope.$watch("countriesData", function (_new, _old) {
             if (_new !== _old) {
                 drawMap($scope.geoObject);
-                // $scope.geoObject.element
-                //     .append("g")
-                //     .attr("transform", "translate(610,20)")
-                //     .append(() => legend({ color: colorScale, title: "antani", ticks: 8, tickFormat: ".0s", width: 260 }));
             }
         });
 
         $scope.$watch("activeYears", function (_new, _old) {
             if (_new !== _old) {
+                console.log("activeYears changed");
                 drawMap($scope.geoObject, false);
             }
         });
 
         const BAD_COUNTRY_COLOR = "#ff5952";
+        const HIGHLIGHTED_COLOR = "#ff9316"
 
         const colorScheme = d3.schemeBlues[9];
         let colorScale;
@@ -48,7 +47,7 @@
 
         $scope.globalStatistics = {};
 
-        let selectedYear = -1;
+        // let selectedYear = -1;
         let barChartSvgElement;
 
         let isBadCountry = (props) => {
@@ -120,6 +119,27 @@
 
             const statistics_avgByCountry = getStatistics_avgByCountry($scope.activeYears, _reduceFunc);
 
+            // Extract Top 5 and Flop 5 countries
+            const sorted_avgByCountry = Object.entries(statistics_avgByCountry)
+                .sort((a, b) => d3.descending(a[1], b[1]))
+
+            let top5Countries  = sorted_avgByCountry.slice(0, 5);
+            let flop5Countries = sorted_avgByCountry.slice(-5);
+
+            // Extract Country objects from the name
+            dataService.countries.then(data => {
+                top5Countries.forEach((o, i, a) => 
+                    a[i][0] = data.find(c => o[0] === c.name));
+
+                flop5Countries.forEach((o, i, a) => 
+                    a[i][0] = data.find(c => o[0] === c.name));
+
+                $scope.top5Countries  = top5Countries;
+                $scope.flop5Countries = flop5Countries;
+
+                $scope.$apply();
+            });
+
             if (_statChanged) {
                 let statistics_avgValues = null;
 
@@ -132,6 +152,9 @@
                 }
 
                 colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
+
+                // console.log(colorScale.ticks(),
+                //             colorScale.ticks().concat(colorScale.domain()));
             }
 
             let _handleMapEnter = (_enter, _path, _statistics) => {
@@ -178,6 +201,12 @@
                             return;
                         }
 
+                        $scope.hoveredCountry = d.properties;
+
+                        console.log($scope.hoveredCountry);
+                        $scope.hoveredCountry.value = transformNumberFormat(v);
+                        $scope.$apply();
+
                         console.log("Hovering over:", d.properties.visName, "-", v);
 
                         // TODO: Extract the current metric value
@@ -188,6 +217,9 @@
                     })
                     .on("mouseout", function (_, d) {
                         let fillColor = null;
+
+                        $scope.hoveredCountry = {};
+                        $scope.$apply();
 
                         if (isBadCountry(d.properties)) {
                             fillColor = BAD_COUNTRY_COLOR;
@@ -228,6 +260,9 @@
                             return;
                         }
 
+                        $scope.hoveredCountry = d.properties;
+                        $scope.hoveredCountry.value = transformNumberFormat(v);
+                        $scope.$apply();
                         console.log("Hovering over:", d.properties.visName, "-", v);
 
                         // TODO: Extract the current metric value
@@ -238,6 +273,9 @@
                     })
                     .on("mouseout", function (_, d) {
                         let fillColor = null;
+
+                        $scope.hoveredCountry = {};
+                        $scope.$apply();
 
                         if (isBadCountry(d.properties)) {
                             fillColor = BAD_COUNTRY_COLOR;
@@ -297,6 +335,8 @@
                     (exit) => exit.remove()
                 );
 
+            
+            // Create color legend
             let colorTicks = colorScale.ticks(10);
 
             geoObject.element
@@ -305,7 +345,7 @@
                 .data(colorTicks)
                 .join(
                     (enter) => {
-                        console.log(enter);
+                        // console.log(enter);
                         enter
                             .append("g")
                             .classed("legend", true)
@@ -325,7 +365,8 @@
 
         let drawCentroids = (geoObject) => {
             // Centroids
-            const geoCentroids = geoObject.element.selectAll("circle").data(geoObject.data.filter((d) => !isBadCountry(d.properties)));
+            const geoCentroids = geoObject.element.selectAll("circle")
+                .data(geoObject.data.filter((d) => !isBadCountry(d.properties)));
 
             geoCentroids
                 .enter()
@@ -335,7 +376,6 @@
                 .attr("r", 2)
                 .on("mouseover", function (_, d) {
                     d3.select(this).transition().duration(100).attr("r", 4);
-
                     console.log(d);
                 })
                 .on("mouseout", function () {
@@ -363,7 +403,7 @@
             let x = d3
                 .scaleBand()
                 .range([margins.left, commonWidth - margins.right])
-                .padding(0.4)
+                .padding(0.16)
                 .domain(xLabels);
 
             let y = d3
@@ -410,7 +450,6 @@
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
 
             enter.selectAll("rect").on("click", function (e, d) {
-                selectedYear = +d.label;
                 if (d3.select(this).classed("selected")) {
                     d3.select(this)
                         .classed("selected", false)
@@ -421,6 +460,7 @@
                         });
 
                     $scope.activeYears = dataService.getActiveYears();
+                    $scope.$apply();
                 } else {
                     d3.select("#global-statistics")
                         .selectAll("g rect.selected")
@@ -431,8 +471,13 @@
                             return colorScheme[4];
                         });
 
-                    d3.select(this).classed("selected", true).transition().duration(100).attr("fill", "#ff9316");
-                    $scope.activeYears = [selectedYear];
+                    d3.select(this).classed("selected", true)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", HIGHLIGHTED_COLOR);
+
+                    $scope.activeYears = [+d.label];
+                    $scope.$apply();
                 }
             });
         };
@@ -559,10 +604,8 @@
          * @param {string} value
          */
         $scope.handleTopCountryClick = function (value, type) {
-            $scope.selectedTopCountry = value;
-            dataService.selectedCountryController = value;
-            dataService.secondaryMenuSelectedValue = "country";
-            dataService.changePage();
+            const _countryName = value.visName;
+            $state.go("country", { countryName: slugify(_countryName) });
         };
 
         /**
@@ -570,9 +613,20 @@
          * @param {string} value
          */
         $scope.showTopCountryHint = function (value, event, type) {
-            $scope.selectedTopFlag = value.toUpperCase();
+            const country   = value[0];
+            const isoAlpha3 = country.props.isoAlpha3;
+
+            $scope.geoObject.element
+                .select(`path#${isoAlpha3}`)
+                .dispatch("mouseover");
+
+            $scope.selectedTopFlag = capitalize(country.name)
+
             let tooltip = document.getElementById("top-flags-tooltip");
-            tooltip.classList.remove("hide");
+
+            tooltip.classList.remove("display-none");
+            tooltip.classList.add("display-block");
+
             tooltip.style.top = event.clientY - 50 + "px";
             tooltip.style.left = event.clientX + "px";
             tooltip.style.zIndex = 100;
@@ -584,6 +638,10 @@
          */
         $scope.hideTopCountryHint = function (type) {
             let tooltip = document.getElementById("top-flags-tooltip");
+
+            tooltip.classList.remove("display-block");
+            tooltip.classList.add("display-none");
+
             tooltip.style.zIndex = -100;
         };
 
