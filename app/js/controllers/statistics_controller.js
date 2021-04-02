@@ -123,6 +123,7 @@
                         return (sum, curr) => sum + +curr.Total;
                     
                     default:
+                        break;
                 }
             }
 
@@ -149,8 +150,6 @@
                 colorScale = d3_scaleLogMinMax(statistics_avgValues,
                     [colorScheme[0], colorScheme[8]]);
             }
-
-            // console.log(colorScale.range(), colorScale.domain());
 
             let _handleMapEnter = (_enter, _path, _statistics) => {
                 _enter.append("path")
