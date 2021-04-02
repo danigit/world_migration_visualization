@@ -472,6 +472,11 @@ COLOR
     color: #ff9316 !important;
 }
 
+.color-orange-small {
+    color: #ff9316 !important;
+    font-size:10px;
+}
+
 .color-violet {
     color: #8338ec;
 }
