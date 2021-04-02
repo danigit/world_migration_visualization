@@ -178,6 +178,12 @@
                             return;
                         }
 
+                        $scope.hoveredCountry = d.properties;
+
+                        console.log($scope.hoveredCountry);
+                        $scope.hoveredCountry.value = transformNumberFormat(v);
+                        $scope.$apply();
+
                         console.log("Hovering over:", d.properties.visName, "-", v);
 
                         // TODO: Extract the current metric value
@@ -188,6 +194,9 @@
                     })
                     .on("mouseout", function (_, d) {
                         let fillColor = null;
+
+                        $scope.hoveredCountry = {};
+                        $scope.$apply();
 
                         if (isBadCountry(d.properties)) {
                             fillColor = BAD_COUNTRY_COLOR;
@@ -228,6 +237,9 @@
                             return;
                         }
 
+                        $scope.hoveredCountry = d.properties;
+                        $scope.hoveredCountry.value = transformNumberFormat(v);
+                        $scope.$apply();
                         console.log("Hovering over:", d.properties.visName, "-", v);
 
                         // TODO: Extract the current metric value
@@ -238,6 +250,9 @@
                     })
                     .on("mouseout", function (_, d) {
                         let fillColor = null;
+
+                        $scope.hoveredCountry = {};
+                        $scope.$apply();
 
                         if (isBadCountry(d.properties)) {
                             fillColor = BAD_COUNTRY_COLOR;
