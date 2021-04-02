@@ -502,7 +502,7 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .text((d) => {
-                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
+                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0, $scope.selectedMetric.value) : "";
                 });
         };
 
@@ -512,7 +512,7 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .text((d) => {
-                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
+                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0, $scope.selectedMetric.value) : "";
                 });
         };
 

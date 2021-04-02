@@ -18,7 +18,10 @@ function resizeMenuPanel(isMenuOpened) {
  * @param {number} number
  * @returns
  */
-function transformNumberFormat(number, order = false, decimals = 2) {
+function transformNumberFormat(number, order = false, decimals = 2, selectedMetric="") {
+    if (selectedMetric==="immigration_vs_population" || selectedMetric==="refugees_vs_immigrants") {
+        return number.toFixed(decimals) + "\%";
+    }
     if (!order) {
         let steps = [
             { value: 1, symbol: "" },
