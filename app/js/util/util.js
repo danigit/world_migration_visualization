@@ -18,13 +18,16 @@ function resizeMenuPanel(isMenuOpened) {
  * @param {number} number
  * @returns
  */
-function transformNumberFormat(number, order = false, decimals = 2) {
+function transformNumberFormat(number, order = false, decimals = 2, selectedMetric="") {
+    if (selectedMetric==="immigration_vs_population" || selectedMetric==="refugees_vs_immigrants") {
+        return number.toFixed(1) + "\%";
+    }
     if (!order) {
         let steps = [
             { value: 1, symbol: "" },
             { value: 1e3, symbol: "k" },
             { value: 1e6, symbol: "M" },
-            { value: 1e9, symbol: "B" },
+            { value: 1e9, symbol: "G" },
             { value: 1e12, symbol: "T" },
             { value: 1e15, symbol: "P" },
             { value: 1e18, symbol: "E" },
@@ -37,6 +40,9 @@ function transformNumberFormat(number, order = false, decimals = 2) {
                 break;
             }
         }
+        /* if (number <= 1 && number >=0) {
+            decimals=1;
+        } */
         return (number / steps[i].value).toFixed(decimals).replace(regularExpression, "$1") + " " + steps[i].symbol;
     } else {
         /*
