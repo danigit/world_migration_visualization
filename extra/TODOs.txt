@@ -80,3 +80,4 @@ Please note: Fix display resolution to 1080p!
 
 - Discard ".." from reduce function in the statistics page
 - Investigate hover coloring malfunctions on the statistics maps
+- On activeYears watch update year title label (top-left) and verify that the data is filtered on the map

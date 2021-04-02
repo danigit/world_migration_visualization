@@ -49,7 +49,7 @@
 
         $scope.globalStatistics = {};
 
-        let selectedYear = 1990;
+        let selectedYear = -1;
         let barChartSvgElement;
 
         let isBadCountry = (props) => {
@@ -379,26 +379,33 @@
                 .attr("y", (d) => svgElement.y(d.val))
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
 
-            enter.selectAll("rect")
-                .on("click", function(e, d) {
-                    if (selectedYear!==-1) {
-                        d3.select("#global-statistics").selectAll("g rect.selected")
-                            .classed("selected", false)
-                            .transition()
-                            .duration(100)
-                            .attr("fill", (datum, i) => {
-                                return colorScheme[4];
-                            });
-                    }
-                    selectedYear=d.label;
+            enter.selectAll("rect").on("click", function (e, d) {
+                selectedYear = +d.label;
+                if (d3.select(this).classed("selected")) {
                     d3.select(this)
-                        .classed("selected", true)
+                        .classed("selected", false)
                         .transition()
                         .duration(100)
-                        .attr("fill", "#ff9316");
-                    // updateMap();
-                });
-            };
+                        .attr("fill", (datum, i) => {
+                            return colorScheme[4];
+                        });
+
+                    $scope.activeYears = dataService.getActiveYears();
+                } else {
+                    d3.select("#global-statistics")
+                        .selectAll("g rect.selected")
+                        .classed("selected", false)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", (datum, i) => {
+                            return colorScheme[4];
+                        });
+
+                    d3.select(this).classed("selected", true).transition().duration(100).attr("fill", "#ff9316");
+                    $scope.activeYears = [selectedYear];
+                }
+            });
+        };
 
         let handleLabelsEnter = (enter, svgElement) => {
             enter
@@ -443,25 +450,32 @@
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
                 .attr("fill", (datum, i) => colorScheme[4]);
 
-            update.selectAll("rect")
-                .on("click", function(e, d) {
-                    if (selectedYear!==-1) {
-                        d3.select("#global-statistics").selectAll("g rect.selected")
-                            .classed("selected", false)
-                            .transition()
-                            .duration(100)
-                            .attr("fill", (datum, i) => {
-                                return colorScheme[4];
-                            });
-                    }
-                    selectedYear=d.label;
-                    d3.select(this)
-                        .classed("selected", true)
-                        .transition()
-                        .duration(100)
-                        .attr("fill", "#ff9316");
-                    // updateMap();
-                });
+            // update.selectAll("rect").on("click", function (e, d) {
+            // selectedYear = +d.label;
+            // if (d3.select(this).classed("selected")) {
+            //     d3.select(this)
+            //         .classed("selected", false)
+            //         .transition()
+            //         .duration(100)
+            //         .attr("fill", (datum, i) => {
+            //             return colorScheme[4];
+            //         });
+
+            //     $scope.activeYears = dataService.getActiveYears();
+            // } else {
+            //     d3.select("#global-statistics")
+            //         .selectAll("g rect.selected")
+            //         .classed("selected", false)
+            //         .transition()
+            //         .duration(100)
+            //         .attr("fill", (datum, i) => {
+            //             return colorScheme[4];
+            //         });
+
+            //     d3.select(this).classed("selected", true).transition().duration(100).attr("fill", "#ff9316");
+            //     $scope.activeYears = [selectedYear];
+            // }
+            // });
         };
 
         let drawBarChart = (data, svgElement) => {
@@ -541,18 +555,18 @@
             tooltip.style.zIndex = -100;
         };
 
-        $scope.handleBarChartMetricChange = function() {
+        $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
-                dataService.getCountriesStatistics(
-                        $scope.selectedMetric)
-                    .then(data => $scope.countriesData = data);
+                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => ($scope.countriesData = data));
 
                 // Update barchart
-                let dataToBePlotted = $scope.globalStatistics.map((d) =>
-                        ({label: d.year, val: d.statistics[$scope.selectedMetric]}));
+                let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
 
-                colorScaleBarChart = d3_scaleLogMinMax(dataToBePlotted.map(d => d.val),[colorScheme[0], colorScheme[8]]);
+                colorScaleBarChart = d3_scaleLogMinMax(
+                    dataToBePlotted.map((d) => d.val),
+                    [colorScheme[0], colorScheme[8]]
+                );
 
                 drawBarChart(dataToBePlotted, barChartSvgElement);
             }
