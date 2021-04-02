@@ -82,17 +82,15 @@ const map = (obj, callable) => {
 * @param {array} b    The second array.
 */
 const equals = (a, b) => {
-    if (Array.isArray(a) && Array.isArray(b)
-        && a.length == b.length) {
-        a = a.concat().sort()
-        b = b.concat().sort()
+    if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {
+        a = a.concat().sort();
+        b = b.concat().sort();
 
-        return a.reduce((acc, e, i) =>
-                acc && e === b[i], true)
+        return a.reduce((acc, e, i) => acc && e === b[i], true);
     } else {
         return false;
     }
-}
+};
 
 /**
  * Wrapper of `d3.scaleLog` to produce a logarithmic scale from a (min, max) domain.
@@ -103,7 +101,7 @@ const equals = (a, b) => {
 let d3_scaleLogMinMax = (data, range) => {
     const data_minMax = [d3.min(data), d3.max(data)];
 
-    return d3.scaleSequentialLog(data_minMax, range);
+    return d3.scaleSymlog(data_minMax, range);
 };
 
 function ramp(color, n = 256) {

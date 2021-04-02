@@ -21,6 +21,10 @@
         $scope.$watch("countriesData", function (_new, _old) {
             if (_new !== _old) {
                 drawMap($scope.geoObject);
+                // $scope.geoObject.element
+                //     .append("g")
+                //     .attr("transform", "translate(610,20)")
+                //     .append(() => legend({ color: colorScale, title: "antani", ticks: 8, tickFormat: ".0s", width: 260 }));
             }
         });
 
@@ -103,25 +107,17 @@
                     (r) => r.Destination
                 );
 
-                console.log(_reduceFunc);
                 let statistics_avgByCountry = map(statistics_groupByCountry, (v) => v.reduce(_reduceFunc, 0) / v.length);
 
                 return statistics_avgByCountry;
             };
 
-            let getReduceFunc = () => {
-                switch ($scope.selectedMetric) {
-                    case "total_immigration":
-                        return (sum, curr) => sum + +curr.Total;
-
-                    default:
-                        return (sum, curr) => sum + +curr.Total;
-                }
-            };
-
-            let _reduceFunc = getReduceFunc();
+            let _reduceFunc = (sum, curr) => sum + +curr.Total;
 
             const statistics_avgByCountry = getStatistics_avgByCountry($scope.activeYears, _reduceFunc);
+
+            console.log($scope.countriesData.filter((c) => c.Destination === "Russian Federation"));
+            console.log(statistics_avgByCountry["Russian Federation"]);
 
             if (_statChanged) {
                 let statistics_avgValues = null;
@@ -218,6 +214,52 @@
 
             let _handleMapUpdate = (_update, _statistics) => {
                 _update
+                    .on("mouseover", function (_, d) {
+                        d3.select(this).transition().duration(100).style("fill", "#800080");
+
+                        if (isBadCountry(d.properties)) {
+                            console.log("Unknown country:", d.id);
+                            return;
+                        }
+
+                        let v = _statistics[d.properties.name];
+
+                        if (isNaN(v)) {
+                            console.log("Data not available:", d.id);
+                            return;
+                        }
+
+                        console.log("Hovering over:", d.properties.visName, "-", v);
+
+                        // TODO: Extract the current metric value
+                        // solely for the hovered country.
+
+                        // TODO: Fill the bottom-center section with
+                        // relevant info on the hovered country.
+                    })
+                    .on("mouseout", function (_, d) {
+                        let fillColor = null;
+
+                        if (isBadCountry(d.properties)) {
+                            fillColor = BAD_COUNTRY_COLOR;
+                        } else {
+                            // TODO: Fill the bottom-center section with
+                            // a general template of insertion.
+
+                            const v = _statistics[d.properties.name];
+
+                            if (isNaN(v)) {
+                                fillColor = BAD_COUNTRY_COLOR;
+                            } else {
+                                fillColor = colorScale(v);
+                            }
+                        }
+
+                        // TODO: Change the fill attribute following
+                        // the color scale on the current metric
+
+                        d3.select(this).transition().duration(100).style("fill", fillColor);
+                    })
                     .transition()
                     .duration(1000)
                     .attr("fill", (d) => {
@@ -403,7 +445,9 @@
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
-                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => ($scope.countriesData = data));
+                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => {
+                    $scope.countriesData = data;
+                });
 
                 // Update barchart
                 let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
