@@ -411,6 +411,13 @@
                 .domain([0, maxY])
                 .range([commonHeight - margins.top - margins.bottom, 0]);
 
+            /* let tickInterval = ;
+            let tickValues = data.map(function(d) { return d.val; }).filter(function(d, i) { return i % tickInterval === 0 });
+            let xAxisLower = d3.axisBottom(x)
+                .tickFormat(d3.timeFormat("%m-%d"))
+                .tickValues(tickValues)
+                .tickPadding(15);  */
+            
             svg.append("g")
                 .attr("class", "axis-dark-cyan")
                 .attr("transform", `translate(${margins.left}, ${commonHeight - margins.bottom})`)
@@ -423,7 +430,7 @@
             svg.append("g")
                 .attr("class", "grid-lines y-axis")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
-                .call(d3.axisLeft(y).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(d3.axisLeft(y).ticks(8).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             return {
                 svgElement: svg,
@@ -437,6 +444,7 @@
         };
 
         let handleEnter = (enter, svgElement) => {
+
             enter
                 .append("rect")
                 .attr("fill", (d, i) => colorScheme[4])
@@ -516,7 +524,7 @@
                 .select("g.grid-lines.y-axis")
                 .transition()
                 .duration(1000)
-                .call(d3.axisLeft(y).tickSize(-svgElement.width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(d3.axisLeft(y).ticks(8).tickSize(-svgElement.width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             update
                 .transition()
