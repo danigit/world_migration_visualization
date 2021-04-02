@@ -105,8 +105,7 @@
             return data_service.countries.then((countries) => {
                 return data_service.loadJson(WORLD_MAP).then((map) => {
                     let countriesMap = addCountriesToMap(countries, map);
-                    return topojson.feature(countriesMap,
-                            countriesMap.objects.countries).features;
+                    return topojson.feature(countriesMap, countriesMap.objects.countries).features;
                 });
             });
         };
@@ -847,73 +846,140 @@
             });
         };
 
-        data_service.getActiveYears = (yearMin=1990, yearMax=2019) => {
+        data_service.getActiveYears = (yearMin = 1990, yearMax = 2019) => {
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 
         let getCountries_totMigrByOriginDest = (countries) => {
-            return data_service.totMigrByOriginDest
-                .then(data => data_service.filterColumn(
-                        data_service.filterDataMulti(data,
-                                countries.map(c => c.name), 1990, 2019),
-                        ['Year', 'Destination', 'Total'])
+            return data_service.totMigrByOriginDest.then((data) =>
+                data_service.filterColumn(
+                    data_service.filterDataMulti(
+                        data,
+                        countries.map((c) => c.name),
+                        1990,
+                        2019
+                    ),
+                    ["Year", "Destination", "Total"]
+                )
             );
         };
 
         let getCountries_totPopulationByAgeSex = (countries) => {
-            return data_service.totMigrByOriginDest
-                .then(data => data_service.filterColumn(
-                        data_service.filterDataMulti(data,
-                                countries.map(c => c.name), 1990, 2019),
-                        ['Year', 'Destination', 'Total'])
-            );
+            return data_service.totPopulationByAgeSex.then((data) => {
+                return data_service
+                    .filterColumn(
+                        data_service.filterDataMulti(
+                            data,
+                            countries.map((c) => c.name),
+                            1990,
+                            2019
+                        ),
+                        ["Year", "Destination", "Total_(mf)"]
+                    )
+                    .map((d) => ({ Year: +d.Year, Destination: d.Destination, Total: +(d["Total_(mf)"] * 1000) }));
+            });
         };
 
         let getCountries_migrAsPercOfPopulationAgeSex = (countries) => {
-            return data_service.totMigrByOriginDest
-                .then(data => data_service.filterColumn(
-                        data_service.filterDataMulti(data,
-                                countries.map(c => c.name), 1990, 2019),
-                        ['Year', 'Destination', 'Total'])
+            return data_service.migrAsPercOfPopulationAgeSex.then((data) =>
+                data_service
+                    .filterColumn(
+                        data_service.filterDataMulti(
+                            data,
+                            countries.map((c) => c.name),
+                            1990,
+                            2019
+                        ),
+                        ["Year", "Destination", "Total_(mf)"]
+                    )
+                    .map((d) => ({ Year: +d.Year, Destination: d.Destination, Total: +d["Total_(mf)"] }))
             );
         };
 
         let getCountries_totMigrByAgeSex = (countries) => {
-            return data_service.totMigrByOriginDest
-                .then(data => data_service.filterColumn(
-                        data_service.filterDataMulti(data,
-                                countries.map(c => c.name), 1990, 2019),
-                        ['Year', 'Destination', 'Total'])
-            );
+            return data_service.totMigrByAgeSex.then((data) => {
+                let filteredData = data_service.filterDataMulti(
+                    data,
+                    countries.map((c) => c.name),
+                    1990,
+                    2019
+                );
+
+                let columns = Object.keys(data[0]).filter((key) => {
+                    if (typeof key === "string" && key !== "Total_(mf)") {
+                        return key.includes("_(mf)");
+                    }
+                });
+
+                columns = columns.map((col) => {
+                    let colElem = col.split("_")[0];
+                    let ages = colElem.split("-");
+                    if (col == "75+_(mf)") return { key: col, value: 77 };
+                    return { key: col, value: (+ages[0] + +ages[1]) / 2 };
+                });
+
+                let groupedByYear = filteredData.map((worldData) => {
+                    let yearsSum = 0;
+                    columns.forEach((col) => {
+                        yearsSum += col.value * +worldData[col.key];
+                    });
+                    let yearsAverage = yearsSum / +worldData["Total_(mf)"];
+
+                    return {
+                        Year: +worldData.Year,
+                        Destination: worldData.Destination,
+                        Total: yearsAverage,
+                    };
+                });
+
+                return groupedByYear;
+            });
         };
 
         let getCountries_estimatedRefugees = (countries) => {
-            return data_service.totMigrByOriginDest
-                .then(data => data_service.filterColumn(
-                        data_service.filterDataMulti(data,
-                                countries.map(c => c.name), 1990, 2019),
-                        ['Year', 'Destination', 'Total'])
-            );
+            return data_service.estimatedRefugees.then((data) => {
+                let filteredData = data.filter((d) => {
+                    return countries.some((c) => c.name === d.Destination);
+                });
+
+                let columns = Object.keys(data[0]).filter((key) => {
+                    if (typeof key === "string") {
+                        return key.includes("pct_(mf)");
+                    }
+                });
+
+                let groupedByYear = filteredData.map((worldData) => {
+                    return columns.map((col) => {
+                        return {
+                            Year: +col.split("_")[0],
+                            Destination: worldData.Destination,
+                            Total: worldData[col],
+                        };
+                    });
+                });
+
+                return groupedByYear.flat();
+            });
         };
 
         data_service.getCountriesStatistics = (metric) => {
-            return data_service.countries.then(countries => {
+            return data_service.countries.then((countries) => {
                 switch (metric) {
-                    case 'total_immigration':
+                    case "total_immigration":
                         return getCountries_totMigrByOriginDest(countries);
-    
-                    case 'total_population':
+
+                    case "total_population":
                         return getCountries_totPopulationByAgeSex(countries);
-    
-                    case 'immigration_vs_population':
+
+                    case "immigration_vs_population":
                         return getCountries_migrAsPercOfPopulationAgeSex(countries);
-    
-                    case 'immigrants_avg_age':
+
+                    case "immigrants_avg_age":
                         return getCountries_totMigrByAgeSex(countries);
-    
-                    case 'refugees_vs_immigrants':
+
+                    case "refugees_vs_immigrants":
                         return getCountries_estimatedRefugees(countries);
-    
+
                     default:
                         throw `Invalid statistics metric: ${metric}`;
                 }
@@ -922,42 +988,34 @@
 
         data_service.getWorldStatistics = () => {
             return data_service.countries.then((countries) => {
-
                 let numCountries = countries.length;
 
                 let totalMigrantsGroupByYear = data_service.totMigrByOriginDest.then((data) => {
                     data = data.filter((countryData) => countryData.Destination === "WORLD");
 
-                    let groupedByYear = data.map(worldData => ({year:+worldData.Year, total_immigration:+worldData.Total}));
+                    let groupedByYear = data.map((worldData) => ({ year: +worldData.Year, total_immigration: +worldData.Total }));
 
                     return groupedByYear;
                 });
 
                 let totalPopulationGroupByYear = data_service.totPopulationByAgeSex.then((data) => {
-
                     data = data.filter((countryData) => countryData.Destination === "WORLD");
 
-
-                    let groupedByYear = data.map(worldData => (
-                        {
-                            year:+worldData.Year, 
-                            total_population:+worldData["Total_(mf)"]*1000
-                        })
-                    );
+                    let groupedByYear = data.map((worldData) => ({
+                        year: +worldData.Year,
+                        total_population: +worldData["Total_(mf)"] * 1000,
+                    }));
 
                     return groupedByYear;
                 });
 
                 let migrPercTotalPopulationGroupByYear = data_service.migrAsPercOfPopulationAgeSex.then((data) => {
+                    data = data.filter((countryData) => countryData.Destination === "WORLD");
 
-                    data = data.filter(countryData => countryData.Destination==="WORLD");
-                    
-                    let groupedByYear = data.map(worldData => (
-                        {
-                            year:+worldData.Year, 
-                            immigration_vs_population:+worldData["Total_(mf)"]
-                        })
-                    );
+                    let groupedByYear = data.map((worldData) => ({
+                        year: +worldData.Year,
+                        immigration_vs_population: +worldData["Total_(mf)"],
+                    }));
 
                     return groupedByYear;
                 });
@@ -983,14 +1041,14 @@
                     let groupedByYear = data.map((worldData) => {
                         let yearsSum = 0;
                         columns.forEach((col) => {
-                                yearsSum += col.value * (+worldData[col.key]); 
+                            yearsSum += col.value * +worldData[col.key];
                         });
-                        let yearsAverage = yearsSum / (+worldData["Total" + selectedGender]);
-                         
+                        let yearsAverage = yearsSum / +worldData["Total" + selectedGender];
+
                         return {
-                            year:+worldData.Year, 
-                            immigrants_avg_age:yearsAverage
-                        }
+                            year: +worldData.Year,
+                            immigrants_avg_age: yearsAverage,
+                        };
                     });
 
                     return groupedByYear;
@@ -1011,7 +1069,7 @@
 
                     columns.forEach((col) => {
                         let groupedObject = {};
-                        groupedObject.refugees_vs_immigrants = (+data[0][col]);
+                        groupedObject.refugees_vs_immigrants = +data[0][col];
                         groupedObject.year = +col.split("_")[0];
                         groupedByYear.push(groupedObject);
                     });
@@ -1026,26 +1084,21 @@
                     percEstimatedRefugeesGroupByYear,
                 ];
 
-                return Promise.all(promisedResultsList).then(values => {
+                return Promise.all(promisedResultsList).then((values) => {
                     return values[0].map((yearData, idx) => {
                         return {
-                            year:yearData.year,
+                            year: yearData.year,
                             statistics: {
-                                total_immigration:values[0][idx].total_immigration
-                                ,
-                                total_population:values[1][idx].total_population
-                                ,
-                                immigration_vs_population:values[2][idx].immigration_vs_population
-                                ,
-                                immigrants_avg_age:values[3][idx].immigrants_avg_age
-                                ,
-                                refugees_vs_immigrants:values[4][idx].refugees_vs_immigrants
-                            }
-                        }
-                    })
+                                total_immigration: values[0][idx].total_immigration,
+                                total_population: values[1][idx].total_population,
+                                immigration_vs_population: values[2][idx].immigration_vs_population,
+                                immigrants_avg_age: values[3][idx].immigrants_avg_age,
+                                refugees_vs_immigrants: values[4][idx].refugees_vs_immigrants,
+                            },
+                        };
+                    });
                 });
-            });  
+            });
         };
-    };
-})
-();
+    }
+})();
