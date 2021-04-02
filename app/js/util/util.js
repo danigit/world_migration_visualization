@@ -20,7 +20,7 @@ function resizeMenuPanel(isMenuOpened) {
  */
 function transformNumberFormat(number, order = false, decimals = 2, selectedMetric="") {
     if (selectedMetric==="immigration_vs_population" || selectedMetric==="refugees_vs_immigrants") {
-        return number.toFixed(decimals) + "\%";
+        return number.toFixed(1) + "\%";
     }
     if (!order) {
         let steps = [
@@ -40,6 +40,9 @@ function transformNumberFormat(number, order = false, decimals = 2, selectedMetr
                 break;
             }
         }
+        /* if (number <= 1 && number >=0) {
+            decimals=1;
+        } */
         return (number / steps[i].value).toFixed(decimals).replace(regularExpression, "$1") + " " + steps[i].symbol;
     } else {
         /*
