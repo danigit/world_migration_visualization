@@ -19,18 +19,40 @@
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
 
+        let _updateTitle = () => {
+            titleLabel.innerHTML = $scope.visualizationTypes
+                .find(t => t.value === $scope.selectedMetric).text;
+
+            let yearText = null;
+            let activeLength = $scope.activeYears.length;
+
+            if (activeLength == 1) {
+                yearText = $scope.activeYears[0];
+            } else {
+                yearText = `${$scope.activeYears[0]} - ${$scope.activeYears[activeLength - 1]}`;
+            }
+
+            titleYear.innerHTML = yearText;
+        }
+
         $scope.$watch("countriesData", function (_new, _old) {
             if (_new !== _old) {
+                _updateTitle();
+
                 drawMap($scope.geoObject);
             }
         });
 
         $scope.$watch("activeYears", function (_new, _old) {
             if (_new !== _old) {
-                console.log("activeYears changed");
+                _updateTitle();
+
                 drawMap($scope.geoObject, false);
             }
         });
+
+        const titleYear  = document.getElementById('title-year');
+        const titleLabel = document.getElementById('title-label');
 
         const BAD_COUNTRY_COLOR = "#ff5952";
         const HIGHLIGHTED_COLOR = "#ff9316"
@@ -39,7 +61,7 @@
         let colorScale;
 
         $scope.globalStatisticsVisName = "Global statistics";
-        $scope.selectedMetric = { text: "Total immigration", value: "total_immigration" };
+        $scope.selectedMetric = "total_immigration";
         $scope.barChartInitialized = false;
 
         $scope.geoObject = null;
@@ -157,6 +179,67 @@
                 //             colorScale.ticks().concat(colorScale.domain()));
             }
 
+            let _handleMapOnMouseOver = (e, d, _statistics) => {
+                d3.select(e.target)
+                    .transition()
+                    .duration(100)
+                    .style("fill", "#800080");
+
+                // FIXME: Investigate why map colors do not update
+                // properly after mouse over events have been triggered
+
+                if (isBadCountry(d.properties)) {
+                    console.log("Unknown country:", d.id);
+                    $scope.hoveredCountry = {
+                        visName: "Unknown country"
+                    };
+                } else {
+                    let v = _statistics[d.properties.name];
+
+                    $scope.hoveredCountry = Object.assign({}, d.properties);
+
+                    if (isNaN(v)) {
+                        console.log("Data not available:", d.id);
+                        $scope.hoveredCountry.value = "Data not available";
+                    } else {
+                        $scope.hoveredCountry.value = transformNumberFormat(v);
+                    }
+
+                    console.log("Hovering over:", d.properties.visName, "-", v);
+                }
+
+                // Check if a dispatch is under way
+                if (!$scope.$$phase)
+                    $scope.$apply();
+            };
+            
+            let _handleMapOnMouseOut  = (e, d, _statistics) => {
+                let fillColor = null;
+
+                $scope.hoveredCountry = {};
+
+                // Check if a dispatch is under way
+                if (!$scope.$$phase)
+                    $scope.$apply();
+
+                if (isBadCountry(d.properties)) {
+                    fillColor = BAD_COUNTRY_COLOR;
+                } else {
+                    const v = _statistics[d.properties.name];
+
+                    if (isNaN(v)) {
+                        fillColor = BAD_COUNTRY_COLOR;
+                    } else {
+                        fillColor = colorScale(v);
+                    }
+                }
+
+                d3.select(e.target)
+                    .transition()
+                    .duration(100)
+                    .style("fill", fillColor);
+            };
+
             let _handleMapEnter = (_enter, _path, _statistics) => {
                 _enter
                     .append("path")
@@ -186,117 +269,18 @@
 
                         $state.go("country", { countryName: slugify(d.properties.visName) });
                     })
-                    .on("mouseover", function (_, d) {
-                        d3.select(this).transition().duration(100).style("fill", "#800080");
-
-                        if (isBadCountry(d.properties)) {
-                            console.log("Unknown country:", d.id);
-                            return;
-                        }
-
-                        let v = _statistics[d.properties.name];
-
-                        if (isNaN(v)) {
-                            console.log("Data not available:", d.id);
-                            return;
-                        }
-
-                        $scope.hoveredCountry = d.properties;
-
-                        console.log($scope.hoveredCountry);
-                        $scope.hoveredCountry.value = transformNumberFormat(v);
-                        $scope.$apply();
-
-                        console.log("Hovering over:", d.properties.visName, "-", v);
-
-                        // TODO: Extract the current metric value
-                        // solely for the hovered country.
-
-                        // TODO: Fill the bottom-center section with
-                        // relevant info on the hovered country.
-                    })
-                    .on("mouseout", function (_, d) {
-                        let fillColor = null;
-
-                        $scope.hoveredCountry = {};
-                        $scope.$apply();
-
-                        if (isBadCountry(d.properties)) {
-                            fillColor = BAD_COUNTRY_COLOR;
-                        } else {
-                            // TODO: Fill the bottom-center section with
-                            // a general template of insertion.
-
-                            const v = _statistics[d.properties.name];
-
-                            if (isNaN(v)) {
-                                fillColor = BAD_COUNTRY_COLOR;
-                            } else {
-                                fillColor = colorScale(v);
-                            }
-                        }
-
-                        // TODO: Change the fill attribute following
-                        // the color scale on the current metric
-
-                        d3.select(this).transition().duration(100).style("fill", fillColor);
-                    });
+                    .on("mouseover", (e, d) =>
+                        _handleMapOnMouseOver(e, d, _statistics))
+                    .on("mouseout", (e, d) =>
+                        _handleMapOnMouseOut(e,  d, _statistics));
             };
 
             let _handleMapUpdate = (_update, _statistics) => {
                 _update
-                    .on("mouseover", function (_, d) {
-                        d3.select(this).transition().duration(100).style("fill", "#800080");
-
-                        if (isBadCountry(d.properties)) {
-                            console.log("Unknown country:", d.id);
-                            return;
-                        }
-
-                        let v = _statistics[d.properties.name];
-
-                        if (isNaN(v)) {
-                            console.log("Data not available:", d.id);
-                            return;
-                        }
-
-                        $scope.hoveredCountry = d.properties;
-                        $scope.hoveredCountry.value = transformNumberFormat(v);
-                        $scope.$apply();
-                        console.log("Hovering over:", d.properties.visName, "-", v);
-
-                        // TODO: Extract the current metric value
-                        // solely for the hovered country.
-
-                        // TODO: Fill the bottom-center section with
-                        // relevant info on the hovered country.
-                    })
-                    .on("mouseout", function (_, d) {
-                        let fillColor = null;
-
-                        $scope.hoveredCountry = {};
-                        $scope.$apply();
-
-                        if (isBadCountry(d.properties)) {
-                            fillColor = BAD_COUNTRY_COLOR;
-                        } else {
-                            // TODO: Fill the bottom-center section with
-                            // a general template of insertion.
-
-                            const v = _statistics[d.properties.name];
-
-                            if (isNaN(v)) {
-                                fillColor = BAD_COUNTRY_COLOR;
-                            } else {
-                                fillColor = colorScale(v);
-                            }
-                        }
-
-                        // TODO: Change the fill attribute following
-                        // the color scale on the current metric
-
-                        d3.select(this).transition().duration(100).style("fill", fillColor);
-                    })
+                    .on("mouseover", (e, d) =>
+                        _handleMapOnMouseOver(e, d, _statistics))
+                    .on("mouseout", (e, d) =>
+                        _handleMapOnMouseOut(e,  d, _statistics))
                     .transition()
                     .duration(1000)
                     .attr("fill", (d) => {
@@ -523,7 +507,12 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
-                .attr("fill", (datum, i) => colorScheme[4]);
+                .attr("fill", function(datum, i) {
+                    if (!d3.select(this).classed("selected"))
+                        return colorScheme[4];
+                    
+                    return HIGHLIGHTED_COLOR;
+                    });
 
             // update.selectAll("rect").on("click", function (e, d) {
             // selectedYear = +d.label;
@@ -575,14 +564,14 @@
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
-                dataService.getCountriesStatistics($scope.selectedMetric.value).then((data) => {
+                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => {
                     $scope.countriesData = data;
                 });
 
                 // Update barchart
                 let dataToBePlotted = $scope.globalStatistics.map((d) => ({
                     label: d.year,
-                    val: d.statistics[$scope.selectedMetric.value],
+                    val: d.statistics[$scope.selectedMetric],
                 }));
 
                 drawBarChart(dataToBePlotted, barChartSvgElement);
@@ -616,11 +605,22 @@
             const country   = value[0];
             const isoAlpha3 = country.props.isoAlpha3;
 
-            $scope.geoObject.element
-                .select(`path#${isoAlpha3}`)
-                .dispatch("mouseover");
-
             $scope.selectedTopFlag = capitalize(country.name)
+            
+            // FIXME: Holy See is not present
+            // in the TopoJSON file
+            if (!(isoAlpha3 === "VAT")) {
+                $scope.geoObject.element
+                    .select(`path#${isoAlpha3}`)
+                    .dispatch("mouseover");
+            } else {
+                $scope.hoveredCountry = {
+                    visName: "Country not available"
+                };
+
+                if (!$scope.$$phase)
+                    $scope.$apply();
+            }
 
             let tooltip = document.getElementById("top-flags-tooltip");
 
@@ -636,7 +636,21 @@
          * Function that handles the mouse out on the top countries flags
          * @param {string} value
          */
-        $scope.hideTopCountryHint = function (type) {
+        $scope.hideTopCountryHint = function (type, value) {
+            const country   = value[0];
+            const isoAlpha3 = country.props.isoAlpha3;
+
+            if (!(isoAlpha3 === "VAT")) {
+                $scope.geoObject.element
+                    .select(`path#${isoAlpha3}`)
+                    .dispatch("mouseout");
+            } else {
+                $scope.hoveredCountry = {};
+
+                if (!$scope.$$phase)
+                    $scope.$apply();
+            }
+
             let tooltip = document.getElementById("top-flags-tooltip");
 
             tooltip.classList.remove("display-block");
@@ -648,12 +662,12 @@
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
-                dataService.getCountriesStatistics($scope.selectedMetric.value).then((data) => ($scope.countriesData = data));
+                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => ($scope.countriesData = data));
 
                 // Update barchart
                 let dataToBePlotted = $scope.globalStatistics.map((d) => ({
                     label: d.year,
-                    val: d.statistics[$scope.selectedMetric.value],
+                    val: d.statistics[$scope.selectedMetric],
                 }));
 
                 // colorScaleBarChart = d3_scaleLogMinMax(
@@ -670,7 +684,7 @@
         dataService.loadWorldMap().then((worldData) => {
             $scope.geoObject = initMap(worldData);
 
-            dataService.getCountriesStatistics($scope.selectedMetric.value).then((data) => {
+            dataService.getCountriesStatistics($scope.selectedMetric).then((data) => {
                 $scope.countriesData = data;
                 $scope.$apply();
             });
@@ -679,7 +693,7 @@
         dataService.getWorldStatistics().then((data) => {
             $scope.globalStatistics = data;
 
-            let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric.value] }));
+            let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
 
             if (!$scope.barChartInitialized) {
                 barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
@@ -688,5 +702,7 @@
 
             drawBarChart(dataToBePlotted, barChartSvgElement);
         });
+
+        _updateTitle();
     }
 })();

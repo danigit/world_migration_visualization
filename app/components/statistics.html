@@ -12,9 +12,8 @@
         <div class="width-20">
             <div layout="column">
                 <div class="color-white margin-top-15-px margin-left-20px">
-                    <div class="font-size-xx-large text-bold">2001 - 2010</div>
-                    <div class="font-large margin-top-10-px color-darkcyan">{{selectedMetric.text}}
-                    </div>
+                    <div id="title-year"  class="font-size-xx-large text-bold"></div>
+                    <div id="title-label" class="font-large margin-top-10-px color-darkcyan"></div>
                 </div>
                 <hr class="menu-divider margin-left-20px">
             </div>
@@ -39,7 +38,7 @@
                     <md-input-container id="visualization-type-container">
                         <label>Visualization type</label>
                         <md-select ng-model="selectedMetric" ng-change="handleBarChartMetricChange()">
-                            <md-option ng-repeat="type in visualizationTypes" ng-value="type">
+                            <md-option ng-repeat="type in visualizationTypes" ng-value="type.value">
                                 {{type.text}}
                             </md-option>
                         </md-select>
@@ -82,13 +81,13 @@
                     <div layout="column">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
                             countries="top5Countries"
-                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
+                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in', flagValue)"
                             top-countries-icon-path="'app/img/home/up.png'">
                         </top-countries>
                         <hr class="menu-divider width-90" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
                             countries="flop5Countries"
-                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
+                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in', flagValue)"
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
                 </div>

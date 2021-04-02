@@ -17,7 +17,7 @@ angular.module("top-countries", []).directive("topCountries", function () {
             '<img class="vertical-align-middle margin-right-10-px" width="15px" src="{{topCountriesIconPath}}">' +
             "</div>" +
             '<div ng-repeat="country in countries" class="padding-10-px" ng-click="handleButton({flagValue: country[0]})">' +
-            '<img class="vertical-align-middle margin-right-5-px"  ng-mouseover="showHint({flagValue: country, event: $event})" ng-mouseout="hideHint({event: $event})"  width="30px" src="{{ country[0].flagPath }}">' +
+            '<img class="vertical-align-middle margin-right-5-px"  ng-mouseover="showHint({flagValue: country, event: $event})" ng-mouseout="hideHint({event: $event, flagValue: country})"  width="30px" src="{{ country[0].flagPath }}">' +
             "</div>" +
             "</div>",
     };
