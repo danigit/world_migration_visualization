@@ -12,7 +12,7 @@
 
     function countryController($scope, $state, dataService, countryService, $stateParams) {
         $scope.countryInfoValue = "global_rank";
-        $scope.selectedTopCountry = "";
+        // $scope.selectedTopCountry = "";
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
 

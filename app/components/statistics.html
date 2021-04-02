@@ -81,13 +81,13 @@
                 <div class="width-30 height-100">
                     <div layout="column">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
-                            ng-model="selectedTopCountryValue" countries="topFlags"
+                            countries="top5Countries"
                             show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
                             top-countries-icon-path="'app/img/home/up.png'">
                         </top-countries>
                         <hr class="menu-divider width-90" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
-                            ng-model="selectedTopCountryValue" countries="topFlags"
+                            countries="flop5Countries"
                             show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in')"
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
