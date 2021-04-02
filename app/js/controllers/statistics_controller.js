@@ -40,7 +40,7 @@
         let colorScale;
 
         $scope.globalStatisticsVisName = "Global statistics";
-        $scope.selectedMetric = "total_immigration";
+        $scope.selectedMetric = { text: "Total immigration", value: "total_immigration" };
         $scope.barChartInitialized = false;
 
         $scope.geoObject = null;
@@ -363,7 +363,7 @@
             let x = d3
                 .scaleBand()
                 .range([margins.left, commonWidth - margins.right])
-                .padding(0.1)
+                .padding(0.4)
                 .domain(xLabels);
 
             let y = d3
@@ -518,7 +518,6 @@
                     (exit) => exit.remove()
                 );
 
-            // Barchart labels
             svgElement.mainGroup
                 .selectAll("text")
                 .data(data)
@@ -531,12 +530,15 @@
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
-                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => {
+                dataService.getCountriesStatistics($scope.selectedMetric.value).then((data) => {
                     $scope.countriesData = data;
                 });
 
                 // Update barchart
-                let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
+                let dataToBePlotted = $scope.globalStatistics.map((d) => ({
+                    label: d.year,
+                    val: d.statistics[$scope.selectedMetric.value],
+                }));
 
                 drawBarChart(dataToBePlotted, barChartSvgElement);
             }
@@ -588,10 +590,13 @@
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
-                dataService.getCountriesStatistics($scope.selectedMetric).then((data) => ($scope.countriesData = data));
+                dataService.getCountriesStatistics($scope.selectedMetric.value).then((data) => ($scope.countriesData = data));
 
                 // Update barchart
-                let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
+                let dataToBePlotted = $scope.globalStatistics.map((d) => ({
+                    label: d.year,
+                    val: d.statistics[$scope.selectedMetric.value],
+                }));
 
                 // colorScaleBarChart = d3_scaleLogMinMax(
                 //     dataToBePlotted.map((d) => d.val),
@@ -607,7 +612,7 @@
         dataService.loadWorldMap().then((worldData) => {
             $scope.geoObject = initMap(worldData);
 
-            dataService.getCountriesStatistics($scope.selectedMetric).then((data) => {
+            dataService.getCountriesStatistics($scope.selectedMetric.value).then((data) => {
                 $scope.countriesData = data;
                 $scope.$apply();
             });
@@ -616,7 +621,7 @@
         dataService.getWorldStatistics().then((data) => {
             $scope.globalStatistics = data;
 
-            let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
+            let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric.value] }));
 
             if (!$scope.barChartInitialized) {
                 barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
