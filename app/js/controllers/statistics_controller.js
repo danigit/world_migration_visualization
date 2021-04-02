@@ -598,12 +598,12 @@
          * @param {string} value
          */
         $scope.showTopCountryHint = function (value, event, type) {
-            // const country   = value[0];
-            // const isoAlpha3 = country.props.isoAlpha3;
+            const country   = value[0];
+            const isoAlpha3 = country.props.isoAlpha3;
 
-            // $scope.geoObject.element
-            //     .select(`path#${isoAlpha3}`)
-            //     .dispatch("mouseover");
+            $scope.geoObject.element
+                .select(`path#${isoAlpha3}`)
+                .dispatch("mouseover");
 
             $scope.selectedTopFlag = capitalize(country.name)
 
