@@ -118,8 +118,8 @@
 
             const statistics_avgByCountry = getStatistics_avgByCountry($scope.activeYears, _reduceFunc);
 
-            console.log($scope.countriesData.filter((c) => c.Destination === "Russian Federation"));
-            console.log(statistics_avgByCountry["Russian Federation"]);
+            // console.log($scope.countriesData.filter((c) => c.Destination === "Russian Federation"));
+            // console.log(statistics_avgByCountry["Russian Federation"]);
 
             if (_statChanged) {
                 let statistics_avgValues = null;
@@ -133,6 +133,7 @@
                 }
 
                 colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
+                console.log(colorScale.ticks());
             }
 
             let _handleMapEnter = (_enter, _path, _statistics) => {
