@@ -486,7 +486,7 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .text((d) => {
-                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0, $scope.selectedMetric.value) : "";
+                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 1, $scope.selectedMetric) : "";
                 });
         };
 
@@ -496,7 +496,7 @@
                 .duration(1000)
                 .attr("y", (d) => svgElement.y(d.val))
                 .text((d) => {
-                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0, $scope.selectedMetric.value) : "";
+                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 1, $scope.selectedMetric) : "";
                 });
         };
 
