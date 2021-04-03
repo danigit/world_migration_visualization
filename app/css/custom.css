@@ -49,6 +49,14 @@ DISPLAY
     min-width: 200px !important;
 }
 
+.max-width-1920-px {
+    max-width: 1920px;
+}
+
+.min-width-1520-px {
+    min-width: 1520px;
+}
+
 .max-width-500-px {
     max-width: 500px;
 }
@@ -63,6 +71,10 @@ DISPLAY
 
 .min-height-55-px {
     min-height: 55px !important;
+}
+
+.min-height-50-px {
+    min-height: 50px !important;
 }
 
 .max-height-700-px {
@@ -133,6 +145,10 @@ DISPLAY
     width: 25% !important;
 }
 
+.width-1920-px {
+    width: 1920px;
+}
+
 .width-300-px {
     width: 300px;
 }
@@ -159,6 +175,10 @@ DISPLAY
 
 .width-45-px {
     width: 45px !important;
+}
+
+.width-55-px {
+    width: 55px !important;
 }
 
 .width-30-px {
@@ -324,6 +344,10 @@ MARGINS
     margin-bottom: 10px !important;
 }
 
+.margin-bottom-5px {
+    margin-bottom: 5px !important;
+}
+
 .margin-bottom-20-px {
     margin-bottom: 20px !important;
 }
@@ -448,6 +472,10 @@ MARGINS
     padding-right: 40px;
 }
 
+.padding-bottom-5px {
+    padding-bottom: 5px !important;
+}
+
 .padding-top-bottom-5px {
     padding: 5px 0 5px 0 !important;
 }
@@ -474,7 +502,7 @@ COLOR
 
 .color-orange-small {
     color: #ff9316 !important;
-    font-size:10px;
+    font-size: 10px;
 }
 
 .color-violet {
@@ -486,7 +514,7 @@ COLOR
 }
 
 .color-red {
-    color: #ef6868;
+    color: #fa606b;
 }
 
 .color-lightgray {

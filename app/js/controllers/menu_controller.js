@@ -17,11 +17,11 @@
         $scope.isSideMenuOpened = true;
         $scope.searchSource = "";
         $scope.searchDestination = "";
-        $scope.genreFilterValue = "menu-male";
+        $scope.genderFilterValue = "menu-male";
         $scope.regionFilterValue = "menu-continent";
         $scope.continents = dataService.continents;
         dataService.countries.then((data) => ($scope.countries = data));
-        $scope.genreButtons = dataService.genreButtons;
+        $scope.genderButtons = dataService.genderButtons;
         $scope.regionButtons = dataService.regionButtons;
         $scope.selectedCountries = {
             source: [],
@@ -57,11 +57,11 @@
         let updateStatistics = () => {};
 
         /**
-         * Function that handles the click on the genre radio group filter in the menu
+         * Function that handles the click on the gender radio group filter in the menu
          * @param {string} value
          */
-        $scope.handleGenreClick = function (value) {
-            $scope.genreFilterValue = value;
+        $scope.handleGenderClick = function (value) {
+            $scope.genderFilterValue = value;
             updateStatistics();
         };
 

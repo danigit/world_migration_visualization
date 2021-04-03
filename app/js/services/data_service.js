@@ -76,8 +76,8 @@
             { value: 2019, legend: "2019" },
         ];
 
-        // Variable that defines the genre buttons in the filter menu
-        data_service.genreButtons = [
+        // Variable that defines the gender buttons in the filter menu
+        data_service.genderButtons = [
             { value: "menu-male", text: "Male" },
             { value: "menu-female", text: "Female" },
             { value: "menu-all", text: "All" },
@@ -778,17 +778,17 @@
 
                         countryData.push({
                             label: label,
-                            value: { first: [reg.reduce((sum, val) => (sum += +val[country_one]), 0)] },
+                            value: { left: [reg.reduce((sum, val) => (sum += +val[country_one]), 0)] },
                         });
 
-                        countryData[i].value["second"] = [reg.reduce((sum, val) => (sum += +val[country_two]), 0)];
+                        countryData[i].value["right"] = [reg.reduce((sum, val) => (sum += +val[country_two]), 0)];
                     });
 
-                    let firstPercentages = data_service.computePercentage(countryData.map((d) => d.value.first[0]));
-                    let secondPercentages = data_service.computePercentage(countryData.map((d) => d.value.second[0]));
+                    let firstPercentages = data_service.computePercentage(countryData.map((d) => d.value.left[0]));
+                    let secondPercentages = data_service.computePercentage(countryData.map((d) => d.value.right[0]));
                     countryData.forEach((elem, i) => {
-                        countryData[i].value["first"].push(firstPercentages[i].toFixed(0));
-                        countryData[i].value["second"].push(secondPercentages[i].toFixed(0));
+                        countryData[i].value["left"].push(firstPercentages[i].toFixed(0));
+                        countryData[i].value["right"].push(secondPercentages[i].toFixed(0));
                     });
 
                     return countryData;

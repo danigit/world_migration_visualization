@@ -13,21 +13,29 @@
     function compareController($scope, $state, dataService) {
         $scope.secondaryMenuSelectedValue = "compare";
         $scope.secondaryMenuButtons = dataService.menuButtons;
-        $scope.searchSource = "";
-        $scope.continents = dataService.continents;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
         $scope.countryInfoValue = "global_rank";
-        $scope.genreButtons = dataService.genreButtons;
+        $scope.genderButtons = dataService.genderButtons;
         $scope.leftSendToRight;
         $scope.rightSendToLeft;
+        $scope.searchSource = "";
+
         let commonStructure;
+        let lineChartStructure;
         let firsCommonStructureCall = true;
         let firstLineChartStructureCall = true;
-        let firstStackedChartStructureCall = true;
-        let color;
-        let lineChartStructure;
-        let stackedStructure;
+        let color = d3.scaleOrdinal(d3.schemePaired);
+        let countryColors = ["#1f78b4", "#a6cee3"];
+        let margins = { top: 20, bottom: 60, left: 20, right: 20 };
+        let width = 500 - margins.left - margins.right;
+        let height = 300 - margins.top - margins.bottom;
 
+        let sliderMin = 1990;
+        let sliderMax = 2019;
+        let consideredYears = dataService.getActiveYears(sliderMin, sliderMax);
+        let parseDate = d3.timeParse("%Y");
+
+        // object that contain the statistics values for the left countries
         $scope.countryLeftStatisticsValues = {
             totalImmigrations: "",
             totalPopulation: "",
@@ -35,6 +43,8 @@
             immigrationAverageAge: "",
             refugeeVsImmigration: "",
         };
+
+        // object that contain the global statistics for the left countries
         $scope.globalRankCountryLeftStatisticsValues = {
             totalImmigrationsGlobalRank: "",
             totalPopulationGlobalRank: "",
@@ -43,6 +53,7 @@
             refugeeVsImmigrationGlobalRank: "",
         };
 
+        // object that contain the statistics values for the right countries
         $scope.countryRightStatisticsValues = {
             totalImmigrations: "",
             totalPopulation: "",
@@ -50,6 +61,8 @@
             immigrationAverageAge: "",
             refugeeVsImmigration: "",
         };
+
+        // object that contain the global statistics for the right countries
         $scope.globalRankCountryRightStatisticsValues = {
             totalImmigrationsGlobalRank: "",
             totalPopulationGlobalRank: "",
@@ -58,6 +71,29 @@
             refugeeVsImmigrationGlobalRank: "",
         };
 
+        /**
+         * Function that returns a N. A. string if the parameter is NaN else returns the parameter
+         * @param {data element} data
+         * @returns
+         */
+        let setNotAvailable = (data, rank) => {
+            return isNaN(data) ? "N. A." : transformNumberFormat(data, rank, 0);
+        };
+
+        /**
+         * Function that removes the sex postfixes from the data passed as parameter
+         * @param {array} data
+         * @returns
+         */
+        let preprocessRateOfChange = (data) => {
+            let xLabels = Object.keys(data);
+            const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
+            xLabels = xLabels.map((label) => label.replace(reg, ""));
+            let yValues = Object.values(data).map((value) => +value);
+            return xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
+        };
+
+        // getting the countries from the service
         dataService.countries.then((data) => {
             $scope.countries = data;
             $scope.selectedCountry = {
@@ -65,59 +101,47 @@
                 right: $scope.countries[1],
             };
 
-            $scope.genreFilterValue = "menu-all";
+            $scope.genderFilterValue = "menu-all";
             $scope.updateStatisticsLeft();
             $scope.updateStatisticsRight();
             $scope.$apply();
         });
 
-        let sliderMin = 1990;
-        let sliderMax = 2019;
-        let consideredYears = [1990, 1995, 2000, 2005, 2010, 2015, 2019];
-        let parseDate = d3.timeParse("%Y");
-
         /**
-         * Function that updates the statistics
+         * Function that updates the statistics for the left country
          */
         $scope.updateStatisticsLeft = () => {
-            // getting the total migrants by origin and destination
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getGlobalRankStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
+                    $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank = setNotAvailable(
+                        data.average_tot_migrants_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank = setNotAvailable(
+                        data.average_tot_population_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank = setNotAvailable(
+                        data.average_perc_immigration_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank = setNotAvailable(
+                        data.average_age_migrants_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank = setNotAvailable(
+                        data.average_est_refugees_global_rank,
+                        true
+                    );
                     $scope.$apply();
                 });
 
-            // $scope.selectedCountryController, sliderMin, sliderMax
+            // getting the total migrants by origin and destination
             dataService
-                .getGlobalRankStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getTotMigrantsByOriginAndDestination($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_tot_migrants_global_rank, true);
-
-                    $scope.globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank = isNaN(data.average_tot_population_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_tot_population_global_rank, true);
-
-                    $scope.globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank = isNaN(
-                        data.average_perc_immigration_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_perc_immigration_global_rank, true);
-
-                    $scope.globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank = isNaN(
-                        data.average_age_migrants_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_age_migrants_global_rank, true);
-
-                    $scope.globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank = isNaN(
-                        data.average_est_refugees_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_est_refugees_global_rank, true);
-
+                    $scope.countryLeftStatisticsValues.totalImmigrations = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -127,10 +151,10 @@
                     $scope.selectedCountry.left.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.totalPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.totalPopulation = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -140,10 +164,10 @@
                     $scope.selectedCountry.left.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.immigrationVsPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.immigrationVsPopulation = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -153,10 +177,10 @@
                     $scope.selectedCountry.left.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.immigrationAverageAge = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.immigrationAverageAge = setNotAvailable(data, false);
                 });
 
             // getting the estimated refugees
@@ -164,24 +188,26 @@
                 .getEstimatedRefugees(
                     $scope.selectedCountry.left.name,
                     consideredYears,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "_pct")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.refugeeVsImmigration = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryLeftStatisticsValues.refugeeVsImmigration = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
+            // getting the mutual migration statistics
             dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
                 $scope.leftSendToRight = transformNumberFormat(data.countryOneSend);
                 $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
                 $scope.$apply();
             });
 
+            // getting the common regions destinations
             dataService
                 .getMutualCommonMigrationDestinations(
                     $scope.selectedCountry.left.name,
                     $scope.selectedCountry.right.name,
-                    $scope.genreFilterValue
+                    $scope.genderFilterValue
                 )
                 .then((data) => {
                     if (firsCommonStructureCall) {
@@ -191,11 +217,9 @@
                     drawBarChart(data, commonStructure);
                 });
 
-            dataService.getRateOfChange($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
-                data = preprocessRateOfChange(data);
-                data.forEach(function (d, i) {
-                    d.label = parseDate(d.label.split("-")[1]);
-                });
+            // getting the rate of change for the right country
+            dataService.getRateOfChange($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue).then((data) => {
+                data = preprocessRateOfChange(data).map((d) => ({ label: parseDate(d.label.split("-")[1]), value: +d.value }));
                 dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
                     if (firstLineChartStructureCall) {
                         lineChartStructure = initializeLineChart(data, minMax, "change-rate-container");
@@ -205,63 +229,51 @@
                 });
             });
 
+            // getting the country migrants age statistics
             dataService
-                .getChildBrainDrainStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getChildBrainDrainStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
                     $scope.childLeftStatistics = transformNumberFormat(data["0-14"], false, 0);
-                    $scope.brainDrainLeftStatistics = transformNumberFormat(data["20-34"], false, 0);
-                    $scope.totalLeftMigrants = transformNumberFormat(data["Total"], false, 0);
                     $scope.childrenLeftPercentage = transformNumberFormat((data["0-14"] / data["Total"]) * 100, false, 0);
+                    $scope.totalLeftMigrants = transformNumberFormat(data["Total"], false, 0);
+                    $scope.brainDrainLeftStatistics = transformNumberFormat(data["20-34"], false, 0);
                     $scope.drainBrainLeftPercentage = transformNumberFormat((data["20-34"] / data["Total"]) * 100, false, 0);
                 });
         };
 
-        let preprocessRateOfChange = (data) => {
-            let xLabels = Object.keys(data);
-            const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
-            xLabels = xLabels.map((label) => label.replace(reg, ""));
-            let yValues = Object.values(data).map((value) => +value);
-            return xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
-        };
-
         $scope.updateStatisticsRight = () => {
-            // $scope.selectedCountryController, sliderMin, sliderMax
+            // getting the ranking statistics
             dataService
-                .getGlobalRankStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getGlobalRankStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    $scope.globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_tot_migrants_global_rank, true);
-
-                    $scope.globalRankCountryRightStatisticsValues.totalPopulationGlobalRank = isNaN(data.average_tot_population_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_tot_population_global_rank, true);
-
-                    $scope.globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank = isNaN(
-                        data.average_perc_immigration_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_perc_immigration_global_rank, true);
-
-                    $scope.globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank = isNaN(
-                        data.average_age_migrants_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_age_migrants_global_rank, true);
-
-                    $scope.globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank = isNaN(
-                        data.average_est_refugees_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_est_refugees_global_rank, true);
-
+                    $scope.globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank = setNotAvailable(
+                        data.average_tot_migrants_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryRightStatisticsValues.totalPopulationGlobalRank = setNotAvailable(
+                        data.average_tot_population_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank = setNotAvailable(
+                        data.average_perc_immigration_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank = setNotAvailable(
+                        data.average_age_migrants_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank = setNotAvailable(
+                        data.average_est_refugees_global_rank,
+                        true
+                    );
                     $scope.$apply();
                 });
 
+            // getting total migration by origin and destination statistics
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getTotMigrantsByOriginAndDestination($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
+                    $scope.countryRightStatisticsValues.totalImmigrations = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -271,62 +283,63 @@
                     $scope.selectedCountry.right.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.totalPopulation = "" + transformNumberFormat(data);
+                    $scope.countryRightStatisticsValues.totalPopulation = setNotAvailable(data, false);
                     $scope.$apply();
                 });
+
             // getting the migrants as percentage of population
             dataService
                 .getMigrantsAsPercentageOfPopulationByAgeAndSex(
                     $scope.selectedCountry.right.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.immigrationVsPopulation = "" + transformNumberFormat(data);
+                    $scope.countryRightStatisticsValues.immigrationVsPopulation = setNotAvailable(data, false);
                     $scope.$apply();
                 });
+
             // getting the immigration average ag
             dataService
                 .getImmigrationAverageAge(
                     $scope.selectedCountry.right.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.immigrationAverageAge = "" + transformNumberFormat(data);
+                    $scope.countryRightStatisticsValues.immigrationAverageAge = setNotAvailable(data, false);
                 });
+
             // getting the estimated refugees
             dataService
                 .getEstimatedRefugees(
                     $scope.selectedCountry.right.name,
                     consideredYears,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "_pct")
                 )
                 .then((data) => {
-                    if (isNaN(data)) {
-                        $scope.countryRightStatisticsValues.refugeeVsImmigration = "N. A.";
-                    } else {
-                        $scope.countryRightStatisticsValues.refugeeVsImmigration = "" + transformNumberFormat(data);
-                    }
+                    $scope.countryRightStatisticsValues.refugeeVsImmigration = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
+            // getting the mutual migration statistics
             dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
                 $scope.leftSendToRight = transformNumberFormat(data.countryOneSend);
                 $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
                 $scope.$apply();
             });
 
+            // getting the statistics for the common regions migration
             dataService
                 .getMutualCommonMigrationDestinations(
                     $scope.selectedCountry.left.name,
                     $scope.selectedCountry.right.name,
-                    $scope.genreFilterValue
+                    $scope.genderFilterValue
                 )
                 .then((data) => {
                     if (firsCommonStructureCall) {
@@ -336,12 +349,9 @@
                     drawBarChart(data, commonStructure);
                 });
 
-            dataService.getRateOfChange($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue).then((data) => {
-                data = preprocessRateOfChange(data);
-                data.forEach(function (d, i) {
-                    d.label = parseDate(d.label.split("-")[1]);
-                });
-
+            // getting the migration rate of change for the left country
+            dataService.getRateOfChange($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue).then((data) => {
+                data = preprocessRateOfChange(data).map((d) => ({ label: parseDate(d.label.split("-")[1]), value: d.value }));
                 dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
                     if (firstLineChartStructureCall) {
                         lineChartStructure = initializeLineChart(data, minMax, "change-rate-container");
@@ -352,65 +362,68 @@
             });
 
             dataService
-                .getChildBrainDrainStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getChildBrainDrainStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    console.log(data);
                     $scope.childRightStatistics = transformNumberFormat(data["0-14"], false, 0);
-                    $scope.brainDrainRightStatistics = transformNumberFormat(data["20-34"], false, 0);
-                    $scope.totalRightMigrants = transformNumberFormat(data["Total"], false, 0);
                     $scope.childrenRightPercentage = transformNumberFormat((data["0-14"] / data["Total"]) * 100, false, 0);
+                    $scope.brainDrainRightStatistics = transformNumberFormat(data["20-34"], false, 0);
                     $scope.drainBrainRightPercentage = transformNumberFormat((data["20-34"] / data["Total"]) * 100, false, 0);
+                    $scope.totalRightMigrants = transformNumberFormat(data["Total"], false, 0);
                 });
         };
 
+        /**
+         * Function that creates the svg structure for drawing the common regions grouped bar chart statistics
+         * @param {array} data
+         * @returns
+         */
         let createCommonMigrationStructure = (data) => {
             let container = d3.select("#common-migration");
-            let margins = { top: 20, right: 20, bottom: 60, left: 20 };
-            let commonWidth = 500 - margins.left - margins.right;
-            let commonHeight = 300 - margins.top - margins.bottom;
 
             let svg = container
                 .append("svg")
-                .attr("width", commonWidth)
-                .attr("height", commonHeight)
+                .attr("width", width)
+                .attr("height", height)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
 
             svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
 
-            let subgroups = ["first", "second"];
+            let subgroups = ["left", "right"];
             let groups = data.map((d) => d.label);
 
+            // creating the x axis
             let x = d3
                 .scaleBand()
-                .range([margins.left, commonWidth - margins.right])
+                .range([margins.left, width - margins.right])
                 .domain(groups);
 
+            // creating the y axis
             let y = d3
                 .scaleLinear()
-                .domain([0, d3.max(data, (d) => Math.max(d.value.first[0], d.value.second[0]))])
-                .range([commonHeight - margins.top - margins.bottom, 0]);
+                .domain([0, d3.max(data, (d) => Math.max(d.value.left[0], d.value.right[0]))])
+                .range([height - margins.top - margins.bottom, 0]);
 
+            // creating the subgroups
             let xSubGroup = d3
                 .scaleBand()
                 .domain(subgroups)
-                .range([margins.left + margins.right, x.bandwidth()])
-                .padding(0.1);
+                .range([margins.left, x.bandwidth() + margins.right])
+                .padding(0.2);
 
-            color = d3.scaleOrdinal(d3.schemePaired);
-
+            // creating the bars labels container
             svg.append("g")
                 .attr("class", "axis-dark-cyan")
-                .attr("transform", `translate(${margins.left}, ${commonHeight - margins.bottom})`)
+                .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
                 .call(d3.axisBottom(x))
                 .selectAll("text")
-                .style("text-anchor", "start")
-                .attr("font-weight", 100)
-                .attr("transform", "rotate(45)");
+                .attr("transform", "rotate(25)")
+                .attr("text-anchor", "start");
 
+            // inserting the x axis
             svg.append("g")
                 .attr("class", "grid-lines y-axis")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
-                .call(d3.axisLeft(y).tickSize(-commonWidth).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(d3.axisLeft(y).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             let svgGroups = svg
                 .select(".main-group")
@@ -418,7 +431,7 @@
                 .data(data)
                 .enter()
                 .append("g")
-                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, ${0})`)
+                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, 0)`)
                 .attr("class", "groups");
 
             let legend = svg
@@ -427,133 +440,144 @@
                 .enter()
                 .append("g")
                 .attr("class", "legend")
-                .attr("transform", function (d, i) {
-                    return `translate(${-commonWidth + margins.left + margins.right + i * 200}, ${commonHeight - 13} )`;
-                });
+                .attr("transform", (_, i) => `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`);
 
             legend
                 .append("rect")
-                .attr("x", commonWidth + 10)
-                .attr("width", 10)
-                .attr("height", 10)
-                .style("fill", (d, i) => color(i));
+                .attr("x", width + 10)
+                .attr("width", LEGEND_SQUARE_DIM)
+                .attr("height", LEGEND_SQUARE_DIM)
+                .style("fill", (_, i) => color(i));
 
             legend
                 .append("text")
-                .attr("x", commonWidth + 40)
-                .attr("y", 10)
+                .attr("x", width + 40)
+                .attr("y", LEGEND_SQUARE_DIM)
                 .attr("font-size", "small")
                 .style("text-anchor", "start")
-                .text(function (d) {
-                    return d;
-                });
+                .text((d) => d);
 
             return {
                 svgElement: svg,
                 groups: svgGroups,
                 x: x,
                 y: y,
-                height: commonHeight,
-                width: commonWidth,
                 subgroups: subgroups,
                 xSubgroup: xSubGroup,
-                margins: margins,
             };
         };
 
-        let handleEnter = (enter, svgElement) => {
+        /**
+         * Function that handles the enter set for the common migration grouped bar chart
+         * @param {array} enter
+         * @param {object} svgElement
+         */
+        let handleCommonMigrationEnter = (enter, svgElement) => {
             enter
                 .append("rect")
-                .style("fill", (d, i) => color(i))
+                .style("fill", (_, i) => color(i))
                 .attr("x", (d) => svgElement.xSubgroup(d.key))
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.xSubgroup.bandwidth())
                 .attr("height", 0);
         };
 
-        let handleLabelsEnter = (enter, svgElement) => {
-            enter
-                .append("text")
-                .attr("stroke", "#FFFFFF")
-                .attr("stroke-width", 0.5)
-                .attr("font-size", "8px")
-                .attr("x", (d) => svgElement.xSubgroup(d.key))
-                .attr("y", svgElement.y(0))
-                .text((d) => {
-                    return d.val !== "0.00" ? transformNumberFormat(d.val, false, 0) : "";
-                });
-        };
-
-        let handleLabelsUpdate = (update, svgElement) => {
-            update
-                .transition()
-                .duration(1000)
-                .attr("y", (d) => svgElement.y(d.val))
-                .attr("transform", (d) => "rotate(-45, " + svgElement.xSubgroup(d.key) + ", " + (svgElement.y(d.val) - 8) + ")")
-                .attr("text-anchor", "start");
-        };
-
-        let handleUpdate = (update, data, svgElement) => {
-            let y = svgElement.y.domain([0, d3.max(data, (d) => Math.max(d.value.first[0], d.value.second[0]))]);
+        /**
+         * Function that handles the update set for the common migration grouped bar chart
+         * @param {array} update
+         * @param {number} yMax
+         * @param {object} svgElement
+         */
+        let handleCommonMigrationUpdate = (update, yMax, svgElement) => {
+            let y = svgElement.y.domain([0, yMax]);
             svgElement.svgElement
                 .select("g.grid-lines.y-axis")
                 .transition()
-                .duration(1000)
-                .call(d3.axisLeft(y).tickSize(-svgElement.width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .duration(TRANSITION_DURATION)
+                .call(d3.axisLeft(y).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             update
                 .transition()
-                .duration(1000)
+                .duration(TRANSITION_DURATION)
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val));
+                .attr("height", (d) => height - margins.bottom - margins.top - svgElement.y(d.val));
         };
 
-        let drawBarChart = (data, svgElement) => {
-            svgElement.svgElement
-                .selectAll(".groups")
-                .data(data)
-                .selectAll("rect")
-                .data(function (d) {
-                    return svgElement.subgroups.map(function (k) {
-                        return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
-                    });
-                })
-                .join(
-                    (enter) => handleEnter(enter, svgElement),
-                    (update) => handleUpdate(update, data, svgElement),
-                    (exit) => exit.remove()
-                );
+        /**
+         * Function that handles the enter set for the labels of the common migration bar chart
+         * @param {array} enter
+         * @param {object} svgElement
+         */
+        let handleCommonMigrationLabelsEnter = (enter, svgElement) => {
+            enter
+                .append("text")
+                .attr("stroke", "#FFFFFF")
+                .attr("stroke-width", 1)
+                .attr("font-size", "10px")
+                .attr("x", (d) => svgElement.xSubgroup(d.key))
+                .attr("y", svgElement.y(0))
+                .text((d) => transformNumberFormat(d.val, false, 0));
+        };
 
-            // TODO - decide what information to show as labels for the bars
-            svgElement.svgElement
-                .selectAll(".groups")
-                .data(data)
-                .selectAll("text")
-                .data(function (d) {
-                    return svgElement.subgroups.map(function (k) {
-                        return { key: k, val: d.value[k][0], percentage: d.value[k][1] };
-                    });
-                })
-                .join(
-                    (enter) => handleLabelsEnter(enter, svgElement),
-                    (update) => handleLabelsUpdate(update, svgElement)
+        /**
+         * Function that handles the update set for the labels of the common migration bar chart
+         * @param {array} update
+         * @param {object} svgElement
+         */
+        let handleCommonMigrationLabelsUpdate = (update, svgElement) => {
+            update
+                .transition()
+                .duration(TRANSITION_DURATION)
+                .attr("y", (d) => svgElement.y(d.val))
+                .attr(
+                    "transform",
+                    (d) => `rotate(-25, ${svgElement.xSubgroup(d.key)},
+                        ${svgElement.y(d.val) - svgElement.xSubgroup.bandwidth() / 2})`
                 );
         };
 
         /**
-         * Function that initialize the svg containing the rate of change lineChart for the selected country
+         * Function that draws the common migration bar chart
+         * @param {array} data
+         * @param {object} svgElement
+         */
+        let drawBarChart = (data, svgElement) => {
+            let yMax = d3.max(data, (d) => Math.max(d.value.left[0], d.value.right[0]));
+
+            // drawing the bars
+            svgElement.svgElement
+                .selectAll(".groups")
+                .data(data)
+                .selectAll("rect")
+                .data((d) => svgElement.subgroups.map((k) => ({ key: k, val: d.value[k][0], percentage: d.value[k][1] })))
+                .join(
+                    (enter) => handleCommonMigrationEnter(enter, svgElement),
+                    (update) => handleCommonMigrationUpdate(update, yMax, svgElement),
+                    (exit) => exit.remove()
+                );
+
+            // setting the labels for the bars
+            svgElement.svgElement
+                .selectAll(".groups")
+                .data(data)
+                .selectAll("text")
+                .data((d) => svgElement.subgroups.map((k) => ({ key: k, val: d.value[k][0], percentage: d.value[k][1] })))
+                .join(
+                    (enter) => handleCommonMigrationLabelsEnter(enter, svgElement),
+                    (update) => handleCommonMigrationLabelsUpdate(update, svgElement),
+                    (exit) => exit.remove()
+                );
+        };
+
+        /**
+         * Function that initialize the svg containing for the rate of change lineChart for the selected country
          * @param {string} container
          * @param {object} margin
          * @param {string} lineChartId
          * @returns
          */
-
-        let margins = { top: 20, bottom: 60, left: 20, right: 20 };
         let initializeLineChart = (data, minMax, container) => {
             let lineChartContainer = d3.select("#" + container);
-
-            let width = 500 - margins.left - margins.right;
-            let height = 300 - margins.top - margins.bottom;
 
             let svg = lineChartContainer
                 .append("svg")
@@ -567,7 +591,7 @@
             let xScale = d3
                 .scaleTime()
                 .domain([d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[5].label, +1)])
-                .range([margins.left, width - margins.left - margins.right]);
+                .range([margins.left, width - margins.right - 15]);
 
             let yScale = d3
                 .scaleLinear()
@@ -576,18 +600,21 @@
 
             svg.append("g")
                 .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
-                .style("font-size", "12px")
+                .style("font-size", "10px")
                 .attr("class", "axis-dark-cyan")
                 .call(d3.axisBottom(xScale).ticks(data.length))
                 .selectAll("text")
-                .attr("transform", "rotate(45)")
+                .attr("transform", "rotate(25)")
                 .attr("text-anchor", "start");
 
             svg.append("g")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
-                .style("font-size", "12px")
+                .style("font-size", "10px")
                 .attr("class", "grid-lines y-axis")
-                .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0));
+                .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0).ticks(8));
+
+            // inserting the circles
+            svg.append("g").attr("transform", `translate(${margins.left}, 0)`).attr("class", "year-circles");
 
             let legend = svg
                 .selectAll(".legend")
@@ -595,32 +622,32 @@
                 .enter()
                 .append("g")
                 .attr("class", "legend")
-                .attr("transform", function (d, i) {
-                    return `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`;
-                });
-
-            let colors = ["#1f78b4", "#a6cee3"];
+                .attr("transform", (_, i) => `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`);
 
             legend
                 .append("rect")
-                .attr("x", width + 10)
-                .attr("width", 10)
-                .attr("height", 10)
-                .style("fill", (d, i) => colors[i]);
+                .attr("x", width + LEGEND_SQUARE_DIM)
+                .attr("width", LEGEND_SQUARE_DIM)
+                .attr("height", LEGEND_SQUARE_DIM)
+                .style("fill", (_, i) => countryColors[i]);
 
             legend
                 .append("text")
                 .attr("x", width + 40)
-                .attr("y", 10)
+                .attr("y", LEGEND_SQUARE_DIM)
                 .attr("font-size", "small")
                 .style("text-anchor", "start")
-                .text(function (d) {
-                    return d;
-                });
+                .text((d) => d);
 
             return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
         };
 
+        /**
+         * Function that creates the svg structure for the line chart plot
+         * @param {array} data
+         * @param {object} structure
+         * @param {string} lineClass
+         */
         let drawLineChart = (data, structure, lineClass) => {
             let lineGenerator = d3
                 .line()
@@ -639,46 +666,82 @@
                             .call((enter) =>
                                 enter
                                     .transition()
-                                    .duration(1000)
+                                    .duration(TRANSITION_DURATION)
                                     .attr("d", (d) => lineGenerator(d))
                             ),
-                    //.call(enter => { return isChartDefined ? enter : lineInitialTransition(enter);}),
                     (update) =>
                         update.call((update) =>
                             update
                                 .transition()
-                                .duration(1000)
+                                .duration(TRANSITION_DURATION)
                                 .attr("d", (d) => lineGenerator(d))
-                        )
+                        ),
+                    (exit) => exit.remove()
+                );
+
+            lineChartStructure.lineChartStructure
+                .select(".year-circles")
+                .selectAll("." + lineClass + "year-circle")
+                .data(data)
+                .join(
+                    (enter) => {
+                        enter
+                            .append("circle")
+                            .attr("class", lineClass + "year-circle " + lineClass)
+                            .attr("fill", "none")
+                            .attr("stroke", countryColors[0])
+                            .attr("cx", (d) => lineChartStructure.xScale(d.label))
+                            .attr("cy", (d) => lineChartStructure.yScale(d.value))
+                            .attr("r", 3);
+                    },
+                    (update) =>
+                        update
+                            .transition()
+                            .duration(TRANSITION_DURATION)
+                            .attr("cx", (d) => lineChartStructure.xScale(d.label))
+                            .attr("cy", (d) => lineChartStructure.yScale(d.value)),
+                    (exit) => exit.remove()
                 );
         };
 
-        // TODO find a way to synchronize this after the data is load
+        /**
+         * Function that controls the winner country for what concern the statistics comparison
+         * @param {string} field
+         * @param {boolean} left
+         * @param {string} type
+         * @returns
+         */
         $scope.comparisonWinner = (field, left, type) => {
             if (left) {
-                if (type == "rank")
-                    return $scope.globalRankCountryLeftStatisticsValues[field] < $scope.globalRankCountryRightStatisticsValues[field];
-                else {
-                    return $scope.countryLeftStatisticsValues[field] < $scope.countryRightStatisticsValues[field];
+                if (type == "rank") {
+                    return (
+                        parseInt($scope.globalRankCountryLeftStatisticsValues[field], 10) <
+                        parseInt($scope.globalRankCountryRightStatisticsValues[field], 10)
+                    );
+                } else {
+                    return (
+                        parseInt($scope.countryLeftStatisticsValues[field], 10) < parseInt($scope.countryRightStatisticsValues[field], 10)
+                    );
                 }
             } else {
-                if (type == "rank")
-                    return $scope.globalRankCountryRightStatisticsValues[field] < $scope.globalRankCountryLeftStatisticsValues[field];
-                else return $scope.countryRightStatisticsValues[field] < $scope.countryLeftStatisticsValues[field];
+                if (type == "rank") {
+                    return (
+                        parseInt($scope.globalRankCountryRightStatisticsValues[field], 10) <
+                        parseInt($scope.globalRankCountryLeftStatisticsValues[field], 10)
+                    );
+                } else
+                    return (
+                        parseInt($scope.countryRightStatisticsValues[field], 10) < parseInt($scope.countryLeftStatisticsValues[field], 10)
+                    );
             }
         };
 
-        $scope.countryChanged = () => {
-            console.log($scope.selectedCountry.left);
-            console.log($scope.selectedCountry.right);
-        };
-
         /**
-         * Function that handles the click on the genre radio group filter in the menu
+         * Function that handles the click on the gender radio group filter in the menu
          * @param {string} value
          */
-        $scope.handleGenreClick = function (value) {
-            $scope.genreFilterValue = value;
+        $scope.handleGenderClick = function (value) {
+            $scope.genderFilterValue = value;
             $scope.updateStatisticsLeft();
             $scope.updateStatisticsRight();
         };
@@ -709,6 +772,10 @@
             $scope.searchDestination = "";
         };
 
+        /**
+         * Function that stops the propagation of the event passed as parameter
+         * @param {event} event
+         */
         $scope.updateSearch = (event) => {
             event.stopPropagation();
         };

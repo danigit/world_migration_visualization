@@ -69,7 +69,7 @@
             $scope.selectedCountryController =
                 dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
 
-            $scope.genreFilterValue = "menu-all";
+            $scope.genderFilterValue = "menu-all";
 
             lineChartStructure = initializeLineChart("roc-linechart-container", margin, "roc-linechart-country");
             $scope.updateStatistics();
@@ -81,7 +81,7 @@
 
         $scope.secondaryMenuSelectedValue = "country";
         $scope.secondaryMenuButtons = dataService.menuButtons;
-        $scope.genreButtons = dataService.genreButtons;
+        $scope.genderButtons = dataService.genderButtons;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
         $scope.countryStatisticsValues = {
             totalImmigrations: "",
@@ -151,7 +151,7 @@
 
             // getting the total migrants by origin and destination
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
                     $scope.countryStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
                     $scope.$apply();
@@ -159,7 +159,7 @@
 
             // $scope.selectedCountryController, sliderMin, sliderMax
             dataService
-                .getGlobalRankStatistics($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getGlobalRankStatistics($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
                     $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
                         ? "N. A."
@@ -192,7 +192,7 @@
                     $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.totalPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
@@ -205,7 +205,7 @@
                     $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "Total")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.immigrationVsPopulation = isNaN(data)
@@ -220,7 +220,7 @@
                     $scope.selectedCountryController.name,
                     sliderMin,
                     sliderMax,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.immigrationAverageAge = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
@@ -231,7 +231,7 @@
                 .getEstimatedRefugees(
                     $scope.selectedCountryController.name,
                     consideredYears,
-                    dataService.getSelectedGenderColumn($scope.genreFilterValue, "_pct")
+                    dataService.getSelectedGenderColumn($scope.genderFilterValue, "_pct")
                 )
                 .then((data) => {
                     $scope.countryStatisticsValues.refugeeVsImmigration = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
@@ -239,13 +239,13 @@
                 });
 
             dataService
-                .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
+                .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genderFilterValue)
                 .then((data) => {
                     drawPieChart(data, developmentStructure, "development");
                 });
 
             dataService
-                .getCountryIncomeStatistic($scope.selectedCountryController.name, consideredYears, $scope.genreFilterValue)
+                .getCountryIncomeStatistic($scope.selectedCountryController.name, consideredYears, $scope.genderFilterValue)
                 .then((data) => {
                     drawPieChart(data, incomeStructure, "income");
                 });
@@ -271,12 +271,12 @@
             // Extract the immigration by age groups:
             // 0-4, 5-18, 19-34, 35-54, 55-74, 75+
             dataService
-                .getImmigrationByAgeGroups($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getImmigrationByAgeGroups($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((ageGroupsData) => drawAgeStackedBarchart(ageGroupsData, ["Total", "Year"], "age-stacked-barchart"));
 
             // Extract Top 5 inward/outward migration countries
             countryService
-                .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
                     const topCountries = data;
 
@@ -287,7 +287,7 @@
                 });
 
             dataService
-                .getRateOfChange($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genreFilterValue)
+                .getRateOfChange($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
                     let xLabels = Object.keys(data);
                     const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
@@ -875,11 +875,11 @@
         };
 
         /**
-         * Function that handles the click on the genre radio group filter in the menu
+         * Function that handles the click on the gender radio group filter in the menu
          * @param {string} value
          */
-        $scope.handleGenreClick = function (value) {
-            $scope.genreFilterValue = value;
+        $scope.handleGenderClick = function (value) {
+            $scope.genderFilterValue = value;
             $scope.updateStatistics();
         };
 
