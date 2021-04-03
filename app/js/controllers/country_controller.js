@@ -15,6 +15,7 @@
         // $scope.selectedTopCountry = "";
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
+        const titleYear = document.getElementById("title-year");
 
         this.uiOnParamsChanged = (newParams) => fetchData(newParams.countryName);
 
@@ -38,6 +39,19 @@
                 dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
 
             $scope.updateStatistics();
+        };
+
+        let updateTitle = () => {
+            let yearText = null;
+            let activeLength = getSliderYears().length;
+
+            if (activeLength == 1) {
+                yearText = sliderMin;
+            } else {
+                yearText = `${sliderMin} - ${sliderMax}`;
+            }
+
+            titleYear.innerHTML = yearText;
         };
 
         $scope.updateView = () => {
@@ -138,6 +152,7 @@
             sliderMax = $scope.sliderCountry.maxValue;
             consideredYears = getSliderYears();
             $scope.updateStatistics();
+            updateTitle();
         });
 
         /**
@@ -208,9 +223,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.immigrationVsPopulation = isNaN(data)
-                        ? "N. A."
-                        : "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.immigrationVsPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
                     $scope.$apply();
                 });
 
