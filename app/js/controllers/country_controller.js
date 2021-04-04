@@ -12,87 +12,9 @@
 
     function countryController($scope, $state, dataService, countryService, $stateParams) {
         $scope.countryInfoValue = "global_rank";
-        // $scope.selectedTopCountry = "";
         $scope.searchSource = "";
         $scope.continents = dataService.continents;
-        const titleYear = document.getElementById("title-year");
-
-        this.uiOnParamsChanged = (newParams) => fetchData(newParams.countryName);
-
-        let fetchData = (countryName) => {
-            if (countryName === null) {
-                dataService.selectedCountryController = "";
-            } else {
-                let selectedCountry = $scope.countries.find((c) => slugify(countryName) === slugify(c.visName));
-
-                if (selectedCountry) {
-                    dataService.selectedCountryController = selectedCountry;
-                } else {
-                    console.log("Invalid country name:", capitalize(countryName));
-
-                    $state.go($state.current, { countryName: null });
-                }
-            }
-
-            // Update the statistics
-            $scope.selectedCountryController =
-                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
-
-            $scope.updateStatistics();
-        };
-
-        let updateTitle = () => {
-            let yearText = null;
-            let activeLength = getSliderYears().length;
-
-            if (activeLength == 1) {
-                yearText = sliderMin;
-            } else {
-                yearText = `${sliderMin} - ${sliderMax}`;
-            }
-
-            titleYear.innerHTML = yearText;
-        };
-
-        $scope.updateView = () => {
-            const _countryName = $scope.selectedCountryController.visName;
-            $state.go($state.current, { countryName: slugify(_countryName) });
-        };
-
-        let margin = { top: 40, bottom: 30, left: 30, right: 30 };
         $scope.sendReceiveTopCountries = "";
-        dataService.countries.then((data) => {
-            $scope.countries = data;
-
-            let countryName = $stateParams.countryName;
-
-            if (countryName === null) {
-                dataService.selectedCountryController = "";
-            } else {
-                let selectedCountry = data.find((c) => slugify(countryName) === slugify(c.visName));
-
-                if (selectedCountry) {
-                    dataService.selectedCountryController = selectedCountry;
-                } else {
-                    console.log("Invalid country name:", capitalize(countryName));
-
-                    $state.go($state.current, { countryName: null });
-                }
-            }
-
-            $scope.selectedCountryController =
-                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
-
-            $scope.genderFilterValue = "menu-all";
-
-            lineChartStructure = initializeLineChart("roc-linechart-container", margin, "roc-linechart-country");
-            $scope.updateStatistics();
-            developmentStructure = createPieStructure("development-piechart", "development");
-            incomeStructure = createPieStructure("income-piechart", "income");
-
-            $scope.updateStatistics();
-        });
-
         $scope.secondaryMenuSelectedValue = "country";
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.genderButtons = dataService.genderButtons;
@@ -104,6 +26,7 @@
             immigrationAverageAge: "",
             refugeeVsImmigration: "",
         };
+
         $scope.globalRankCountryStatisticsValues = {
             totalImmigrationsGlobalRank: "",
             totalPopulationGlobalRank: "",
@@ -124,79 +47,123 @@
             },
         };
 
-        let svgWidth;
-        let svgHeight;
+        const titleYear = document.getElementById("title-year");
+        const margins = { top: 40, bottom: 40, left: 30, right: 30 };
+
+        let svgWidth = 500 - margins.left - margins.right;
+        let svgHeight = 350 - margins.top - margins.bottom;
         let radius;
         let arc;
         let sliderMin = 1900;
         let sliderMax = 2019;
         let lineChartStructure;
         let developmentStructure;
+        let stackedStructure;
+        let stackedStructureCall = true;
         let incomeStructure;
         let colors = d3.scaleOrdinal(d3.schemePaired);
 
+        // inserting the name of the country in the url
+        this.uiOnParamsChanged = (newParams) => fetchData(newParams.countryName);
+
         /**
-         * Function that returns an array with the selected years in the slider
-         * @returns selected years
+         * Function that fetch the country navigates to the country passed as parameter
+         * @param {string} countryName
          */
-        let getSliderYears = () => {
-            return dataService.getActiveYears(sliderMin, sliderMax);
+        let fetchData = (countryName) => {
+            if (countryName === null) {
+                dataService.selectedCountryController = "";
+            } else {
+                let selectedCountry = $scope.countries.find((c) => slugify(countryName) === slugify(c.visName));
+
+                if (selectedCountry) {
+                    dataService.selectedCountryController = selectedCountry;
+                } else {
+                    console.log("Invalid country name:", capitalize(countryName));
+
+                    $state.go($state.current, { countryName: null });
+                }
+            }
+
+            // Update the statistics
+            $scope.selectedCountryController =
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
+
+            updateStatistics();
         };
 
+        /**
+         * Function that updates the view when a new country is selected
+         */
+        $scope.updateView = () => {
+            const _countryName = $scope.selectedCountryController.visName;
+            $state.go($state.current, { countryName: slugify(_countryName) });
+        };
+
+        // getting the countries data
+        dataService.countries.then((data) => {
+            $scope.countries = data;
+
+            $scope.selectedCountryController =
+                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
+            $scope.genderFilterValue = "menu-all";
+
+            lineChartStructure = initializeLineChart("roc-linechart-container", "roc-linechart-country");
+            developmentStructure = createPieStructure("development-piechart", "development");
+            incomeStructure = createPieStructure("income-piechart", "income");
+
+            fetchData($stateParams.countryName);
+        });
+
         // getting the years selected in the slider
-        let consideredYears = getSliderYears();
+        let consideredYears = dataService.getActiveYears(sliderMin, sliderMax);
 
         // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
             sliderMin = $scope.sliderCountry.minValue;
             sliderMax = $scope.sliderCountry.maxValue;
-            consideredYears = getSliderYears();
-            $scope.updateStatistics();
+            consideredYears = dataService.getActiveYears(sliderMin, sliderMax);
+            updateStatistics();
             updateTitle();
         });
 
         /**
          * Function that updates the statistics
          */
-        $scope.updateStatistics = () => {
-            console.log("Selected new country:");
-            console.log($scope.selectedCountryController);
-
+        let updateStatistics = () => {
             dataService.selectedCountryController = $scope.selectedCountryController;
 
             // getting the total migrants by origin and destination
             dataService
                 .getTotMigrantsByOriginAndDestination($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    $scope.countryStatisticsValues.totalImmigrations = "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.totalImmigrations = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
-            // $scope.selectedCountryController, sliderMin, sliderMax
             dataService
                 .getGlobalRankStatistics($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = isNaN(data.average_tot_migrants_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_tot_migrants_global_rank, true);
-
-                    $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank = isNaN(data.average_tot_population_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_tot_population_global_rank, true);
-
-                    $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank = isNaN(
-                        data.average_perc_immigration_global_rank
-                    )
-                        ? "N. A."
-                        : transformNumberFormat(data.average_perc_immigration_global_rank, true);
-
-                    $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank = isNaN(data.average_age_migrants_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_age_migrants_global_rank, true);
-
-                    $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = isNaN(data.average_est_refugees_global_rank)
-                        ? "N. A."
-                        : transformNumberFormat(data.average_est_refugees_global_rank, true);
+                    $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = setNotAvailable(
+                        data.average_tot_migrants_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryStatisticsValues.totalPopulationGlobalRank = setNotAvailable(
+                        data.average_tot_population_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryStatisticsValues.immigrationVsPopulationGlobalRank = setNotAvailable(
+                        data.average_perc_immigration_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryStatisticsValues.immigrationAverageAgeGlobalRank = setNotAvailable(
+                        data.average_age_migrants_global_rank,
+                        true
+                    );
+                    $scope.globalRankCountryStatisticsValues.refugeeVsImmigrationGlobalRank = setNotAvailable(
+                        data.average_est_refugees_global_rank,
+                        true
+                    );
 
                     $scope.$apply();
                 });
@@ -210,7 +177,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.totalPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.totalPopulation = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -223,7 +190,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.immigrationVsPopulation = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.immigrationVsPopulation = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -236,7 +203,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.immigrationAverageAge = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.immigrationAverageAge = setNotAvailable(data, false);
                 });
 
             // getting the estimated refugees
@@ -247,7 +214,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "_pct")
                 )
                 .then((data) => {
-                    $scope.countryStatisticsValues.refugeeVsImmigration = isNaN(data) ? "N. A." : "" + transformNumberFormat(data);
+                    $scope.countryStatisticsValues.refugeeVsImmigration = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
@@ -263,38 +230,24 @@
                     drawPieChart(data, incomeStructure, "income");
                 });
 
-            const getDummyData = new Promise((resolve, _) => {
-                const dummyData = [
-                    { Year: "2006", Delicious: "10", McIntosh: "15", Oranges: "9", Pears: "6" },
-                    { Year: "2007", Delicious: "12", McIntosh: "18", Oranges: "9", Pears: "4" },
-                    { Year: "2008", Delicious: "05", McIntosh: "20", Oranges: "8", Pears: "2" },
-                    { Year: "2009", Delicious: "01", McIntosh: "15", Oranges: "5", Pears: "4" },
-                    { Year: "2010", Delicious: "02", McIntosh: "10", Oranges: "4", Pears: "2" },
-                    { Year: "2011", Delicious: "03", McIntosh: "12", Oranges: "6", Pears: "3" },
-                    { Year: "2012", Delicious: "04", McIntosh: "15", Oranges: "8", Pears: "1" },
-                    { Year: "2013", Delicious: "06", McIntosh: "11", Oranges: "9", Pears: "4" },
-                    { Year: "2014", Delicious: "10", McIntosh: "13", Oranges: "9", Pears: "5" },
-                    { Year: "2015", Delicious: "16", McIntosh: "19", Oranges: "6", Pears: "9" },
-                    { Year: "2016", Delicious: "19", McIntosh: "17", Oranges: "5", Pears: "7" },
-                ];
-
-                resolve(dummyData);
-            });
-
             // Extract the immigration by age groups:
             // 0-4, 5-18, 19-34, 35-54, 55-74, 75+
             dataService
                 .getImmigrationByAgeGroups($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
-                .then((ageGroupsData) => drawAgeStackedBarchart(ageGroupsData, ["Total", "Year"], "age-stacked-barchart"));
+                .then((ageGroupsData) => {
+                    if (stackedStructureCall) {
+                        stackedStructure = initializeStackedBarChart(ageGroupsData, "age-stacked-barchart");
+                        stackedStructureCall = false;
+                    }
+                    drawAgeStackedBarchart(ageGroupsData, ["Total", "Year"]);
+                });
 
             // Extract Top 5 inward/outward migration countries
             countryService
                 .getTopCountries($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    const topCountries = data;
-
-                    $scope.top5InwardCountries = topCountries["topInward"];
-                    $scope.top5OutwardCountries = topCountries["topOutward"];
+                    $scope.top5InwardCountries = data["topInward"];
+                    $scope.top5OutwardCountries = data["topOutward"];
 
                     $scope.$apply();
                 });
@@ -302,21 +255,9 @@
             dataService
                 .getRateOfChange($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    let xLabels = Object.keys(data);
-                    const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
-                    xLabels = xLabels.map((label) => label.replace(reg, ""));
-                    let yValues = Object.values(data).map((value) => +value);
-                    data = xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
+                    data = preprocessRateOfChange(data);
                     dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
-                        drawLineChart(
-                            data,
-                            "roc-linechart-country",
-                            minMax.MinRateOfChange,
-                            minMax.MaxRateOfChange,
-                            margin,
-                            lineChartStructure.width,
-                            lineChartStructure.height
-                        );
+                        drawLineChart(data, "roc-linechart-country", minMax.MinRateOfChange, minMax.MaxRateOfChange);
                     });
                 });
         };
@@ -328,66 +269,12 @@
          * @returns
          */
         let arcTweenEnter = (data) => {
-            // let i = d3.interpolate(data.endAngle, data.startAngle);
             let i = d3.interpolate(this._current, data);
 
             this._current = i(0);
             return function (t) {
-                // data.startAngle = i(t);
-                // return arc(data);
                 return arc(i(t));
             };
-        };
-
-        /**
-         * Function that initialize the svg containing the rate of change lineChart for the selected country
-         * @param {string} container
-         * @param {object} margin
-         * @param {string} lineChartId
-         * @returns
-         */
-
-        let initializeLineChart = (container, margin, lineChartId) => {
-            let rateOfChangeLineChartContainer = d3.select("#" + container);
-            rateOfChangeLineChartContainer.html("");
-
-            let rateOfChangeLineChartContainerDim = rateOfChangeLineChartContainer.node().getBoundingClientRect();
-            let width = rateOfChangeLineChartContainerDim.width - margin.left - margin.right;
-            let height = rateOfChangeLineChartContainerDim.height - margin.top - margin.bottom;
-
-            let svg = rateOfChangeLineChartContainer
-                .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .attr("id", lineChartId + "-svg");
-
-            let lineChartStructure = svg.append("g").attr("id", lineChartId).attr("class", "country-linechart");
-
-            d3.select("#" + lineChartId + "-svg")
-                .append("g")
-                .attr("transform", "translate(0," + (height + margin.bottom / 1.1) + ")")
-                .attr("color", "white")
-                .style("font-size", "12px")
-                .attr("id", lineChartId + "-xaxis")
-                .append("text")
-                .classed("legend", true)
-                .attr("transform", "translate(" + 410 + "," + 40 + ")")
-                .style("text-anchor", "end")
-                .text("Time Span");
-
-            d3.select("#" + lineChartId + "-svg")
-                .append("g")
-                .attr("color", "white")
-                .attr("transform", "translate(" + (margin.left + margin.right) + "," + margin.top / 3 + ")")
-                .style("font-size", "12px")
-                .attr("id", lineChartId + "-yaxis")
-                .append("text")
-                .classed("legend", true)
-                .attr("transform", "rotate(-90) translate(" + -40 + "," + -35 + ")")
-                .style("text-anchor", "end")
-                .text("Rate Of Change, Migrant Stock");
-
-            return { lineChartStructure: lineChartStructure, width: width, height: height };
         };
 
         /**
@@ -398,18 +285,18 @@
          */
         let createPieStructure = (container, type) => {
             let svgContainer = d3.select("#" + container);
-            svgWidth = svgContainer.node().getBoundingClientRect().width;
-            svgHeight = svgContainer.node().getBoundingClientRect().height;
             radius = Math.min(svgWidth, svgHeight) / 2;
 
             let svg = svgContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
-            // .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2})`);
+
             svg.append("g")
                 .attr("class", type + "-slices")
                 .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
+
             svg.append("g")
                 .attr("class", type + "-labels")
                 .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
+
             arc = d3
                 .arc()
                 .outerRadius(radius - 50)
@@ -428,9 +315,9 @@
                 .append("path")
                 .attr("class", type + "-arc")
                 .style("stroke", "white")
-                .style("fill", (d, i) => colors(i))
+                .style("fill", (_, i) => colors(i))
                 .transition()
-                .duration(1000)
+                .duration(TRANSITION_DURATION)
                 .attrTween("d", arcTweenEnter);
         };
 
@@ -441,7 +328,7 @@
         let handleUpdate = (update) => {
             update
                 .transition()
-                .duration(1000)
+                .duration(TRANSITION_DURATION)
                 .attrTween("d", function (d) {
                     this._current = this._current || d;
                     var interpolate = d3.interpolate(this._current, d);
@@ -491,7 +378,7 @@
                 .attr("stroke", "#FFFFFF")
                 .attr("fill", (d, i) => colors(i))
                 .attr("class", type + "-legend-rect")
-                .attr("transform", (d, i) => {
+                .attr("transform", (_, i) => {
                     if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - i * 20})`;
                     else {
                         return `translate(0, ${svgHeight / 2 - legendIndex++ * 20})`;
@@ -503,7 +390,7 @@
             // creating the text of the labels
             enterLabel
                 .append("text")
-                .attr("stroke", (d, i) => colors(i))
+                .attr("stroke", (_, i) => colors(i))
                 .attr("class", type + "-label-text");
 
             // creating the text for the legend
@@ -513,7 +400,7 @@
                 .attr("y", "5")
                 .attr("class", type + "-legend-text")
                 .attr("class", "label-text")
-                .attr("transform", (d, i) => {
+                .attr("transform", (_, i) => {
                     if (i < dataLength / 2) {
                         return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - i * 20})`;
                     } else {
@@ -535,7 +422,7 @@
                 .selectAll("." + type + "-label-inner-circle")
                 .data(piedData)
                 .transition()
-                .duration(1000)
+                .duration(TRANSITION_DURATION)
                 .attrTween("transform", function (d, i, n) {
                     n[i]._current = n[i]._current || d;
                     let interpolate = d3.interpolate(n[i]._current, d);
@@ -552,53 +439,51 @@
                 .selectAll("." + type + "-label-line")
                 .data(piedData)
                 .transition()
-                .duration(1000)
-                .attr("x1", (d, i) => arc.centroid(d)[0])
-                .attr("y1", (d, i) => arc.centroid(d)[1])
-                .attr("x2", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "x"))
-                .attr("y2", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
+                .duration(TRANSITION_DURATION)
+                .attr("x1", (d) => arc.centroid(d)[0])
+                .attr("y1", (d) => arc.centroid(d)[1])
+                .attr("x2", (d) => computePieChartEndOfLabelLineXY(d, arc, "x"))
+                .attr("y2", (d) => computePieChartEndOfLabelLineXY(d, arc, "y"));
 
             // updating the label outer circle
             svgElement
                 .selectAll("." + type + "-label-outer-circle")
                 .data(piedData)
                 .transition()
-                .duration(1000)
+                .duration(TRANSITION_DURATION)
                 .attr("r", (d) => (d.value !== 0 ? 4 : 0))
-                .attr("fill", (d, i) => colors(i))
-                .attr("cx", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "x"))
-                .attr("cy", (d, i) => computePieChartEndOfLabelLineXY(d, arc, "y"));
+                .attr("fill", (_, i) => colors(i))
+                .attr("cx", (d) => computePieChartEndOfLabelLineXY(d, arc, "x"))
+                .attr("cy", (d) => computePieChartEndOfLabelLineXY(d, arc, "y"));
 
             // updating the label text
             svgElement
                 .selectAll("." + type + "-label-text")
                 .data(piedData)
                 .transition()
-                .duration(1000)
-                .attr("x", (d, i) => {
+                .duration(TRANSITION_DURATION)
+                .attr("x", (d) => {
                     let x = computePieChartEndOfLabelLineXY(d, arc, "x");
                     if (x == undefined) x = 0;
                     let sign = x > 0 ? 1 : -1;
                     let xLabel = x + 10 * sign;
                     return xLabel;
                 })
-                .attr("y", (d, i) => {
+                .attr("y", (d) => {
                     let y = computePieChartEndOfLabelLineXY(d, arc, "y");
                     if (y == undefined) y = 0;
                     let sign = y > 0 ? 1 : -1;
                     let yLabel = y + 1 * sign;
                     return yLabel;
                 })
-                .attr("text-anchor", (d, i) => {
+                .attr("text-anchor", (d) => {
                     let centroid = arc.centroid(d);
                     let midAngle = Math.atan2(centroid[1], centroid[0]);
                     let x = Math.cos(midAngle) * (radius - 45);
                     return x > 0 ? "start" : "end";
                 })
                 .attr("font-size", "small")
-                .text((d) => {
-                    return d.data.percentage !== "0.0" ? d.data.percentage + "%" : "";
-                });
+                .text((d) => (d.data.percentage !== "0.0" ? d.data.percentage + "%" : ""));
         };
 
         /**
@@ -652,89 +537,103 @@
                 );
         };
 
-        let drawAgeStackedBarchart = (data, toExclude, containerId) => {
-            // TODO: Enter - update - exit pattern
-            const containerElem = d3.select("#" + containerId);
-            containerElem.html("");
+        let initializeStackedBarChart = (data, containerId) => {
+            let containerElem = d3.select("#" + containerId);
 
-            const containerDims = containerElem.node().getBoundingClientRect();
-
-            const legendMargin = 15;
-
-            // Stack up the data
-            const groups = d3.map(data, (d) => +d.Year);
-
-            const subgroups = Object.keys(data[0]).filter((i) => !toExclude.includes(i));
-
-            const stackedData = d3.stack().keys(subgroups)(data);
-
-            // Setup Bostock's margin convention
-            const svgMargins = { top: 8, right: 32, left: 32, bottom: 64 + Math.floor(subgroups.length / 3) * legendMargin }; // Legend labels are stacked at
-            // the bottom in 3 separate columns
-
-            const svgWidth = containerDims.width - svgMargins.left - svgMargins.right;
-
-            const svgHeight = containerDims.height - svgMargins.top - svgMargins.bottom;
-
-            const containerWidth = svgWidth + svgMargins.left + svgMargins.right;
-
-            const containerHeight = svgHeight + svgMargins.top + svgMargins.bottom;
-
-            const svgElem = containerElem
+            let svgElem = containerElem
                 .append("svg")
-                .attr("width", containerWidth)
-                .attr("height", containerHeight)
+                .attr("width", svgWidth)
+                .attr("height", svgHeight)
+                .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
                 .append("g")
-                .attr("transform", "translate(" + svgMargins.left + "," + svgMargins.top + ")");
+                .attr("transform", `translate(${margins.left + margins.right}, 10)`);
 
+            svgElem.append("g").attr("font-size", "10px").attr("class", "grid-lines y-axis");
+
+            svgElem
+                .append("g")
+                .attr("transform", `translate(0, ${svgHeight - margins.bottom - margins.top})`)
+                .attr("class", "axis-dark-cyan x-axis");
+
+            return { svgElement: svgElem };
+        };
+
+        let drawAgeStackedBarchart = (data) => {
             const timeFormat = d3.timeFormat("%Y").parse;
+            const barGroups = d3.map(data, (d) => +d.Year);
+            const subgroups = Object.keys(data[0]).filter((i) => !["Total", "Year"].includes(i));
+            const stackedData = d3.stack().keys(subgroups)(data);
+            const colorScale = d3.scaleOrdinal(d3.schemePaired.slice(0, subgroups.length));
 
             // Set all the scales
             let xScale = d3
                 .scaleBand()
-                .domain(groups)
-                .rangeRound([4, svgWidth - 2])
+                .domain(barGroups)
+                .rangeRound([0, svgWidth - margins.left - margins.right])
                 .padding(0.16);
 
             let yScale = d3
                 .scaleLinear()
                 .domain([0, d3.max(stackedData, (layerData) => d3.max(layerData, (d) => d[1]))])
-                .range([svgHeight, 0]);
+                .range([svgHeight - margins.bottom - margins.top, 0]);
 
-            const colorScale = d3.scaleOrdinal(d3.schemePaired.slice(0, subgroups.length));
+            stackedStructure.svgElement.select(".y-axis").call(
+                d3
+                    .axisLeft()
+                    .scale(yScale)
+                    .tickSize(-svgWidth)
+                    .tickSizeOuter(0)
+                    .ticks(6)
+                    .tickFormat((d) => d + "%")
+            );
 
-            // Define and draw axes
-            const yAxis = d3
-                .axisLeft()
-                .scale(yScale)
-                .ticks(6)
-                .tickSize(-svgWidth, 0, 0)
-                .tickFormat((d) => d + "%");
+            stackedStructure.svgElement.select(".x-axis").call(d3.axisBottom().scale(xScale).tickFormat(timeFormat));
 
-            const xAxis = d3.axisBottom().scale(xScale).tickFormat(timeFormat);
-
-            const yAxis_group = svgElem.append("g").classed("y", true).classed("axis", true).call(yAxis);
-
-            yAxis_group.selectAll(".tick line").remove();
-
-            svgElem
+            let base = stackedStructure.svgElement
                 .append("g")
-                .classed("x", true)
-                .classed("axis", true)
-                .attr("transform", "translate(0," + svgHeight + ")")
-                .call(xAxis);
-
-            // Create groups for each series
-            const groupsElem = svgElem
-                .selectAll("g.age-group")
+                .selectAll(".groups")
                 .data(stackedData)
                 .enter()
                 .append("g")
-                .classed("age-group", true)
-                .style("fill", (_, i) => colorScale(i));
+                .attr("fill", (_, i) => colorScale(i));
 
-            // Create the hover tooltip
-            const tooltipElem = svgElem.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
+            d3.selectAll("rect").data(stackedData).exit().transition().duration(TRANSITION_DURATION).attr("x", 500).remove();
+
+            let groups = base
+                .selectAll("rect")
+                .data((d) => d)
+                .attr("x", 0)
+                .attr("width", xScale.bandwidth())
+                .attr("y", (d) => yScale(d[1]))
+                .attr("height", (d) => yScale(d[0]) - yScale(d[1]));
+
+            let groupsEnter = groups.enter().append("rect");
+
+            groupsEnter
+                .attr("x", (d) => 0)
+                .attr("width", 0)
+                .attr("y", (d) => yScale(d[1]))
+                .attr("height", (d) => yScale(d[1]) - yScale(d[1]))
+                .on("mouseover", () => {
+                    tooltipElem.classed("hide", false);
+                })
+                .on("mouseout", () => tooltipElem.classed("hide", true))
+                .on("mousemove", (e, d) => {
+                    let xPos = d3.pointer(e)[0] - 15;
+                    let yPos = d3.pointer(e)[1] - 25;
+
+                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
+                    tooltipElem.select("text").text((d[1] - d[0]).toFixed(1) + "%");
+                });
+
+            groupsEnter
+                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+                .transition()
+                .duration(TRANSITION_DURATION)
+                .attr("x", (d) => xScale(d.data.Year))
+                .attr("width", xScale.bandwidth());
+
+            const tooltipElem = stackedStructure.svgElement.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
 
             tooltipElem
                 .append("rect")
@@ -752,28 +651,6 @@
                 .style("font-weight", "bold")
                 .style("text-anchor", "middle");
 
-            // Create rects for each segment
-            groupsElem
-                .selectAll("rect")
-                .data((d) => d)
-                .enter()
-                .append("rect")
-                .attr("x", (d) => xScale(+d.data.Year))
-                .attr("y", (d) => yScale(d[1]))
-                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
-                .attr("width", xScale.bandwidth())
-                .on("mouseover", () => tooltipElem.classed("hide", false))
-                .on("mouseout", () => tooltipElem.classed("hide", true))
-                .on("mousemove", (e, d) => {
-                    let xPos = d3.pointer(e)[0] - 15;
-                    let yPos = d3.pointer(e)[1] - 25;
-
-                    // Make the tooltip follow the mouse movement
-                    // while hovering onto a rect
-                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
-                    tooltipElem.select("text").text((d[1] - d[0]).toFixed(1) + "%");
-                });
-
             const getLegendTranslation = (datumId) => {
                 const horizDelta = 16;
                 const vertDelta = 16;
@@ -784,21 +661,22 @@
 
                 switch (c) {
                     case 0:
-                        return `translate(${-(svgWidth + horizDelta)},
-                            ${svgHeight + vertDelta + legendMargin * (r + 1)})`;
-
+                        return `translate(${-svgWidth},
+                            ${svgHeight + vertDelta + 15 * (r + 1)})`;
                     case 1:
-                        return `translate(${-(svgWidth / 2 + 2 * horizDelta)},
-                            ${svgHeight + vertDelta + legendMargin * (r + 1)})`;
-
+                        return `translate(${-svgWidth + 150},
+                                ${svgHeight + vertDelta + 15 * (r + 1)})`;
                     case 2:
-                        return `translate(${-(0 + 4 * horizDelta)},
-                            ${svgHeight + vertDelta + legendMargin * (r + 1)})`;
+                        return `translate(${-svgWidth + 300},
+                        ${svgHeight + vertDelta + 15 * (r + 1)})`;
                 }
             };
 
             // Draw layers legend
-            const legendElem = svgElem
+            // TODO if the legend element is part of the of the svg the top percentage cannot be seen
+            const legendElem = stackedStructure.svgElement
+                .append("g")
+                .attr("transform", `translate(0, ${-margins.bottom - margins.top})`)
                 .selectAll(".legend")
                 .data(colorScale.range())
                 .enter()
@@ -806,8 +684,7 @@
                 .classed("age-stacked-barchart-legend", true)
                 .attr("width", 50)
                 .attr("height", 12)
-                // .attr("transform", (_, i) => "translate("
-                //         + i*legendMargin +",30)")
+                .attr("transform", (_, i) => "translate(" + i * 15 + ",30)")
                 .attr("transform", (_, i) => getLegendTranslation(i));
 
             legendElem
@@ -828,29 +705,106 @@
                 .text((_, i) => subgroups[i] + " years");
         };
 
-        let drawLineChart = (data, lineChartId, globalMinY, globalMaxY, margin, lineChartWidth, lineChartHeight) => {
+        /**
+         * Function that initialize the svg containing the rate of change lineChart for the selected country
+         * @param {string} container
+         * @param {string} lineChartId
+         * @returns
+         */
+
+        let initializeLineChart = (container, lineChartId) => {
+            let rateOfChangeLineChartContainer = d3.select("#" + container);
+
+            let svg = rateOfChangeLineChartContainer
+                .append("svg")
+                .attr("width", svgWidth)
+                .attr("height", svgHeight)
+                .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
+                .attr("id", lineChartId + "-svg");
+
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("id", lineChartId)
+                .attr("class", "country-linechart");
+
+            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "year-circles");
+
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${svgHeight - margins.bottom})`)
+                .attr("color", "white")
+                .style("font-size", "10px")
+                .attr("id", lineChartId + "-xaxis")
+                .attr("class", "axis-dark-cyan");
+
+            svg.append("g")
+                .append("text")
+                .classed("legend", true)
+                .attr("transform", `translate(${svgWidth - margins.right}, ${svgHeight - 5})`)
+                .style("text-anchor", "end")
+                .text("Time Span");
+
+            svg.append("g")
+                .attr("color", "white")
+                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .style("font-size", "10px")
+                .attr("id", lineChartId + "-yaxis")
+                .attr("class", "grid-lines y-axis");
+
+            svg.append("g")
+                .append("text")
+                .attr("font-size", "10px")
+                .classed("legend", true)
+                .attr("transform", `rotate(-90) translate(-${margins.top}, ${margins.left})`)
+                .style("text-anchor", "end")
+                .attr("stroke", "#FFFFFF!important")
+                .text("Rate Of Change");
+
+            return { lineChartStructure: svg };
+        };
+
+        let drawLineChart = (data, lineChartId, globalMinY, globalMaxY) => {
             let xScale = d3
                 .scalePoint()
                 .domain(data.map((rateOfChange) => rateOfChange.label))
-                .range([margin.left + margin.right, lineChartWidth]);
+                .range([margins.left, svgWidth - margins.right - margins.left]);
 
             let yScale = d3
                 .scaleLinear()
                 .domain([globalMinY, globalMaxY])
-                .range([lineChartHeight + margin.top / 3, 0]);
-
-            let updateTransitionDuration = 1500;
-            let enterTransitionDuration = 1500;
+                .range([0, svgHeight - margins.bottom - margins.top]);
 
             d3.select("#" + lineChartId + "-xaxis")
                 .transition()
-                .duration(updateTransitionDuration)
+                .duration(TRANSITION_DURATION)
                 .call(d3.axisBottom(xScale));
 
             d3.select("#" + lineChartId + "-yaxis")
                 .transition()
-                .duration(updateTransitionDuration)
-                .call(d3.axisLeft(yScale));
+                .duration(TRANSITION_DURATION)
+                .call(d3.axisLeft(yScale).tickSize(-svgWidth).tickSizeOuter(0).ticks(8));
+
+            lineChartStructure.lineChartStructure
+                .select(".year-circles")
+                .selectAll(".year-circle")
+                .data(data)
+                .join(
+                    (enter) => {
+                        enter
+                            .append("circle")
+                            .attr("class", "year-circle")
+                            .attr("fill", "none")
+                            .attr("cx", (d) => xScale(d.label))
+                            .attr("cy", (d) => yScale(d.value))
+                            .attr("r", 3);
+                    },
+                    (update) =>
+                        update
+                            .transition()
+                            .duration(TRANSITION_DURATION)
+                            .attr("cx", (d) => xScale(d.label))
+                            .attr("cy", (d) => yScale(d.value)),
+                    (exit) => exit.remove()
+                );
 
             let lineGenerator = d3
                 .line()
@@ -872,18 +826,17 @@
                             .call((enter) =>
                                 enter
                                     .transition()
-                                    .duration(enterTransitionDuration)
+                                    .duration(TRANSITION_DURATION)
                                     .attr("d", (d) => lineGenerator(d))
                             ),
-                    //.call(enter => { return isChartDefined ? enter : lineInitialTransition(enter);}),
                     (update) =>
                         update.call((update) =>
                             update
                                 .transition()
-                                .duration(updateTransitionDuration)
+                                .duration(TRANSITION_DURATION)
                                 .attr("d", (d) => lineGenerator(d))
                         ),
-                    (exit) => exit.call((exit) => exit.transition().duration(updateTransitionDuration).remove())
+                    (exit) => exit.transition().duration(TRANSITION_DURATION).remove()
                 );
         };
 
@@ -893,7 +846,7 @@
          */
         $scope.handleGenderClick = function (value) {
             $scope.genderFilterValue = value;
-            $scope.updateStatistics();
+            updateStatistics();
         };
 
         /**
@@ -919,7 +872,6 @@
          * @param {string} value
          */
         $scope.handleTopCountryClick = function (value, type) {
-            // $scope.selectedTopCountry = value;
             $scope.selectedCountryController = value;
             $scope.updateView();
         };
@@ -967,6 +919,22 @@
 
         $scope.updateSearch = (event) => {
             event.stopPropagation();
+        };
+
+        /**
+         * Function that updates the selected years in the title section
+         */
+        let updateTitle = () => {
+            let yearText = null;
+            let activeLength = dataService.getActiveYears(sliderMin, sliderMax);
+
+            if (activeLength == 1) {
+                yearText = sliderMin;
+            } else {
+                yearText = `${sliderMin} - ${sliderMax}`;
+            }
+
+            titleYear.innerHTML = yearText;
         };
     }
 })();

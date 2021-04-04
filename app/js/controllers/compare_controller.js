@@ -71,28 +71,6 @@
             refugeeVsImmigrationGlobalRank: "",
         };
 
-        /**
-         * Function that returns a N. A. string if the parameter is NaN else returns the parameter
-         * @param {data element} data
-         * @returns
-         */
-        let setNotAvailable = (data, rank) => {
-            return isNaN(data) ? "N. A." : transformNumberFormat(data, rank, 0);
-        };
-
-        /**
-         * Function that removes the sex postfixes from the data passed as parameter
-         * @param {array} data
-         * @returns
-         */
-        let preprocessRateOfChange = (data) => {
-            let xLabels = Object.keys(data);
-            const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
-            xLabels = xLabels.map((label) => label.replace(reg, ""));
-            let yValues = Object.values(data).map((value) => +value);
-            return xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
-        };
-
         // getting the countries from the service
         dataService.countries.then((data) => {
             $scope.countries = data;
