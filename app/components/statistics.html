@@ -1,4 +1,4 @@
-<div layout="column" class="parent-size">
+<div layout="column" class="parent-size max-width-1920-px margin-auto min-width-1520-px">
     <div ng-include="'app/commons/navbar.html'" onload="active='statistics'"></div>
 
     <div layout="row" class="background-dark height-5">
@@ -12,21 +12,47 @@
         <div class="width-20">
             <div layout="column">
                 <div class="color-white margin-top-15-px margin-left-20px">
-                    <div id="title-year"  class="font-size-xx-large text-bold"></div>
+                    <div id="title-year" class="font-size-xx-large text-bold"></div>
                     <div id="title-label" class="font-large margin-top-10-px color-darkcyan"></div>
                 </div>
-                <hr class="menu-divider margin-left-20px">
             </div>
-            <div layout="column" class="color-white margin-top-20">
-                <div class="font-size-small text-bold padding-left-20px">
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Iusto aliquid excepturi unde veritatis
-                    nulla, dolore voluptate minus, libero natus architecto illo enim aliquam. Accusamus odit
-                    voluptatibus velit modi at neque placeat similique recusandae voluptate ut.
+
+            <hr class="menu-divider">
+            <div layout="column" class="color-white margin-top-none">
+                <div ng-if="selectedMetric === 'total_immigration'"
+                    class="font-size-small color-white padding-10-px text-justify">
+                    <span class="color-darkcyan">Total immigration</span> is referred to the total number of
+                    persons that have migrated (includes all countries).
                 </div>
-                <div id="global-statistics" class="margin-top-20">
-                    <div class="color-orange padding-10-px">World Estimates</div>
-                    <div class="color-orange-small padding-10-px">Click on a bar in the graph below to filter the visualized statistics.</div>
-                    <!-- <img src="../../sketch/Mask_Group_2.png"> -->
+                <div ng-if="selectedMetric === 'total_population'"
+                    class="font-size-small padding-10-px color-white text-justify">
+                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
+                    <span class="color-darkcyan">Total population</span> is referred tot the total population of all the
+                    countries that have migrants (inward or outward)
+                </div>
+                <div ng-if="selectedMetric === 'immigration_vs_population'"
+                    class="font-size-small padding-10-px color-white text-justify">
+                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
+                    <span class="color-darkcyan">Immigration vs. Population</span> is referred tot the percentage of the
+                    total population that has migrated
+                </div>
+                <div ng-if="selectedMetric === 'immigrants_avg_age'"
+                    class="font-size-small padding-10-px color-white text-justify">
+                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
+                    <span class="color-darkcyan">Immigrants average age</span> is referred tot the migrants average
+                    age calculated on all the immigrants
+                </div>
+                <div ng-if="selectedMetric === 'refugees_vs_immigration'"
+                    class="font-size-small padding-10-px color-white text-justify">
+                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
+                    <span class="color-darkcyan">Refugees vs. Immigrants</span> is referred tot the percentage of the
+                    migrant that are refugees
+                </div>
+                <div class="margin-top-20">
+                    <div class="color-orange font-size-large padding-10-px">World Estimates</div>
+                    <div id="global-statistics"></div>
+                    <div class="color-white font-size-small padding-10-px">Click on a bar in the above plot to filter
+                        the visualized statistics.</div>
                 </div>
             </div>
         </div>
@@ -51,9 +77,8 @@
                 <div class="width-70 height-100">
                     <div layout="row" class="color-white font-size-small">
                         <div class="padding-lr-20-px width-40">
-                            <div class="color-darkgray" ng-if="!hoveredCountry.visName">Hover over a country and you will
-                                see here the related
-                                information</div>
+                            <div class="color-darkgray" ng-if="!hoveredCountry.visName">Hover over a country and you
+                                will see here the related information</div>
                             <div layout="row" class="margin-bottom-10-px">
                                 <img src="{{hoveredCountry.flagPath}}" width="30" height="20"
                                     class="margin-top-bottom-auto margin-right-20-px" ng-if="hoveredCountry.flagPath">
@@ -80,15 +105,15 @@
                 </div>
                 <div class="width-30 height-100">
                     <div layout="column">
-                        <top-countries handle-button="handleTopCountryClick(flagValue, 'in')"
-                            countries="top5Countries"
-                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in', flagValue)"
+                        <top-countries handle-button="handleTopCountryClick(flagValue, 'in')" countries="top5Countries"
+                            show-hint="showTopCountryHint(flagValue, event, 'in')"
+                            hide-hint="hideTopCountryHint('in', flagValue)"
                             top-countries-icon-path="'app/img/home/up.png'">
                         </top-countries>
                         <hr class="menu-divider width-90" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
-                            countries="flop5Countries"
-                            show-hint="showTopCountryHint(flagValue, event, 'in')" hide-hint="hideTopCountryHint('in', flagValue)"
+                            countries="flop5Countries" show-hint="showTopCountryHint(flagValue, event, 'in')"
+                            hide-hint="hideTopCountryHint('in', flagValue)"
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
                 </div>
