@@ -824,7 +824,7 @@
                     } else return false;
                 });
                 if (filteredDataColumns.length == 0) {
-                    return "Data not available for the specified time span!";
+                    return filteredDataColumns;
                 }
                 filteredDataColumns = filteredDataColumns.filter((columnName) => {
                     let pattern = /([0-9]+-[0-9]+)_(\(mf\)|\(m\)|\(f\))/g;
