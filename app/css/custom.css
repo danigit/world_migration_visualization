@@ -260,6 +260,10 @@ FONTS
     font-size: medium !important;
 }
 
+.font-size-large {
+    font-size: large !important;
+}
+
 .font-size-larger {
     font-size: larger !important;
 }

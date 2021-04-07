@@ -507,6 +507,7 @@
                 .transition()
                 .duration(TRANSITION_DURATION)
                 .attr("y", (d) => svgElement.y(d.val))
+                .text((d) => transformNumberFormat(d.val, false, 0))
                 .attr(
                     "transform",
                     (d) => `rotate(-25, ${svgElement.xSubgroup(d.key)},
