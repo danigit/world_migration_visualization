@@ -304,6 +304,10 @@ MARGINS
     margin-top: 20%;
 }
 
+.margin-top-5-px {
+    margin-top: 5px !important;
+}
+
 .margin-top-10-px {
     margin-top: 10px !important;
 }

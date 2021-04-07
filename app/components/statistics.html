@@ -26,34 +26,32 @@
                 </div>
                 <div ng-if="selectedMetric === 'total_population'"
                     class="font-size-small padding-10-px color-white text-justify">
-                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
                     <span class="color-darkcyan">Total population</span> is referred tot the total population of all the
                     countries that have migrants (inward or outward)
                 </div>
                 <div ng-if="selectedMetric === 'immigration_vs_population'"
                     class="font-size-small padding-10-px color-white text-justify">
-                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
                     <span class="color-darkcyan">Immigration vs. Population</span> is referred tot the percentage of the
                     total population that has migrated
                 </div>
                 <div ng-if="selectedMetric === 'immigrants_avg_age'"
                     class="font-size-small padding-10-px color-white text-justify">
-                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
                     <span class="color-darkcyan">Immigrants average age</span> is referred tot the migrants average
                     age calculated on all the immigrants
                 </div>
-                <div ng-if="selectedMetric === 'refugees_vs_immigration'"
+                <div ng-if="selectedMetric === 'refugees_vs_immigrants'"
                     class="font-size-small padding-10-px color-white text-justify">
-                    <hr class="menu-divider width-100 margin-top-bottom-5-px" />
                     <span class="color-darkcyan">Refugees vs. Immigrants</span> is referred tot the percentage of the
                     migrant that are refugees
                 </div>
                 <div class="margin-top-20">
-                    <div class="color-orange font-size-large padding-10-px">World Estimates</div>
-                    <div id="global-statistics"></div>
-                    <div class="color-white font-size-small padding-10-px">Click on a bar in the above plot to filter
-                        the visualized statistics.</div>
+                    <div class="color-orange font-size-large padding-10-px">World Estimates - <span
+                            class="color-white font-size-medium background-gray padding-5-px border-radius-5-px">Inward</span>
+                    </div>
                 </div>
+                <div id="global-statistics"></div>
+                <div class="color-white font-size-small padding-10-px">Click on a bar in the above plot to filter
+                    the visualized statistics.</div>
             </div>
         </div>
         <div layout="column" class="width-80">
@@ -74,7 +72,7 @@
             </div>
             <hr class="menu-divider">
             <div layout="row" class="height-20">
-                <div class="width-70 height-100">
+                <div class="width-90 height-100">
                     <div layout="row" class="color-white font-size-small">
                         <div class="padding-lr-20-px width-40">
                             <div class="color-darkgray" ng-if="!hoveredCountry.visName">Hover over a country and you
@@ -92,7 +90,7 @@
                             <div ng-if="hoveredCountry.value" class="font-size-medium">
                                 <span
                                     class="color-darkcyan font-size-small background-gray padding-lr-5-px padding-top-bottom-3-px border-radius-5-px">Value</span>
-                                - {{hoveredCountry.value}}
+                                &ensp; - &ensp; &ensp; {{hoveredCountry.value}}
                             </div>
                         </div>
                         <div class="padding-lr-20-px margin-right-20-px width-60 text-justify">
@@ -101,16 +99,21 @@
                             cum voluptatibus accusamus, commodi quaerat? Voluptatibus quibusdam nihil nulla, consequatur
                             quod velit quia reiciendis?
                         </div>
+                        <div
+                            class="color-white margin-top-5-px margin-right-10-px font-size-small background-darkgray padding-10-px width-25 height-100 text-justify">
+                            Ranking of the top 5 countries according to the selected metric computed on all the
+                            countries. In particular <span class="color-green">outward</span> statistics, and
+                            and <span class="color-red">inward</span> statistics </div>
                     </div>
                 </div>
-                <div class="width-30 height-100">
-                    <div layout="column">
+                <div class="width-300-px height-100">
+                    <div layout="column" class="margin-right-10-px">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')" countries="top5Countries"
                             show-hint="showTopCountryHint(flagValue, event, 'in')"
                             hide-hint="hideTopCountryHint('in', flagValue)"
                             top-countries-icon-path="'app/img/home/up.png'">
                         </top-countries>
-                        <hr class="menu-divider width-90" />
+                        <hr class="menu-divider width-100 margin-top-bottom-5-px" />
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'out')"
                             countries="flop5Countries" show-hint="showTopCountryHint(flagValue, event, 'in')"
                             hide-hint="hideTopCountryHint('in', flagValue)"
@@ -123,5 +126,7 @@
             </div>
         </div>
     </div>
-    <!-- end map container-->
+
+</div>
+<!-- end map container-->
 </div>

@@ -751,6 +751,28 @@
             $scope.searchDestination = "";
         };
 
+        $scope.showLabelDescription = (source, event) => {
+            let tooltip = document.querySelector("#compare-tooltip");
+            tooltip.classList.remove("display-none");
+            tooltip.classList.add("display-block");
+
+            tooltip.style.top = event.clientY - 50 + "px";
+            tooltip.style.left = event.clientX + "px";
+            tooltip.style.zIndex = 100;
+
+            if (source === "children") {
+                tooltip.innerHTML = "children";
+            } else {
+                tooltip.innerHTML = "brain drain";
+            }
+        };
+
+        $scope.hideLabelDescription = () => {
+            let tooltip = document.querySelector("#compare-tooltip");
+            tooltip.classList.remove("display-block");
+            tooltip.classList.add("display-none");
+        };
+
         /**
          * Function that stops the propagation of the event passed as parameter
          * @param {event} event

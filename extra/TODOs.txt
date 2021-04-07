@@ -12,12 +12,12 @@ Please note: Fix display resolution to 1080p!
 
 ## World page
 
-- Add the top flags description
+-- Add the top flags description
 
-- A color legend should be precomputed for each metric, conveying the minimum and the maximum possible value
+-- A color legend should be precomputed for each metric, conveying the minimum and the maximum possible value
     in the outer rect ticks in order to keep the colors consistent on data changes
 
-- Fill the blank space atop the barchart with info on the current metric:
+-- Fill the blank space atop the barchart with info on the current metric:
     + What it stands for
     + How it has been calculated
 
@@ -72,9 +72,9 @@ Please note: Fix display resolution to 1080p!
     + Outward idioms:
         * Migratory regions side-by-side barchart.
 
-- add hover information on children and brain drain
+-- add hover information on children and brain drain
 - plot with country migration???
-- Add the top flags description
+-- Add the top flags description
 
 
 
@@ -87,7 +87,7 @@ Please note: Fix display resolution to 1080p!
 -- On activeYears watch update year title label (top-left) and verify that the data is filtered on the map
 
 - Collapsing timespan when closing nav menu in Map page
-- Steal metrics labels from Daniel's resources
+-- Steal metrics labels from Daniel's resources
 - Discard ".." from reduce function in the statistics page
-- Investigate hover coloring malfunctions on the statistics maps
-- Add inward label on the statistics page barchart
+-- Investigate hover coloring malfunctions on the statistics maps
+-- Add inward label on the statistics page barchart

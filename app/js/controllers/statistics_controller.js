@@ -55,7 +55,7 @@
 
         const BAD_COUNTRY_COLOR = "#ff5952";
         const HIGHLIGHTED_COLOR = "#ff9316";
-        const HOVERED_COLOR     = "#800080";
+        const HOVERED_COLOR = "#800080";
 
         const colorScheme = d3.schemeBlues[9];
         let colorScale, colorTicks;
@@ -174,10 +174,7 @@
             }
 
             let _handleMapOnMouseOver = (e, d, _statistics) => {
-                d3.select(e.target)
-                    .transition()
-                    .duration(100)
-                    .attr("fill", HOVERED_COLOR);
+                d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR);
 
                 if (isBadCountry(d.properties)) {
                     console.log("Unknown country:", d.id);
@@ -193,7 +190,7 @@
                         console.log("Data not available:", d.id);
                         $scope.hoveredCountry.value = "Data not available";
                     } else {
-                        $scope.hoveredCountry.value = transformNumberFormat(v);
+                        $scope.hoveredCountry.value = transformNumberFormat(v, false, 1, $scope.selectedMetric);
                     }
 
                     console.log("Hovering over:", d.properties.visName, "-", v);
@@ -223,10 +220,7 @@
                     }
                 }
 
-                d3.select(e.target)
-                    .transition()
-                    .duration(100)
-                    .attr("fill", fillColor);
+                d3.select(e.target).transition().duration(100).attr("fill", fillColor);
             };
 
             let _handleMapEnter = (_enter, _path, _statistics) => {
@@ -285,19 +279,18 @@
                 .selectAll("path")
                 .data(geoObject.data)
                 .join(
-                    enter  => _handleMapEnter(enter, geoObject.path, statistics_avgByCountry),
+                    (enter) => _handleMapEnter(enter, geoObject.path, statistics_avgByCountry),
 
-                    update => _handleMapUpdate(update, statistics_avgByCountry),
+                    (update) => _handleMapUpdate(update, statistics_avgByCountry),
 
-                    exit   => exit.remove()
+                    (exit) => exit.remove()
                 );
 
             // Create color legend
             colorTicks = colorScale.ticks(9);
-            console.log('Color ticks:', colorTicks);
             // console.log(colorTicks.map(d => colorScale(d)));
 
-            const rectWidth  = 25;
+            const rectWidth = 25;
             const rectMargin = 25;
 
             geoObject.element
@@ -305,24 +298,37 @@
                 .selectAll(".legend")
                 .data(colorTicks)
                 .join(
-                    enter  => {
+                    (enter) => {
                         enter
+                            .append("g")
                             .append("rect")
                             .classed("legend", true)
                             .attr("width", rectWidth)
                             .attr("height", 20)
-                            .style("fill", d => colorScale(d))
-                            .attr("transform", (d, i) => "translate("
-                                + (svgMapWidth - rectWidth*colorTicks.length + i*rectWidth - rectMargin)
-                                + ", " + (svgMapHeight - 25) + ")");
+                            .style("fill", (d) => colorScale(d))
+                            .attr(
+                                "transform",
+                                (d, i) =>
+                                    "translate(" +
+                                    (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
+                                    ", " +
+                                    (svgMapHeight - 25) +
+                                    ")"
+                            );
                     },
-                    update =>
+                    (update) =>
                         update
-                            .style("fill", d => colorScale(d))
-                            .attr("transform", (d, i) => "translate("
-                                + (svgMapWidth - rectWidth*colorTicks.length + i*rectWidth - rectMargin)
-                                + ", " + (svgMapHeight - 25) + ")"),
-                    exit   => exit.remove()
+                            .style("fill", (d) => colorScale(d))
+                            .attr(
+                                "transform",
+                                (d, i) =>
+                                    "translate(" +
+                                    (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
+                                    ", " +
+                                    (svgMapHeight - 25) +
+                                    ")"
+                            ),
+                    (exit) => exit.remove()
                 );
 
             geoObject.element
@@ -330,21 +336,24 @@
                 .selectAll(".legend-unk")
                 .data([colorTicks.length])
                 .join(
-                    enter  => {
+                    (enter) => {
                         return enter
+
                             .append("rect")
                             .classed("legend-unk", true)
                             .attr("width", rectWidth)
                             .attr("height", 20)
                             .style("fill", BAD_COUNTRY_COLOR)
-                            .attr("transform", d => "translate("
-                                + (svgMapWidth - rectWidth*d - 4*rectMargin)
-                                + ", " + (svgMapHeight - 25) + ")")},
-                    update =>
-                        update
-                            .attr("transform", d => "translate("
-                                + (svgMapWidth - rectWidth*d - 4*rectMargin)
-                                + ", " + (svgMapHeight - 25) + ")"),
+                            .attr(
+                                "transform",
+                                (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 25) + ")"
+                            );
+                    },
+                    (update) =>
+                        update.attr(
+                            "transform",
+                            (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 25) + ")"
+                        )
                 );
         };
 
@@ -436,34 +445,34 @@
                 .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
                 .attr("fill", colorScheme[4]);
 
-            // enter.selectAll("rect").on("click", function (e, d) {
-            //     if (d3.select(this).classed("selected")) {
-            //         d3.select(this)
-            //             .classed("selected", false)
-            //             .transition()
-            //             .duration(100)
-            //             .attr("fill", (datum, i) => {
-            //                 return colorScheme[4];
-            //             });
+            enter.selectAll("rect").on("click", function (e, d) {
+                if (d3.select(this).classed("selected")) {
+                    d3.select(this)
+                        .classed("selected", false)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", (datum, i) => {
+                            return colorScheme[4];
+                        });
 
-            //         $scope.activeYears = dataService.getActiveYears();
-            //         $scope.$apply();
-            //     } else {
-            //         d3.select("#global-statistics")
-            //             .selectAll("g rect.selected")
-            //             .classed("selected", false)
-            //             .transition()
-            //             .duration(100)
-            //             .attr("fill", (datum, i) => {
-            //                 return colorScheme[4];
-            //             });
+                    $scope.activeYears = dataService.getActiveYears();
+                    $scope.$apply();
+                } else {
+                    d3.select("#global-statistics")
+                        .selectAll("g rect.selected")
+                        .classed("selected", false)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", (datum, i) => {
+                            return colorScheme[4];
+                        });
 
-            //         d3.select(this).classed("selected", true).transition().duration(100).attr("fill", HIGHLIGHTED_COLOR);
+                    d3.select(this).classed("selected", true).transition().duration(100).attr("fill", HIGHLIGHTED_COLOR);
 
-            //         $scope.activeYears = [+d.label];
-            //         $scope.$apply();
-            //     }
-            // });
+                    $scope.activeYears = [+d.label];
+                    $scope.$apply();
+                }
+            });
         };
 
         let handleUpdate = (update, data, svgElement) => {
@@ -485,7 +494,7 @@
                     if (!d3.select(this).classed("selected")) return colorScheme[4];
 
                     return HIGHLIGHTED_COLOR;
-                    });
+                });
         };
 
         let handleLabelsEnter = (enter, svgElement) => {
@@ -518,8 +527,8 @@
                 .data(data)
                 .join(
                     (enter) => handleEnter(enter, svgElement),
-                    (update) => handleUpdate(update, data, svgElement)
-                    // (exit) => exit.remove()
+                    (update) => handleUpdate(update, data, svgElement),
+                    (exit) => exit.remove()
                 );
 
             svgElement.mainGroup
