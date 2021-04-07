@@ -110,7 +110,7 @@ const equals = (a, b) => {
 let d3_scaleLogMinMax = (data, range) => {
     const data_minMax = [d3.min(data), d3.max(data)];
 
-    return d3.scaleSymlog(data_minMax, range);
+    return d3.scaleSymlog(data_minMax, range).nice();
 };
 
 /**

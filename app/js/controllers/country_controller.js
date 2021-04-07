@@ -763,6 +763,24 @@
         };
 
         let drawLineChart = (data, lineChartId, globalMinY, globalMaxY) => {
+            
+            if (data.length==0) {
+                d3.select("#" + lineChartId).selectAll("*").remove();
+                lineChartStructure.lineChartStructure
+                    .select(".year-circles")
+                    .selectAll(".year-circle")
+                    .remove();
+                d3.select("#" + lineChartId).append("text")
+                    .attr("id", "data-not-available-label")
+                    .attr("color", "white")
+                    .attr("font-size", "13px")
+                    .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                    .text("Data not available!Please select a valid time span.");
+                return;
+            }
+            else {
+                d3.select("#data-not-available-label").remove();
+            }
             let xScale = d3
                 .scalePoint()
                 .domain(data.map((rateOfChange) => rateOfChange.label))

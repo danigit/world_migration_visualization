@@ -55,9 +55,10 @@
 
         const BAD_COUNTRY_COLOR = "#ff5952";
         const HIGHLIGHTED_COLOR = "#ff9316";
+        const HOVERED_COLOR     = "#800080";
 
         const colorScheme = d3.schemeBlues[9];
-        let colorScale;
+        let colorScale, colorTicks;
 
         $scope.globalStatisticsVisName = "Global statistics";
         $scope.selectedMetric = "total_immigration";
@@ -96,7 +97,7 @@
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map");
-            svgMap.append("g").attr("class", "legends");
+            svgMap.append("g").classed("legends", true);
             // let svgGraticule = svgMapContainer.append("g")
             //         .attr('id', 'graticule');
 
@@ -170,16 +171,13 @@
                 }
 
                 colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
-
-                // console.log(colorScale.ticks(),
-                //             colorScale.ticks().concat(colorScale.domain()));
             }
 
             let _handleMapOnMouseOver = (e, d, _statistics) => {
-                d3.select(e.target).transition().duration(100).style("fill", "#800080");
-
-                // FIXME: Investigate why map colors do not update
-                // properly after mouse over events have been triggered
+                d3.select(e.target)
+                    .transition()
+                    .duration(100)
+                    .attr("fill", HOVERED_COLOR);
 
                 if (isBadCountry(d.properties)) {
                     console.log("Unknown country:", d.id);
@@ -225,7 +223,10 @@
                     }
                 }
 
-                d3.select(e.target).transition().duration(100).style("fill", fillColor);
+                d3.select(e.target)
+                    .transition()
+                    .duration(100)
+                    .attr("fill", fillColor);
             };
 
             let _handleMapEnter = (_enter, _path, _statistics) => {
@@ -245,8 +246,6 @@
                             return BAD_COUNTRY_COLOR;
                         }
 
-                        // TODO: Change the fill attribute following
-                        // the color scale on the current metric
                         return colorScale(v);
                     })
                     .on("click", (_, d) => {
@@ -278,17 +277,7 @@
                             return BAD_COUNTRY_COLOR;
                         }
 
-                        // TODO: Change the fill attribute following
-                        // the color scale on the current metric
                         return colorScale(v);
-                    });
-
-                _update
-                    .select(".legends")
-                    .selectAll(".legend")
-                    .data(colorScale.ticks)
-                    .attr("fill", (d, i) => {
-                        return colorScale(d);
                     });
             };
 
@@ -296,37 +285,66 @@
                 .selectAll("path")
                 .data(geoObject.data)
                 .join(
-                    (enter) => _handleMapEnter(enter, geoObject.path, statistics_avgByCountry),
+                    enter  => _handleMapEnter(enter, geoObject.path, statistics_avgByCountry),
 
-                    (update) => _handleMapUpdate(update, statistics_avgByCountry),
+                    update => _handleMapUpdate(update, statistics_avgByCountry),
 
-                    (exit) => exit.remove()
+                    exit   => exit.remove()
                 );
 
             // Create color legend
-            let colorTicks = colorScale.ticks(10);
+            colorTicks = colorScale.ticks(9);
+            console.log('Color ticks:', colorTicks);
+            // console.log(colorTicks.map(d => colorScale(d)));
+
+            const rectWidth  = 25;
+            const rectMargin = 25;
 
             geoObject.element
                 .select(".legends")
                 .selectAll(".legend")
                 .data(colorTicks)
                 .join(
-                    (enter) => {
-                        // console.log(enter);
+                    enter  => {
                         enter
-                            .append("g")
-                            .classed("legend", true)
-                            .attr("transform", (d, i) => "translate(" + (svgMapWidth - 200 + i * 25) + ", " + (svgMapHeight - 25) + ")")
                             .append("rect")
-                            .attr("width", 25)
+                            .classed("legend", true)
+                            .attr("width", rectWidth)
                             .attr("height", 20)
-                            .attr("fill", (d, i) => {
-                                return colorScale(d);
-                            });
+                            .style("fill", d => colorScale(d))
+                            .attr("transform", (d, i) => "translate("
+                                + (svgMapWidth - rectWidth*colorTicks.length + i*rectWidth - rectMargin)
+                                + ", " + (svgMapHeight - 25) + ")");
                     },
-                    (update) => {
-                        update.selectAll("rect").attr("fill", (d, i) => colorScale(d));
-                    }
+                    update =>
+                        update
+                            .style("fill", d => colorScale(d))
+                            .attr("transform", (d, i) => "translate("
+                                + (svgMapWidth - rectWidth*colorTicks.length + i*rectWidth - rectMargin)
+                                + ", " + (svgMapHeight - 25) + ")"),
+                    exit   => exit.remove()
+                );
+
+            geoObject.element
+                .select(".legends")
+                .selectAll(".legend-unk")
+                .data([colorTicks.length])
+                .join(
+                    enter  => {
+                        return enter
+                            .append("rect")
+                            .classed("legend-unk", true)
+                            .attr("width", rectWidth)
+                            .attr("height", 20)
+                            .style("fill", BAD_COUNTRY_COLOR)
+                            .attr("transform", d => "translate("
+                                + (svgMapWidth - rectWidth*d - 4*rectMargin)
+                                + ", " + (svgMapHeight - 25) + ")")},
+                    update =>
+                        update
+                            .attr("transform", d => "translate("
+                                + (svgMapWidth - rectWidth*d - 4*rectMargin)
+                                + ", " + (svgMapHeight - 25) + ")"),
                 );
         };
 
@@ -467,34 +485,7 @@
                     if (!d3.select(this).classed("selected")) return colorScheme[4];
 
                     return HIGHLIGHTED_COLOR;
-                });
-
-            // update.selectAll("rect").on("click", function (e, d) {
-            // selectedYear = +d.label;
-            // if (d3.select(this).classed("selected")) {
-            //     d3.select(this)
-            //         .classed("selected", false)
-            //         .transition()
-            //         .duration(100)
-            //         .attr("fill", (datum, i) => {
-            //             return colorScheme[4];
-            //         });
-
-            //     $scope.activeYears = dataService.getActiveYears();
-            // } else {
-            //     d3.select("#global-statistics")
-            //         .selectAll("g rect.selected")
-            //         .classed("selected", false)
-            //         .transition()
-            //         .duration(100)
-            //         .attr("fill", (datum, i) => {
-            //             return colorScheme[4];
-            //         });
-
-            //     d3.select(this).classed("selected", true).transition().duration(100).attr("fill", "#ff9316");
-            //     $scope.activeYears = [selectedYear];
-            // }
-            // });
+                    });
         };
 
         let handleLabelsEnter = (enter, svgElement) => {
