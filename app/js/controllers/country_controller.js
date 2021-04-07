@@ -715,19 +715,22 @@
         let initializeLineChart = (container, lineChartId) => {
             let rateOfChangeLineChartContainer = d3.select("#" + container);
 
+            //margins.top=10;
             let svg = rateOfChangeLineChartContainer
                 .append("svg")
                 .attr("width", svgWidth)
                 .attr("height", svgHeight)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
                 .attr("id", lineChartId + "-svg");
+                //.attr("transform", `translate(${margins.left + margins.right}, 10)`);
+
 
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${margins.left}, 10)`)
                 .attr("id", lineChartId)
                 .attr("class", "country-linechart");
 
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "year-circles");
+            svg.append("g").attr("transform", `translate(${margins.left}, 10)`).attr("class", "year-circles");
 
             svg.append("g")
                 .attr("transform", `translate(${margins.left}, ${svgHeight - margins.bottom})`)
@@ -745,7 +748,7 @@
 
             svg.append("g")
                 .attr("color", "white")
-                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .attr("transform", `translate(${margins.left + margins.right}, 10)`)
                 .style("font-size", "10px")
                 .attr("id", lineChartId + "-yaxis")
                 .attr("class", "grid-lines y-axis");
@@ -754,7 +757,7 @@
                 .append("text")
                 .attr("font-size", "10px")
                 .classed("legend", true)
-                .attr("transform", `rotate(-90) translate(-${margins.top}, ${margins.left})`)
+                .attr("transform", `rotate(-90) translate(-10, ${margins.left})`)
                 .style("text-anchor", "end")
                 .attr("stroke", "#FFFFFF!important")
                 .text("Rate Of Change");
@@ -774,7 +777,7 @@
                     .attr("id", "data-not-available-label")
                     .attr("color", "white")
                     .attr("font-size", "13px")
-                    .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                    .attr("transform", `translate(${margins.left + margins.right}, 10)`)
                     .text("Data not available!Please select a valid time span.");
                 return;
             }
@@ -790,7 +793,7 @@
             let yScale = d3
                 .scaleLinear()
                 .domain([globalMinY, globalMaxY])
-                .range([svgHeight - margins.bottom - margins.top, 0]);
+                .range([svgHeight - margins.bottom - 10, 0]);
 
             d3.select("#" + lineChartId + "-xaxis")
                 .transition()
