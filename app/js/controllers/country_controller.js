@@ -781,6 +781,7 @@
             else {
                 d3.select("#data-not-available-label").remove();
             }
+
             let xScale = d3
                 .scalePoint()
                 .domain(data.map((rateOfChange) => rateOfChange.label))
@@ -789,7 +790,7 @@
             let yScale = d3
                 .scaleLinear()
                 .domain([globalMinY, globalMaxY])
-                .range([0, svgHeight - margins.bottom - margins.top]);
+                .range([svgHeight - margins.bottom - margins.top, 0]);
 
             d3.select("#" + lineChartId + "-xaxis")
                 .transition()
@@ -833,6 +834,22 @@
                     return yScale(d.value);
                 });
 
+            if (data.length==1) {
+                let pointValue = data[0].value;
+                d3.select("#" + lineChartId)
+                    .append("line")
+                    .attr("class", "country-linechart-path")
+                    .attr("id", "single-point-line")
+                    .attr("x1", margins.left)
+                    .attr("y1", yScale(pointValue))
+                    .attr("x2", svgWidth - margins.right - margins.left)
+                    .attr("y2", yScale(pointValue));
+            }
+            else {
+                d3.select("#single-point-line")
+                    .remove();
+            }
+                        
             d3.select("#" + lineChartId)
                 .selectAll("path")
                 .data([data])
