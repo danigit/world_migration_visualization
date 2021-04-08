@@ -119,7 +119,7 @@ let d3_scaleLogMinMax = (data, range) => {
  * @returns
  */
 let setNotAvailable = (data, rank) => {
-    return isNaN(data) ? "N. A." : transformNumberFormat(data, rank, 0);
+    return isNaN(data) ? "N/A" : transformNumberFormat(data, rank, 0);
 };
 
 /**

@@ -1,4 +1,4 @@
-(function () {
+    (function () {
     "use strict";
 
     // reloading the angular module
@@ -567,7 +567,7 @@
             const country = value[0];
             const isoAlpha3 = country.props.isoAlpha3;
 
-            $scope.selectedTopFlag = capitalize(country.name);
+            $scope.selectedTopFlag = capitalize(country.visName);
 
             // FIXME: Holy See is not present
             // in the TopoJSON file
