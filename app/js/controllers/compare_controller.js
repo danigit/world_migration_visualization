@@ -761,9 +761,9 @@
             tooltip.style.zIndex = 100;
 
             if (source === "children") {
-                tooltip.innerHTML = "children";
+                tooltip.innerHTML = "Share of migrant stock with an age between 0 and 14";
             } else {
-                tooltip.innerHTML = "brain drain";
+                tooltip.innerHTML = "Share of migrant stock with an age between 20 and 35";
             }
         };
 
