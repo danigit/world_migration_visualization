@@ -17,6 +17,87 @@
             drawMap(data);
         });
 
+        dataService.getCountriesInwardOutwardMigrants().then((data) => {
+            /* let country = {}
+            let tot = [];
+
+            dataService.countries.then(countries => {
+                let countryNames = countries.map(c => c.name);
+                data.forEach(c => {
+                    country.Destination = c.Destination;
+                    country.Total = c.Total;
+                    let prev = c.Year;
+                    data.forEach(c1 => {
+                        if (c.Destination === c1.Destination && c.Year !== c1.Year) {
+                            let currentCountry = {}
+                            let keys = Object.keys(c1).slice(2);
+                            console.log(keys)
+                            Object.values(c1).forEach((p, i) => {
+                                console.log(p)
+                                if (!keys[i] in c)
+                                    currentCountry[keys[i]] = c[keys[i]]
+                                else if(!keys[i] in c1)
+                                    currentCountry[keys[i]] = 0
+                                else
+                                    currentCountry[keys[i]] = p - c[keys[i]]
+                            })
+                            country[prev + "-" + c.Year] = currentCountry;
+                        }
+                        prev = c1.Year;
+                    })
+                    tot.push(country)
+                    country = {};
+                })
+            })
+            console.log(tot) */
+
+
+
+            let yearInwardOutwardMappings = {
+                "1990-1995" : [],
+                "1995-2000" : [],
+                "2000-2005" : [],
+                "2005-2010" : [],
+                "2010-2015" : [],
+                "2015-2019" : []
+            };
+
+            
+            dataService.countries.then(countries => {
+                let countryNames =countries.map(country => country.name);
+                countryNames.forEach(countryName => {
+                    let countryDataObject = {};
+                    let allYearsDestData = data.filter(yearData => yearData.Destination == countryName);
+                    allYearsDestData.sort(obj => obj.Year);
+                    for (let i = 0; i<allYearsDestData.length - 1; i++) {
+                        /* countryDataObject[allYearsDestData[i].Year + "-" + allYearsDestData[i+1].Year]["Destination"] = 
+                            countryName; */
+                        countryDataObject.Destination = countryName;
+                        for (let key in allYearsDestData[i]) {
+                            if (key!="Year" && key!="Destination" && key!="Total") {
+                                let weight;
+                                if (key in allYearsDestData[i + 1]) {
+                                    weight = allYearsDestData[i+1][key] - allYearsDestData[i][key];
+                                }
+                                else {
+                                    weight = 0;
+                                }
+                                countryDataObject[key] = weight;
+                                
+                                /* countryDataObject[allYearsDestData[i].Year + "-" + allYearsDestData[i+1].Year]
+                                [key] = weight; */
+                            }
+                        }
+
+                        yearInwardOutwardMappings[allYearsDestData[i].Year + "-" + allYearsDestData[i+1].Year]
+                        .push(countryDataObject);
+                    }
+
+                });
+                console.log("Final object: ", yearInwardOutwardMappings);
+            });
+        });
+
         let svgGroup;
 
         let drawMap = (data) => {
@@ -33,7 +114,7 @@
             svgGroup = svgMap.append("g");
             svgGroup
                 .selectAll("path")
-                .data(topojson.feature(data, data.objects.countries).features)
+                .data(data)
                 .enter()
                 .append("path")
                 .attr("d", path)

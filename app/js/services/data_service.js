@@ -850,7 +850,7 @@
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 
-        let getCountries_totMigrByOriginDest = (countries) => {
+        let getCountries_totMigrByOriginDest = (countries, columnsArray = ["Year", "Destination", "Total"]) => {
             return data_service.totMigrByOriginDest.then((data) =>
                 data_service.filterColumn(
                     data_service.filterDataMulti(
@@ -859,7 +859,7 @@
                         1990,
                         2019
                     ),
-                    ["Year", "Destination", "Total"]
+                    columnsArray
                 )
             );
         };
@@ -983,6 +983,24 @@
                     default:
                         throw `Invalid statistics metric: ${metric}`;
                 }
+            });
+        };
+
+data_service.getCountriesInwardOutwardMigrants = () => {
+            return data_service.countries.then((countries) => {
+                let countryNames = countries.map(country => country.name);
+                return getCountries_totMigrByOriginDest(countries, ["Year", "Destination", "Total"].concat(countryNames)).then(data => {
+                        return data.map(obj => {
+                            for (let key in obj) {
+                                if (obj[key]==="")
+                                    delete obj[key];
+                                else if (key!=="Destination") {
+                                    obj[key] = +obj[key];
+                                }
+                            }
+                            return obj;
+                        });
+                    })
             });
         };
 
