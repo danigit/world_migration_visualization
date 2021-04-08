@@ -986,21 +986,20 @@
             });
         };
 
-data_service.getCountriesInwardOutwardMigrants = () => {
+        data_service.getCountriesInwardOutwardMigrants = () => {
             return data_service.countries.then((countries) => {
-                let countryNames = countries.map(country => country.name);
-                return getCountries_totMigrByOriginDest(countries, ["Year", "Destination", "Total"].concat(countryNames)).then(data => {
-                        return data.map(obj => {
-                            for (let key in obj) {
-                                if (obj[key]==="")
-                                    delete obj[key];
-                                else if (key!=="Destination") {
-                                    obj[key] = +obj[key];
-                                }
+                let countryNames = countries.map((country) => country.name);
+                return getCountries_totMigrByOriginDest(countries, ["Year", "Destination", "Total"].concat(countryNames)).then((data) => {
+                    return data.map((obj) => {
+                        for (let key in obj) {
+                            if (obj[key] === "" || obj[key] === "-") delete obj[key];
+                            else if (key !== "Destination") {
+                                obj[key] = +obj[key];
                             }
-                            return obj;
-                        });
-                    })
+                        }
+                        return obj;
+                    });
+                });
             });
         };
 
