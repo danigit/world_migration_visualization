@@ -548,12 +548,50 @@
                 .append("g")
                 .attr("transform", `translate(${svgMargins.left + svgMargins.right}, 10)`);
 
-            svgElem.append("g").attr("font-size", "10px").attr("class", "grid-lines y-axis");
-
+            // Y axis container
             svgElem
                 .append("g")
-                .attr("transform", `translate(0, ${svgHeight - svgMargins.bottom - svgMargins.top})`)
-                .attr("class", "axis-dark-cyan x-axis");
+                    .attr("font-size", "10px")
+                    .attr("class", "grid-lines y-axis");
+
+            // X axis container
+            svgElem
+                .append("g")
+                    .attr("transform", `translate(0, ${svgHeight - svgMargins.bottom - svgMargins.top})`)
+                    .attr("class", "axis-dark-cyan x-axis");
+
+            // Groups container
+            svgElem
+                .append("g")
+                    .classed("groups", true)
+
+            // Tooltip element
+            let tooltipElem = svgElem
+                .append("g")
+                    .classed("age-stacked-barchart-tooltip", true)
+                    .classed("hide", true);
+
+            tooltipElem
+                .append("rect")
+                    .attr("width", 40)
+                    .attr("height", 20)
+                    .attr("fill", "white")
+                    .style("padding", "1em")
+                    .style("opacity", 0.5);
+    
+            tooltipElem
+                .append("text")
+                    .attr("x", 20)
+                    .attr("dy", "1.2em")
+                    .style("font-size", "12px")
+                    .style("font-weight", "bold")
+                    .style("text-anchor", "middle");
+
+            // Color legend container
+            svgElem
+                .append("g")
+                    .classed("age-stacked-barchart-legend-container", true)
+                    .attr("transform", `translate(0, ${-svgMargins.bottom - svgMargins.top})`)
 
             return { svgElement: svgElem };
         };
@@ -581,17 +619,29 @@
             if (dataNaN) {
                 stackedData = [];
 
+                const xPos = Math.round(svgWidth/2) - 1.6*(svgMargins.right + svgMargins.left);
+                const yPos = Math.round(svgHeight/2) - svgMargins.top;
+
                 stackedStructure.svgElement
                     .append("text")
-                    .classed("data-not-available", true)
-                    .classed("label-text", true)
-                    .attr("x", Math.round(svgWidth/2) - 1.6*(svgMargins.right + svgMargins.left))
-                    .attr("y", Math.round(svgHeight/2) - svgMargins.top)
-                    .style("text-anchor", "start")
-                    .text("Age groups data not available!");
+                        .classed("data-not-available", true)
+                        .classed("label-text", true)
+                        .attr("x", xPos)
+                        .attr("y", yPos)
+                        .style("text-anchor", "start")
+                        .style("opacity", "0")
+                        .text("Age groups data not available!")
+                    .transition()
+                        .duration(TRANSITION_DURATION)
+                        .style("opacity", "1");
+                        
             } else {
                 stackedStructure.svgElement
-                    .selectAll(".data-not-available").remove();
+                    .selectAll(".data-not-available")
+                    .transition()
+                        .duration(TRANSITION_DURATION)
+                        .style("opacity", "0")
+                    .remove();
             }
 
             // Set all the scales
@@ -618,67 +668,79 @@
 
             stackedStructure.svgElement.select(".x-axis").call(d3.axisBottom().scale(xScale).tickFormat(timeFormat));
 
-            let base = stackedStructure.svgElement
-                .append("g")
-                .selectAll(".groups")
-                .data(stackedData)
+            let groupsContaienr = stackedStructure.svgElement.select('.groups');
+
+            let groupsElems = groupsContaienr
+                .selectAll(".group")
+                    .data(stackedData, d => d.key);
+
+            groupsElems.exit()
+                .selectAll("rect")
+                .transition()
+                    .duration(TRANSITION_DURATION)
+                    .style("opacity", "0")
+                .remove();
+
+            let groupsEnter = groupsElems
                 .enter()
                 .append("g")
-                .attr("fill", (_, i) => colorScale(i));
+                    .classed('group', true)
+                    .attr("fill", (_, i) => colorScale(i))
 
-            d3.selectAll("rect").data(stackedData).exit().transition().duration(TRANSITION_DURATION).attr("x", 500).remove();
+            groupsElems = groupsEnter.merge(groupsElems);
 
-            let groups = base
+            let groupRects = groupsElems
                 .selectAll("rect")
-                .data((d) => d)
-                .attr("x", 0)
-                .attr("width", xScale.bandwidth())
-                .attr("y", (d) => yScale(d[1]))
-                .attr("height", (d) => yScale(d[0]) - yScale(d[1]));
+                    .data(d => d);
 
-            let groupsEnter = groups.enter().append("rect");
+            groupRects.exit()
+                .transition()
+                    .duration(TRANSITION_DURATION)
+                    .attr("width",  0)
+                    .style("opacity", "0")
+                .remove()
 
-            groupsEnter
-                .attr("x", (d) => 0)
-                .attr("width", 0)
-                .attr("y", (d) => yScale(d[1]))
-                .attr("height", (d) => yScale(d[1]) - yScale(d[1]))
-                .on("mouseover", () => {
-                    tooltipElem.classed("hide", false);
-                })
-                .on("mouseout", () => tooltipElem.classed("hide", true))
+            let groupRectsEnter = groupRects.enter()
+                .append("rect")
+                    .attr("x", (d) => xScale(d.data.Year))
+                    .attr("y", (d) => yScale(d[1]))
+                    .attr("width",  0)
+                    .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+                    .style("opacity", "0")
+            
+            groupRectsEnter
+                .on("mouseover", () => tooltipElem.classed("hide", false))
+                .on("mouseout",  () => tooltipElem.classed("hide", true))
                 .on("mousemove", (e, d) => {
                     let xPos = d3.pointer(e)[0] - 15;
                     let yPos = d3.pointer(e)[1] - 25;
 
-                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
-                    tooltipElem.select("text").text((d[1] - d[0]).toFixed(1) + "%");
+                    tooltipElem
+                        .attr("transform", "translate(" + xPos + "," + yPos + ")");
+
+                    tooltipElem
+                        .select("text")
+                            .text((d[1] - d[0]).toFixed(1) + "%");
                 });
 
-            groupsEnter
-                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+            groupRectsEnter.
+                transition()
+                    .duration(TRANSITION_DURATION)
+                    .delay(300)
+                    .attr("width", xScale.bandwidth())
+                    .style("opacity", "1");
+
+            groupRects
                 .transition()
-                .duration(TRANSITION_DURATION)
-                .attr("x", (d) => xScale(d.data.Year))
-                .attr("width", xScale.bandwidth());
+                    .duration(TRANSITION_DURATION)
+                    .delay(150)
+                    .attr("x", (d) => xScale(d.data.Year))
+                    .attr("y", (d) => yScale(d[1]))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", (d) => yScale(d[0]) - yScale(d[1]));
 
-            const tooltipElem = stackedStructure.svgElement.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
-
-            tooltipElem
-                .append("rect")
-                .attr("width", 40)
-                .attr("height", 20)
-                .attr("fill", "white")
-                .style("padding", "1em")
-                .style("opacity", 0.5);
-
-            tooltipElem
-                .append("text")
-                .attr("x", 20)
-                .attr("dy", "1.2em")
-                .style("font-size", "12px")
-                .style("font-weight", "bold")
-                .style("text-anchor", "middle");
+            const tooltipElem = stackedStructure.svgElement
+                .select(".age-stacked-barchart-tooltip");
 
             const getLegendTranslation = (datumId) => {
                 const horizDelta = 16;
@@ -702,35 +764,36 @@
             };
 
             // Draw layers legend
-            const legendElem = stackedStructure.svgElement
-                .append("g")
-                .attr("transform", `translate(0, ${-svgMargins.bottom - svgMargins.top})`)
-                .selectAll(".legend")
+            const legendContainer = stackedStructure.svgElement
+                .select(".age-stacked-barchart-legend-container");
+
+            const legendElem = legendContainer
+                .selectAll(".age-stacked-barchart-legend")
                 .data(colorScale.range())
                 .enter()
                 .append("g")
-                .classed("age-stacked-barchart-legend", true)
-                .attr("width", 50)
-                .attr("height", 12)
-                .attr("transform", (_, i) => "translate(" + i * 15 + ",30)")
-                .attr("transform", (_, i) => getLegendTranslation(i));
+                    .classed("age-stacked-barchart-legend", true)
+                    .attr("width", 50)
+                    .attr("height", 12)
+                    .attr("transform", (_, i) => "translate(" + i * 15 + ",30)")
+                    .attr("transform", (_, i) => getLegendTranslation(i));
 
             legendElem
                 .append("rect")
-                .attr("x", svgWidth - 12)
-                .attr("width", 12)
-                .attr("height", 12)
-                .attr("stroke", "white")
-                .style("fill", (_, i) => colorScale(i));
+                    .attr("x", svgWidth - 12)
+                    .attr("width", 12)
+                    .attr("height", 12)
+                    .attr("stroke", "white")
+                    .style("fill", (_, i) => colorScale(i));
 
             legendElem
                 .append("text")
-                .attr("x", svgWidth + 5)
-                .attr("y", 7)
-                .classed("label-text", true)
-                .attr("dy", "-0em")
-                .style("text-anchor", "start")
-                .text((_, i) => subgroups[i] + " years");
+                    .classed("label-text", true)
+                    .attr("x", svgWidth + 5)
+                    .attr("y", 7)
+                    .attr("dy", "-0em")
+                    .style("text-anchor", "start")
+                    .text((_, i) => subgroups[i] + " years");
         };
 
         /**
