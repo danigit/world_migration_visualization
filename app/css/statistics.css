@@ -7,8 +7,8 @@
 }
 
 .countries-home {
-    stroke: #000000;
-    fill: #b0b0b0;
+    stroke: #000000 !important;
+    fill: #b0b0b0 !important;
 }
 
 .graticule {

@@ -9,6 +9,7 @@ Please note: Fix display resolution to 1080p!
 - Implement Top 5 inward/outward carousel
 - Add a 'How to read' section in the bottom-left blank space
 - Implement vertical bar to control current visualization
+- Implement the connection map with a threshold for the number of arcs
 
 ## World page
 
@@ -21,7 +22,7 @@ Please note: Fix display resolution to 1080p!
     + What it stands for
     + How it has been calculated
 
-- add label in the info box (%)
+-- add label in the info box (%)
 
 -- Barchart in the bottom-left corner with a single metric across the timespan (1995-2019):
     + Each bar will represent the average of that metric for a given year across all world countries
@@ -73,7 +74,6 @@ Please note: Fix display resolution to 1080p!
         * Migratory regions side-by-side barchart.
 
 -- add hover information on children and brain drain
-- plot with country migration???
 -- Add the top flags description
 
 
@@ -88,6 +88,13 @@ Please note: Fix display resolution to 1080p!
 
 - Collapsing timespan when closing nav menu in Map page
 -- Steal metrics labels from Daniel's resources
-- Discard ".." from reduce function in the statistics page
 -- Investigate hover coloring malfunctions on the statistics maps
 -- Add inward label on the statistics page barchart
+- remove the legend from inside the map
+- country top 5 green label
+
+
+
+
+- plot with country refugees
+- Discard ".." from reduce function in the statistics page

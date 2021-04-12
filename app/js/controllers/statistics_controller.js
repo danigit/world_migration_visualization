@@ -75,6 +75,7 @@
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
         };
+
         let svgMapWidth;
         let svgMapHeight;
 
