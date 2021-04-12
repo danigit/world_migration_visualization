@@ -12,38 +12,116 @@
 
     function homeController($scope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
+        let geoData;
+        let projection;
+
+        let isBadCountry = (props) => {
+            return !props || !(props instanceof Country);
+        };
 
         dataService.loadWorldMap().then((data) => {
             drawMap(data);
         });
 
-        dataService.getCountriesInwardOutwardMigrants().then((data) => {
-            let countriesData = {};
-            for (let c of data) {
-                if (c.Year == 1995) break;
-                let countryData = {};
-                let prev = c.Year;
-                data.forEach((c1) => {
-                    if (c.Destination === c1.Destination && c.Year !== c1.Year) {
-                        let currentCountry = {};
-                        let keys = Object.keys(c1).slice(3);
-                        keys.forEach((k) => {
-                            if (k !== c1.Destination) {
-                                if (!(k in c)) currentCountry[k] = c1[k];
-                                else currentCountry[k] = c1[k] - c[k];
+        const defineArc = (source, target) => {
+            if (source && target) {
+                const sourceX = source[0],
+                    sourceY = source[1];
+
+                const targetX = target[0],
+                    targetY = target[1];
+
+                const midXY = [(sourceX + targetX) / 2, (sourceY + targetY) / 2];
+
+                return "M" + sourceX + "," + sourceY + "S" + (midXY[0] + 50) + "," + (midXY[1] - 75) + "," + targetX + "," + targetY;
+            } else {
+                return "M0,0,l0,0z";
+            }
+        };
+
+        /**
+         * Function that draws the migration on the map
+         * @param {object} map
+         */
+        let drawArcs = (map) => {
+            dataService.getCountriesInwardOutwardMigrants().then((data) => {
+                let yearIntervalData = [
+                    { yearRange: "1990-1995", yearData: [] },
+                    { yearRange: "1995-2000", yearData: [] },
+                    { yearRange: "2000-2005", yearData: [] },
+                    { yearRange: "2005-2010", yearData: [] },
+                    { yearRange: "2010-2015", yearData: [] },
+                    { yearRange: "2015-2019", yearData: [] },
+                ];
+
+                for (let o of yearIntervalData) {
+                    for (let c of data) {
+                        let prev = c;
+
+                        if (c.Year == 1995) break;
+                        let intervalData = {
+                            destination: {
+                                name: c.Destination,
+                                radius: 2,
+                                fillKey: "markers",
+                                centroid: c.centroid,
+                            },
+                            origins: [],
+                        };
+                        data.forEach((c1) => {
+                            if (c.Destination == c1.Destination && c.Year != c1.Year) {
+                                let keys = Object.keys(c1).slice(4);
+                                keys.forEach((k) => {
+                                    let weight = 0;
+                                    if (k !== c.Destination) {
+                                        let source = {
+                                            name: k,
+                                            radius: 2,
+                                            fillKey: "marker",
+                                            year: prev.Year + "-" + c1.Year,
+                                            centroid: data.find((c) => c.Destination === k).centroid,
+                                        };
+                                        if (!(k in c)) {
+                                            source.weight = c1[k];
+                                        } else {
+                                            weight = c1[k] - c[k];
+                                        }
+
+                                        let yearRange = o.yearRange.split("-");
+                                        if (prev.Year == +yearRange[0] && c1.Year == +yearRange[1]) {
+                                            if (weight > 1000) {
+                                                source.weight = weight;
+                                                intervalData.origins.push(source);
+                                            }
+                                        }
+                                    }
+                                });
+                                prev = c1;
                             }
                         });
-
-                        currentCountry["TotalPrev"] = c.Total == undefined ? 0 : c.Total;
-                        currentCountry["TotalNext"] = c1.Total == undefined ? 0 : c1.Total;
-                        currentCountry["Total"] = currentCountry["TotalNext"] - currentCountry["TotalPrev"];
-                        countryData[prev + "-" + c1.Year] = currentCountry;
-                        prev = c1.Year;
+                        o.yearData.push(intervalData);
                     }
-                });
-                countriesData[c.Destination] = countryData;
-            }
-        });
+                }
+
+                if (!map.selectAll(".arch-container")._groups[0].length) {
+                    map.append("g").attr("class", "arch-container");
+                }
+
+                for (let i = 0; i < yearIntervalData[0].yearData.length; i++) {
+                    console.log(i);
+                    console.log(yearIntervalData[0].yearData[i]);
+                    map.selectAll(".arch-container")
+                        .data(yearIntervalData[0].yearData[i].origins)
+                        .enter()
+                        .append("svg:path")
+                        .style("stroke-linecap", "round")
+                        .attr("stroke", () => "red")
+                        .attr("stroke-width", () => 2)
+                        .attr("fill", "none")
+                        .attr("d", (d) => defineArc(d.centroid, yearIntervalData[0].yearData[i].destination.centroid));
+                }
+            });
+        };
 
         let svgGroup;
 
@@ -51,10 +129,18 @@
             let mapContainer = d3.select("#map");
             let svgWidth = mapContainer.node().getBoundingClientRect().width;
             let svgHeight = mapContainer.node().getBoundingClientRect().height;
-            let projection = d3
+            projection = d3
                 .geoMercator()
+                .center([14, 40])
                 .scale(170)
                 .translate([svgWidth / 2, svgHeight / 2]);
+
+            data.forEach((d) => {
+                if (isBadCountry(d.properties)) return;
+
+                d.properties.props["C"] = projection(d3.geoCentroid(d));
+            });
+
             let path = d3.geoPath().projection(projection);
 
             let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
@@ -74,6 +160,8 @@
 
             svgMap.call(zoom);
             svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
+
+            drawArcs(svgGroup);
         };
 
         let zoom = d3
@@ -104,7 +192,6 @@
                 d.year = parseDate(d.year);
             });
 
-            console.log(data);
             // creating the x axis generator
             let x = d3
                 .scaleTime()

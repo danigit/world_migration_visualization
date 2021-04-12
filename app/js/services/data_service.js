@@ -989,15 +989,22 @@
         data_service.getCountriesInwardOutwardMigrants = () => {
             return data_service.countries.then((countries) => {
                 let countryNames = countries.map((country) => country.name);
+
                 return getCountries_totMigrByOriginDest(countries, ["Year", "Destination", "Total"].concat(countryNames)).then((data) => {
                     return data.map((obj) => {
+                        let result = {};
+                        result["centroid"] = countries.find((c) => c.name === obj.Destination).props.C;
+
                         for (let key in obj) {
-                            if (obj[key] === "" || obj[key] === "-") delete obj[key];
+                            if (obj[key] === "" || obj[key] === "-") continue;
                             else if (key !== "Destination") {
-                                obj[key] = +obj[key];
+                                result[key] = +obj[key];
+                            } else {
+                                result[key] = obj[key];
                             }
                         }
-                        return obj;
+
+                        return result;
                     });
                 });
             });

@@ -19,53 +19,53 @@ let element = document.getElementById('container'),
     selectedFill = 'rgba(255,255,255, 0.2)',
     arcSetup = {
       inbound: {
-        level_1: { 
-          strokeColor: 'rgb(78, 249, 81)', 
+        level_1: {
+          strokeColor: 'rgb(78, 249, 81)',
           strokeWidth: .2
         },
-        level_2: { 
-          strokeColor: 'rgb(78, 249, 81)', 
+        level_2: {
+          strokeColor: 'rgb(78, 249, 81)',
           strokeWidth: 0.4
         },
-        level_3: { 
-          strokeColor: 'rgb(78, 249, 81)', 
+        level_3: {
+          strokeColor: 'rgb(78, 249, 81)',
           strokeWidth: 0.6
         },
-        level_4: { 
-          strokeColor: 'rgb(78, 249, 81)', 
+        level_4: {
+          strokeColor: 'rgb(78, 249, 81)',
           strokeWidth: 0.8
         },
-        level_5: { 
-          strokeColor: 'rgb(78, 249, 81)', 
+        level_5: {
+          strokeColor: 'rgb(78, 249, 81)',
           strokeWidth: 1
         },
-        level_6: { 
-          strokeColor: 'rgb(78, 249, 81)', 
+        level_6: {
+          strokeColor: 'rgb(78, 249, 81)',
           strokeWidth: 1.2
         }
       },
       outbound: {
-        level_1: { 
-          strokeColor: 'rgb(255, 82, 82)', 
+        level_1: {
+          strokeColor: 'rgb(255, 82, 82)',
           strokeWidth: 0.2
         },
-        level_2: { 
+        level_2: {
           strokeColor: 'rgb(255, 82, 82)',
           strokeWidth: 0.4
         },
-        level_3: { 
+        level_3: {
           strokeColor: 'rgb(255, 82, 82)',
           strokeWidth: 0.6
         },
-        level_4: { 
+        level_4: {
           strokeColor: 'rgb(255, 82, 82)',
           strokeWidth: 0.8
         },
-        level_5: { 
+        level_5: {
           strokeColor: 'rgb(255, 82, 82)',
           strokeWidth: 1
         },
-        level_6: { 
+        level_6: {
           strokeColor: 'rgb(255, 82, 82)',
           strokeWidth: 1.2
         }
@@ -79,379 +79,379 @@ let element = document.getElementById('container'),
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Brussels",          
+          name: "Brussels",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             4.3676,
-            50.8371            
+            50.8371
           ]
         },
         options: arcSetup.inbound.level_6
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         options: arcSetup.outbound.level_6
       },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Prague",          
+          name: "Prague",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             14.4205,
-            50.0878            
+            50.0878
           ]
         },
         options: arcSetup.outbound.level_2
       },
       {
         origin: {
-          name: "Manchester",          
+          name: "Manchester",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             2.244644,
-            53.483959            
+            53.483959
           ]
         },
         destination: {
-          name: "Athens",          
+          name: "Athens",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             23.7166,
-            37.9792            
+            37.9792
           ]
         },
         options: arcSetup.inbound.level_5
-      }, 
+      },
       {
         origin: {
-          name: "Manchester",          
+          name: "Manchester",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             2.244644,
-            53.483959            
+            53.483959
           ]
         },
         destination: {
-          name: "Reykjavik",          
+          name: "Reykjavik",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -21.8952,
-            64.1353            
+            64.1353
           ]
         },
         options: arcSetup.inbound.level_1
-      }, 
+      },
       {
         origin: {
-          name: "Manchester",          
+          name: "Manchester",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             2.244644,
-            53.483959            
+            53.483959
           ]
         },
         destination: {
-          name: "Dublin",          
+          name: "Dublin",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -6.2675,
-            53.3441            
+            53.3441
           ]
         },
         options: arcSetup.outbound.level_1
-      }, 
+      },
       {
         origin: {
-          name: "Manchester",          
+          name: "Manchester",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             2.244644,
-            53.483959            
+            53.483959
           ]
         },
         destination: {
-          name: "Oslo",          
+          name: "Oslo",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             10.7387,
-            59.9138            
+            59.9138
           ]
         },
         options: arcSetup.outbound.level_3
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Lisbon",          
+          name: "Lisbon",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -9.1355,
-            38.7072            
+            38.7072
           ]
         },
         options: arcSetup.outbound.level_4
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Moscow",          
+          name: "Moscow",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             37.6176,
-            55.7558            
+            55.7558
           ]
         },
         options: arcSetup.outbound.level_3
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Belgrade",          
+          name: "Belgrade",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             20.4781,
-            44.8048            
+            44.8048
           ]
         },
         options: arcSetup.outbound.level_1
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Bratislava",          
+          name: "Bratislava",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             17.1547,
-            48.2116            
+            48.2116
           ]
         },
         options: arcSetup.outbound.level_2
       },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Ljubljana",          
+          name: "Ljubljana",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             14.5060,
-            46.0514            
+            46.0514
           ]
         },
         options: arcSetup.outbound.level_3
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Madrid",          
+          name: "Madrid",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -3.7033,
-            40.4167            
+            40.4167
           ]
         },
         options: arcSetup.outbound.level_1
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Stockholm",          
+          name: "Stockholm",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             18.0645,
-            59.3328            
+            59.3328
           ]
         },
         options: arcSetup.outbound.level_5
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Bern",          
+          name: "Bern",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             7.4481,
-            46.9480            
+            46.9480
           ]
         },
         options: arcSetup.outbound.level_4
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Kiev",          
+          name: "Kiev",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             30.5367,
-            50.4422            
+            50.4422
           ]
         },
         options: arcSetup.outbound.level_1
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "Paris",          
+          name: "Paris",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             2.3510,
-            48.8567            
+            48.8567
           ]
         },
         options: arcSetup.outbound.level_2
-      }, 
+      },
       {
         origin: {
-          name: "London",          
+          name: "London",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -0.1262,
-            51.5002            
+            51.5002
           ]
         },
         destination: {
-          name: "New York",          
+          name: "New York",
           radius: 2,
           fillKey: 'markers',
           coordinates: [
             -74,
-            40.43            
+            40.43
           ]
         },
         options: arcSetup.outbound.level_3
       }
     ];
-  
+
 const getBound = (translate, scale) => {
   translate[0] = Math.min(
     (width / height)  * (scale - 1),
@@ -475,7 +475,7 @@ const scalePopup = (translate, scale) => {
           popupCard.node().offsetWidth,
           popupCard.node().offsetHeight
         ];
-  
+
   let originalPointX = !popupCard.empty() && popupCard.attr('data-left'),
       originalPointY = !popupCard.empty() && popupCard.attr('data-top'),
       currentLeft = !popupCard.empty() && popupCard.style('left').replace('px', ''),
@@ -499,7 +499,7 @@ const scalePopup = (translate, scale) => {
     popupCard.style('bottom', 'auto');
   }
 }
-          
+
 const zoomed = (datamap) => {
   const currentTranslate = d3Zoom.translate(),
         currentScale = d3Zoom.scale(),
@@ -521,7 +521,7 @@ const zoomed = (datamap) => {
       return 'translate(' + translate + ')scale(' + scale + ')rotate(' + rotate + ')';
     });
 
-  // translate all the node according the current scale and translate    
+  // translate all the node according the current scale and translate
   datamap.svg.selectAll('g')
     .attr("transform", "translate(" + limitBound.translate + ")scale(" + limitBound.scale + ")");
 
@@ -564,7 +564,7 @@ const zoomControl = (datamap, type) => {
   if (type === 'reset') {
     activeNode.classed("active", false);
     activeNode = d3.select(null);
-    
+
     interpolate(datamap, [0, 0], 1);
   } else {
     let direction = 1,
@@ -584,18 +584,18 @@ const zoomControl = (datamap, type) => {
 
     direction = (type === 'in') ? 1 : -1;
     target_zoom = d3Zoom.scale() * (1 + factor * direction);
-  
+
     if (target_zoom < extent[0] || target_zoom > extent[1]) { return false; }
-  
+
     translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
     view.k = target_zoom;
     l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
-  
+
     view.x += center[0] - l[0];
     view.y += center[1] - l[1];
 
     bound = getBound([ view.x, view.y ], view.k);
-  
+
     interpolate(datamap, bound.translate, bound.scale);
   }
 };
@@ -618,9 +618,9 @@ const interpolate = (datamap, translate, scale) => {
 // function to get the path point at the given length
 // and return the translate and rotation position for the arrows
 const translateAlong = (path, direction) => {
-  let l = path.getTotalLength();    
+  let l = path.getTotalLength();
   return function(d, i, a) {
-    return function(t) {      
+    return function(t) {
       let atLength = direction === 1 ? (t * l) : (l - (t * l)),
           p1 = path.getPointAtLength(atLength),
           p2 = path.getPointAtLength((atLength) + direction),
@@ -634,10 +634,10 @@ const translateAlong = (path, direction) => {
       }
 
       angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI) - 90;
-          
+
       rot_tran = "rotate(" + angle + ")";
       p = path.getPointAtLength(t * l);
-            
+
       return "translate(" + p.x + "," + p.y + ") " + rot_tran;
     };
   };
@@ -674,7 +674,7 @@ const arcPopup = (data, position) => {
         currentScale = d3Zoom.scale(),
         bound = getBound(currentTranslate, currentScale),
         container = d3.select('#container');
-  
+
   let className = popup.attr('class');
 
   // hide the previous popup
@@ -695,7 +695,7 @@ const arcPopup = (data, position) => {
       .attr('class', 'popup__close-btn cursor')
       .append('span')
         .html('&times;');
-  }      
+  }
 
   // append content
   if (popup.selectAll('.popup-content').empty()) {
@@ -707,7 +707,7 @@ const arcPopup = (data, position) => {
     .append('h3')
       .attr('class', 'title')
       .html('Source:' + data.origin.title);
-    
+
   popup.selectAll('.popup-content')
     .append('h3')
       .attr('class', 'title')
@@ -733,7 +733,7 @@ const createGlows = (map) => {
 		.attr('result', 'coloredBlur');
 
   const feMerge = filter.append('feMerge');
-  
+
 	feMerge.append('feMergeNode')
 		.attr('in','coloredBlur');
 	feMerge.append('feMergeNode')
@@ -744,7 +744,7 @@ const createGlows = (map) => {
 const mapLines = (map, data) => {
   // create the line
   let direction = 1;
-  
+
   map.svg.selectAll('.arch-container')
     .append('svg:path')
       .style('stroke-linecap', 'round')
@@ -755,7 +755,7 @@ const mapLines = (map, data) => {
       .attr('stroke-width', () => {
         return data.options.strokeWidth
       })
-      .attr('fill', 'none')      
+      .attr('fill', 'none')
       .on('click', function(event) {
         arcPopup(data, d3.mouse(this))
       })
@@ -787,17 +787,17 @@ const mapLines = (map, data) => {
                 .delay(0)
                 .duration(750)
                 .ease('linear')
-                .attrTween('transform', translateAlong(this, direction));                  
+                .attrTween('transform', translateAlong(this, direction));
           return 'none';
         });
 
-  enableGlow && 
+  enableGlow &&
   map.svg.selectAll('.datamaps-arc').style('filter', 'url(#glow)');
 }
 
 const createMarkerLabel = (map, data) => {
   const limitBound = getBound(d3Zoom.translate(), d3Zoom.scale());
-  
+
   map.svg.selectAll('.bubbles')
     .selectAll('text')
     .data(data)
@@ -841,7 +841,7 @@ const drawAttack = (map) => {
         map.svg.append('g')
           .attr('class', 'arch-container');
       }
-      
+
       setTimeout(() => {
         mapLines(map, arcData[i]);
 
@@ -870,7 +870,7 @@ const drawAttack = (map) => {
 
         // when all of the data is mapped...
         if (count === arcData.length) {
-          
+
           // pause for 10 seconds before triggering this function again
           setTimeout(() => {
             drawAttack(map);
@@ -880,18 +880,18 @@ const drawAttack = (map) => {
         if (showLabel) {
           // find if the location already exists in labels
           const labelOriginExists = tempLabels.find(label => label.name === arcData[i].origin.name && label.coordinates[0] === arcData[i].origin.coordinates[0] && label.coordinates[1] === arcData[i].origin.coordinates[1]);
-          
+
           const labelDestinationExists = tempLabels.find(label => label.name === arcData[i].destination.name && label.coordinates[0] === arcData[i].destination.coordinates[0] && label.coordinates[1] === arcData[i].destination.coordinates[1]);
-          
+
           if (!labelOriginExists) {
             // put label to the markers
             tempLabels.push(arcData[i].origin);
           }
-          
+
           if (!labelDestinationExists) {
             tempLabels.push(arcData[i].destination);
           }
-          
+
           createMarkerLabel(map, tempLabels);
         }
       }, i * 1500);
@@ -915,12 +915,12 @@ const mapReady = (datamap) => {
   // bind zoom control
   d3.selectAll('.map-control').on('click', function() {
     var currentItem = d3.event.target;
-    
+
     if (currentItem.className.indexOf('map-control') === -1) {
       // take the parent
       currentItem = currentItem.parentNode;
     }
-    
+
     zoomControl(datamap, currentItem.dataset.zoom);
   });
 
