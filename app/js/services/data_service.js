@@ -988,25 +988,29 @@
 
         data_service.getCountriesInwardOutwardMigrants = () => {
             return data_service.countries.then((countries) => {
-                let countryNames = countries.map((country) => country.name);
+                let filteredCountries = countries.filter((c) => c.props.C != undefined);
+                let countryNames = filteredCountries.map((country) => country.name);
 
-                return getCountries_totMigrByOriginDest(countries, ["Year", "Destination", "Total"].concat(countryNames)).then((data) => {
-                    return data.map((obj) => {
-                        let result = {};
-                        result["centroid"] = countries.find((c) => c.name === obj.Destination).props.C;
+                return getCountries_totMigrByOriginDest(filteredCountries, ["Year", "Destination", "Total"].concat(countryNames)).then(
+                    (data) => {
+                        return data.map((obj) => {
+                            let result = {};
+                            let centroid = countries.find((c) => c.name === obj.Destination);
+                            result["centroid"] = centroid.props.C;
 
-                        for (let key in obj) {
-                            if (obj[key] === "" || obj[key] === "-") continue;
-                            else if (key !== "Destination") {
-                                result[key] = +obj[key];
-                            } else {
-                                result[key] = obj[key];
+                            for (let key in obj) {
+                                if (obj[key] === "" || obj[key] === "-") continue;
+                                else if (key !== "Destination") {
+                                    result[key] = +obj[key];
+                                } else {
+                                    result[key] = obj[key];
+                                }
                             }
-                        }
 
-                        return result;
-                    });
-                });
+                            return result;
+                        });
+                    }
+                );
             });
         };
 

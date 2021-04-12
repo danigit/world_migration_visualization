@@ -30,11 +30,36 @@
 
                 const targetX = target[0],
                     targetY = target[1];
+                const dx = targetX - sourceX,
+                    dy = targetY - sourceY;
+
+                let euclideanDistance = Math.sqrt(dx * dx + dy * dy);
+
+                let sharpness = 0;
+                if (euclideanDistance < 100) {
+                    sharpness = 0.1;
+                } else {
+                    sharpness = 1.5;
+                }
 
                 const midXY = [(sourceX + targetX) / 2, (sourceY + targetY) / 2];
 
-                return "M" + sourceX + "," + sourceY + "S" + (midXY[0] + 50) + "," + (midXY[1] - 75) + "," + targetX + "," + targetY;
+                return (
+                    "M" +
+                    sourceX +
+                    "," +
+                    sourceY +
+                    "S" +
+                    (midXY[0] + 50 * sharpness) +
+                    "," +
+                    (midXY[1] - 75 * sharpness) +
+                    "," +
+                    targetX +
+                    "," +
+                    targetY
+                );
             } else {
+                console.log(target);
                 return "M0,0,l0,0z";
             }
         };
@@ -68,6 +93,7 @@
                             },
                             origins: [],
                         };
+
                         data.forEach((c1) => {
                             if (c.Destination == c1.Destination && c.Year != c1.Year) {
                                 let keys = Object.keys(c1).slice(4);
@@ -79,8 +105,9 @@
                                             radius: 2,
                                             fillKey: "marker",
                                             year: prev.Year + "-" + c1.Year,
-                                            centroid: data.find((c) => c.Destination === k).centroid,
+                                            centroid: data.find((e) => e.Destination === k).centroid,
                                         };
+
                                         if (!(k in c)) {
                                             source.weight = c1[k];
                                         } else {
@@ -89,7 +116,7 @@
 
                                         let yearRange = o.yearRange.split("-");
                                         if (prev.Year == +yearRange[0] && c1.Year == +yearRange[1]) {
-                                            if (weight > 1000) {
+                                            if (weight > 10000) {
                                                 source.weight = weight;
                                                 intervalData.origins.push(source);
                                             }
@@ -108,15 +135,14 @@
                 }
 
                 for (let i = 0; i < yearIntervalData[0].yearData.length; i++) {
-                    console.log(i);
-                    console.log(yearIntervalData[0].yearData[i]);
                     map.selectAll(".arch-container")
                         .data(yearIntervalData[0].yearData[i].origins)
                         .enter()
                         .append("svg:path")
+                        .attr("class", (d) => d.name)
                         .style("stroke-linecap", "round")
                         .attr("stroke", () => "red")
-                        .attr("stroke-width", () => 2)
+                        .attr("stroke-width", () => 0.3)
                         .attr("fill", "none")
                         .attr("d", (d) => defineArc(d.centroid, yearIntervalData[0].yearData[i].destination.centroid));
                 }
@@ -131,9 +157,8 @@
             let svgHeight = mapContainer.node().getBoundingClientRect().height;
             projection = d3
                 .geoMercator()
-                .center([14, 40])
                 .scale(170)
-                .translate([svgWidth / 2, svgHeight / 2]);
+                .translate([svgWidth / 2, svgHeight / 2 + 128]);
 
             data.forEach((d) => {
                 if (isBadCountry(d.properties)) return;
@@ -151,6 +176,7 @@
                 .enter()
                 .append("path")
                 .attr("d", path)
+                .attr("stroke-width", 0.1)
                 .attr("class", "countries-home")
                 .attr("id", (d) => d.id)
                 .on("click", (e, d) => {
