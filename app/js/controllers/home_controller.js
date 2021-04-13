@@ -64,6 +64,33 @@
             }
         };
 
+        const translateAlong = (path, direction) => {
+            let l = path.getTotalLength();
+            return function (d, i, a) {
+                return function (t) {
+                    let atLength = direction === 1 ? t * l : l - t * l,
+                        p1 = path.getPointAtLength(atLength),
+                        p2 = path.getPointAtLength(atLength + direction),
+                        angle = 0,
+                        rot_tran,
+                        p;
+
+                    // when it reached the end of the path, we need to get the point at the end of the path and a point before, else we would -90 degree since the point are the same
+                    if (p2.y === p1.y && p2.x === p1.x) {
+                        p1 = path.getPointAtLength(l - 1);
+                        p2 = path.getPointAtLength(l);
+                    }
+
+                    angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI) - 90;
+
+                    rot_tran = "rotate(" + angle + ")";
+                    p = path.getPointAtLength(t * l);
+
+                    return "translate(" + p.x + "," + p.y + ") " + rot_tran;
+                };
+            };
+        };
+
         /**
          * Function that draws the migration on the map
          * @param {object} map
@@ -116,7 +143,7 @@
 
                                         let yearRange = o.yearRange.split("-");
                                         if (prev.Year == +yearRange[0] && c1.Year == +yearRange[1]) {
-                                            if (weight > 10000) {
+                                            if (weight > 1000) {
                                                 source.weight = weight;
                                                 intervalData.origins.push(source);
                                             }
@@ -134,17 +161,37 @@
                     map.append("g").attr("class", "arch-container");
                 }
 
-                for (let i = 0; i < yearIntervalData[0].yearData.length; i++) {
-                    map.selectAll(".arch-container")
-                        .data(yearIntervalData[0].yearData[i].origins)
-                        .enter()
-                        .append("svg:path")
-                        .attr("class", (d) => d.name)
-                        .style("stroke-linecap", "round")
-                        .attr("stroke", () => "red")
-                        .attr("stroke-width", () => 0.3)
-                        .attr("fill", "none")
-                        .attr("d", (d) => defineArc(d.centroid, yearIntervalData[0].yearData[i].destination.centroid));
+                let yearData = yearIntervalData[0].yearData;
+                for (let i = 0; i < yearData.length; i++) {
+                    setInterval(() => {
+                        map.selectAll(".arch-container").remove();
+                        map.selectAll(".arch-container")
+                            .data(yearData[i].origins)
+                            .enter()
+                            .append("svg:path")
+                            .attr("class", "arc-path")
+                            .style("stroke-linecap", "round")
+                            .attr("stroke", "red")
+                            .attr("stroke-width", 0.6)
+                            .attr("d", (d) => defineArc(d.centroid, yearData[i].destination.centroid))
+                            .transition()
+                            .style("fill", function () {
+                                var length = this.getTotalLength();
+                                this.style.transition = this.style.WebkitTransition = "none";
+                                this.style.strokeDasharray = length / 4 + " " + (length + 10);
+                                this.style.strokeDashoffset = length;
+                                this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 2000ms ease-out";
+                                this.style.strokeDashoffset = -length;
+
+                                map.selectAll(".arch-container")
+                                    .append("svg:path")
+                                    .attr("class", "arch-arrow")
+                                    .transition()
+                                    .ease(d3.easeLinear)
+                                    .attrTween("transform", translateAlong(this, 1));
+                                return "none";
+                            });
+                    }, 5000);
                 }
             });
         };
