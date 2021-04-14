@@ -19,8 +19,10 @@
             return !props || !(props instanceof Country);
         };
 
+        
         dataService.loadWorldMap().then((data) => {
-            drawMap(data);
+            $scope.geoObject = initMap(data);
+            drawMap($scope.geoObject);
         });
 
         const defineArc = (source, target) => {
@@ -143,7 +145,7 @@
 
                                         let yearRange = o.yearRange.split("-");
                                         if (prev.Year == +yearRange[0] && c1.Year == +yearRange[1]) {
-                                            if (weight > 1000) {
+                                            if (weight > 10000) {
                                                 source.weight = weight;
                                                 intervalData.origins.push(source);
                                             }
@@ -161,10 +163,197 @@
                     map.append("g").attr("class", "arch-container");
                 }
 
-                let yearData = yearIntervalData[0].yearData;
+                let arcList = [];
+
+                for (let yearObj of yearIntervalData) {
+                    yearObj.yearData = yearObj.yearData.filter(destData => destData.origins.length!=0);
+                    for (let i of yearObj.yearData) {
+                        for (let src of i.origins) {
+                            let temp = {};
+                            Object.assign(temp,src);
+                            temp.destination = i.destination.name;
+                            temp.destinationCentroid = i.destination.centroid;
+                            temp.sourceCentroid = temp.centroid;
+                            delete temp.centroid;
+                            arcList.push(temp);
+                        }
+                    }
+                }
+
+
+                // console.log("arcList ", arcList);
+                //let yearData = yearIntervalData[0].yearData;
+
+                let yearData = arcList.filter(arc => arc.year=="1990-1995");
+                console.log(yearData.length);
+
+                // console.log("one year data ", yearData.length);
+                /* var width = 500,
+                height = 500;
+                var svg = d3.select("svg");
+
+                var projection = d3.geoMercator()
+                    .scale(2800)
+                    .rotate([86, 0])
+                    .center([0, 43.2])
+                    .translate([width / 2, height / 2]);
+                var path = d3.geoPath().projection(projection);
+
+                var clipPath = svg.append("defs")
+                    .append("clipPath").attr("id", "circle-clip")
+                    .append("circle")
+                    .attr("cy", "50%")
+                    .attr("cx", "50%")
+                    .attr("r", "50%")
+                    .attr("fill", "transparent");
+
+                var g = svg.append("g")
+                    .attr("clip-path", "url(#circle-clip)");
+
+                var aa = [-83.7377, 42.2733];
+                var chi = [-87.732, 41.8338]; */
+
+
+                /* function link(p1, p2) {
+                    var start = projection(p1);
+                    var end = projection(p2);
+                    return "M" + start[0] + "," + start[1]
+                        + "C" + (start[0] + end[0]) / 2 + "," + start[1]
+                        + " " + (start[0] + end[0]) / 2 + "," + start[1]
+                        + " " + end[0] + "," + end[1];
+                } */
+
+                function tweenDash() {
+                    var l = this.getTotalLength();
+                    var i = d3.interpolateString("0," + l, l + "," + l);
+                    return function (t) { 
+                        return i(t); 
+                    };
+                }
+
+                // From https://bl.ocks.org/mbostock/5649592
+                /* function transition(path, i) {
+                    console.log("transition");
+                    path.transition()
+                        .delay(i*1000)
+                        .duration(3000)
+                        .on('start',function() {
+                            console.log("sono qui");
+                            path.style("opacity", 1);
+                        })
+                        .attrTween("stroke-dasharray", tweenDash);
+                } */
+            
+
+                // console.log("tweenDash ", tweenDash());
+
+                // https://bl.ocks.org/mbostock/1705868
+                function translateAlong(path, attr) {
+                    var l = path.getTotalLength();
+                    return function (d, i, a) {
+                        return function (t) {
+                            var p = path.getPointAtLength(t * l);
+                            return p[attr];
+                        };
+                    };
+                }
+
+                // ann arbor 42.2733, -83.7377
+                // chicago 41.8338, -87.7320
+                /* d3.json("us-states.json", function (error, us) {
+                    if (error) throw error;
+
+                    g.selectAll("path")
+                        .data(us.features)
+                        .enter().append("path")
+                            .attr("class", "states")
+                            .attr("d", path);
+
+                    g.append("path")
+                        .attr("class", "arc")
+                        .attr("d", link(aa, chi))
+                        .call(transition);
+
+                    var pAA = projection(aa);
+                    var circle = g.append("circle")
+                        .attr("width", 0)
+                        .attr("height", 0)
+                        .attr("fill", "blue")
+                        .attr("cx", pAA[0])
+                        .attr("cy", pAA[1])
+                        .attr("r", 15);
+
+                    circle.transition()
+                        .duration(1000)
+                        .attrTween("cx", translateAlong(d3.select("path.arc").node(), "x"))
+                        .attrTween("cy", translateAlong(d3.select("path.arc").node(), "y"));
+
+                }); */
+
+                // .on("end", myCallback);
+                let arcContainers = map.selectAll(".arch-container");
+                
+                setInterval(function() {
+                    arcContainers
+                        .data(yearData)
+                        .enter()
+                        .append("path")
+                        //.style("opacity", 0)
+                        .attr("class", "path-arc")
+                        .attr("stroke", "red")
+                        .attr("fill", "none")
+                        .attr("d", (d) => defineArc(d.sourceCentroid, d.destinationCentroid))
+                        .transition()
+                        //.delay((d, i)=>i*200)
+                        .duration(3000)
+                        /* .on('start',function() {
+                            console.log("sono qui");
+                            d3.select(this).style("opacity", 1);
+                        })*/
+                        .on('end', function() {
+                            d3.select(this).remove();
+                        }) 
+                        .attrTween("stroke-dasharray", tweenDash);
+                }, 3500);
+                /* arcContainers
+                        .data(yearData.slice(length-2))
+                        .enter()
+                        .append("path")
+                        .style("opacity", 0)
+                        .attr("class", "path-arc")
+                        .attr("stroke", "red")
+                        .attr("fill", "none")
+                        .attr("d", (d) => defineArc(d.sourceCentroid, d.destinationCentroid))
+                        .transition()
+                        .delay((d, i)=>i*200)
+                        .duration(3000)
+                        .on('start',function() {
+                            console.log("sono qui");
+                            d3.select(this).style("opacity", 1);
+                        })
+                        .on('end', function() {
+                            d3.select(this).remove();
+                        })
+                        .attrTween("stroke-dasharray", tweenDash) */;
+
+               /*  let totalArcs = 0;
                 for (let i = 0; i < yearData.length; i++) {
-                    setInterval(() => {
-                        map.selectAll(".arch-container").remove();
+                    totalArcs += yearData[i].origins.length;
+                    arcContainers
+                        .data(yearData[i].origins)
+                        .enter()
+                        .append("path")
+                        .attr("class", "path-arc")
+                        .attr("stroke", "red")
+                        .attr("fill", "none")
+                        .attr("d", (d) => defineArc(d.centroid, yearData[i].destination.centroid))
+                        .call(transition); */
+                        // .on("end", myCallback)
+
+
+
+
+                        /* map.selectAll(".arch-container").remove();
                         map.selectAll(".arch-container")
                             .data(yearData[i].origins)
                             .enter()
@@ -173,33 +362,96 @@
                             .style("stroke-linecap", "round")
                             .attr("stroke", "red")
                             .attr("stroke-width", 0.6)
+                            .attr("fill", "none")
                             .attr("d", (d) => defineArc(d.centroid, yearData[i].destination.centroid))
                             .transition()
-                            .style("fill", function () {
+                            .ease(d3.easeLinear)
+                            .attrTween("transform", (d)=>translateAlong(d, 1)); */
+                            /* .style("fill", function () {
                                 var length = this.getTotalLength();
                                 this.style.transition = this.style.WebkitTransition = "none";
                                 this.style.strokeDasharray = length / 4 + " " + (length + 10);
                                 this.style.strokeDashoffset = length;
-                                this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 2000ms ease-out";
+                                this.style.wetransition = this.style.WebkitTransition = "stroke-dashoffset 2000ms ease-out";
                                 this.style.strokeDashoffset = -length;
 
-                                map.selectAll(".arch-container")
+                                    map.selectAll(".arch-container")
                                     .append("svg:path")
                                     .attr("class", "arch-arrow")
                                     .transition()
                                     .ease(d3.easeLinear)
-                                    .attrTween("transform", translateAlong(this, 1));
+                                    .attrTween("transform", translateAlong(this, 1)); 
                                 return "none";
-                            });
-                    }, 5000);
-                }
+                            }); */
+                /* } */
+
+                // console.log("Total arcs", totalArcs);
             });
         };
 
         let svgGroup;
+        let svgMapWidth;
+        let svgMapHeight;
 
-        let drawMap = (data) => {
+        let initMap = (worldData) => {
             let mapContainer = d3.select("#map");
+            mapContainer.html("");
+
+            svgMapWidth = mapContainer.node().getBoundingClientRect().width;
+            svgMapHeight = mapContainer.node().getBoundingClientRect().height;
+
+            let svgPaddings = { top: 128, right: 0, bottom: 0, left: 0 };
+
+            let mapProjection = d3
+                .geoMercator()
+                .scale(170)
+                .translate([svgMapWidth / 2, svgMapHeight / 2 + svgPaddings.top]);
+
+            let geoPath = d3.geoPath().projection(mapProjection);
+
+            let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
+
+            let svgMap = svgMapContainer.append("g").attr("id", "map");
+            svgGroup = svgMap.append("g");
+            // let svgGraticule = svgMapContainer.append("g")
+            //         .attr('id', 'graticule');
+
+            let zoomMap = d3
+                .zoom()
+                .scaleExtent([1, 10])
+                .on("zoom", (e) => svgMap.attr("transform", e.transform));
+
+            let geoJson = worldData;
+
+            geoJson.forEach((d) => {
+                if (isBadCountry(d.properties)) return;
+
+                d.properties.props["C"] = mapProjection(d3.geoCentroid(d));
+            });
+
+            svgMapContainer.call(zoomMap);
+            svgMapContainer.call(zoomMap.transform, () => d3.zoomIdentity.scale(1));
+
+            return {
+                data: geoJson,
+                element: svgMap,
+                path: geoPath,
+                projection: mapProjection,
+            };
+        };
+
+        let _handleMapEnter = (_enter, _path) => {
+            _enter
+                .append("path")
+                .attr("d", _path)
+                .attr("class", "countries")
+                .attr("id", (d) => d.id)
+                .attr("fill", "gray")
+                .attr("stroke", "black");
+        };
+
+        let drawMap = (geoObject) => {
+            /* let mapContainer = d3.select("#map");
             let svgWidth = mapContainer.node().getBoundingClientRect().width;
             let svgHeight = mapContainer.node().getBoundingClientRect().height;
             projection = d3
@@ -232,8 +484,16 @@
                 });
 
             svgMap.call(zoom);
-            svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
+            svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1)); */
 
+            geoObject.element
+                .selectAll("path")
+                .data(geoObject.data)
+                .join(
+                    (enter) => _handleMapEnter(enter, geoObject.path),
+                    (exit) => exit.remove()
+                );
+            
             drawArcs(svgGroup);
         };
 

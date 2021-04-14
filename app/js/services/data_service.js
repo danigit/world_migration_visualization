@@ -105,6 +105,8 @@
             return data_service.countries.then((countries) => {
                 return data_service.loadJson(WORLD_MAP).then((map) => {
                     let countriesMap = addCountriesToMap(countries, map);
+                    //countriesMap = topojson.simplify(countriesMap);
+                    //console.log(countriesMap);
                     return topojson.feature(countriesMap, countriesMap.objects.countries).features;
                 });
             });
