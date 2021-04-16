@@ -13,14 +13,18 @@
     function homeController($scope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
         let projection;
+        let svgGroup;
+        let svgMapWidth;
+        let svgMapHeight;
+        let yearsData = [];
+        let pressed = false;
+        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
+        let j = 0;
 
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
         };
 
-        // dataService.loadWorldMap().then((data) => {
-        //     drawMap(data);
-        // });
         dataService.loadWorldMap().then((data) => {
             $scope.geoObject = initMap(data);
             drawMap($scope.geoObject);
@@ -66,39 +70,29 @@
             }
         };
 
-        const translateAlong = (path, direction) => {
-            let l = path.getTotalLength();
-            return function (d, i, a) {
-                return function (t) {
-                    let atLength = direction === 1 ? t * l : l - t * l,
-                        p1 = path.getPointAtLength(atLength),
-                        p2 = path.getPointAtLength(atLength + direction),
-                        angle = 0,
-                        rot_tran,
-                        p;
+        let drawArcs = (map, i) => {
+            console.log("init");
+            map.select(".arch-container").selectAll(".arch-path").remove();
+            if (j == 5) j = 0;
+            let yearData = yearsData.filter((arc) => arc.year == yearsInterval[j]);
+            console.log(yearData.length);
+            map.select(".arch-container")
+                .selectAll(".arch-path")
+                .data(yearData)
+                .enter()
+                .append("path")
+                .attr("class", "arch-path")
+                .attr("stroke", "none")
+                .attr("fill", "none")
+                .attr("stroke-width", 1)
+                .attr("d", (d) => {
+                    return defineArc(d.sourceCentroid, d.destinationCentroid);
+                });
 
-                    // when it reached the end of the path, we need to get the point at the end of the path and a point before, else we would -90 degree since the point are the same
-                    if (p2.y === p1.y && p2.x === p1.x) {
-                        p1 = path.getPointAtLength(l - 1);
-                        p2 = path.getPointAtLength(l);
-                    }
-
-                    angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * (180 / Math.PI) - 90;
-
-                    rot_tran = "rotate(" + angle + ")";
-                    p = path.getPointAtLength(t * l);
-
-                    return "translate(" + p.x + "," + p.y + ") " + rot_tran;
-                };
-            };
+            update(map, data, i);
         };
 
         function tweenDash() {
-            var length = this.getTotalLength();
-            this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 5000ms ease-out";
-            this.style.strokeDashoffset = -length;
-            this.style.opacity = 1;
-
             var l = this.getTotalLength();
             var i = d3.interpolateString("0," + l, l + "," + l);
             return function (t) {
@@ -106,187 +100,96 @@
             };
         }
 
-        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
+        let localDashArray = d3.local();
 
-        let update = (map, arcList, i) => {
-            let data = arcList.filter((arc) => arc.year == yearsInterval[i]);
-
-            map.selectAll(".arch-path").remove();
+        let update = (map, i) => {
             map.select(".arch-container")
                 .selectAll(".arch-path")
-                .data(data)
-                .enter()
-                .append("path")
-                .style("opacity", 0)
-                .attr("class", "arch-path")
-                .style("stroke-linecap", "round")
-                .attr("stroke", "red")
-                .attr("fill", "none")
-                .attr("stroke-width", 0.6)
-                .attr("d", (d) => {
-                    return defineArc(d.sourceCentroid, d.destinationCentroid);
-                })
                 .transition()
                 .duration(5000)
+                .attr("stroke", "red")
+                .attr("stroke-dashoffset", function () {
+                    return this.getTotalLength();
+                })
                 .attrTween("stroke-dasharray", tweenDash)
+                .on("interrupt", function () {
+                    let currentElem = this;
+                    d3.select(this).on("mouseover", function () {
+                        let arcData = d3.select(this).datum();
+                        d3.select(this).attr("stroke", "blue");
+                        localDashArray.set(currentElem, d3.select(this).attr("stroke-dasharray"));
+                        d3.select(this)
+                            // .transition()
+                            // .duration(100)
+                            .attr("stroke-dasharray", this.getTotalLength() + ", 0");
+                    });
+
+                    d3.select(this).on("mouseout", function () {
+                        d3.select(this).attr("stroke", "red");
+                        d3.select(this).attr("stroke-dasharray", localDashArray.get(currentElem));
+                        d3.select(this)
+                            // .transition().duration(100)
+                            .attr("stroke-dashoffset", this.getTotalLength());
+                    });
+                })
                 .end()
-                .then(() => {
-                    if (i < arcList.length - 1) {
-                        map.selectAll(".arch-path").remove();
-                        update(map, arcList, i + 1);
-                    } else {
-                        update(map, arcList, 0);
-                        map.selectAll(".arch-path").remove();
+                .then(
+                    () => {
+                        if (i > 3) {
+                            j++;
+                            drawArcs(map, 0);
+                        } else {
+                            return update(map, i + 1);
+                        }
+                    },
+                    (error) => {
+                        console.log(error);
                     }
-                });
+                );
         };
 
         /**
          * Function that draws the migration on the map
          * @param {object} map
          */
-        let drawArcs = (map) => {
+        let initArcs = (map) => {
             dataService.getCountriesInwardOutwardMigrants().then((data) => {
-                let yearIntervalData = [
-                    { yearRange: "1990-1995", yearData: [] },
-                    { yearRange: "1995-2000", yearData: [] },
-                    { yearRange: "2000-2005", yearData: [] },
-                    { yearRange: "2005-2010", yearData: [] },
-                    { yearRange: "2010-2015", yearData: [] },
-                    { yearRange: "2015-2019", yearData: [] },
-                ];
+                for (let c of data) {
+                    let prev = c;
+                    if (c.Year == 1995) break;
+                    data.forEach((c1) => {
+                        if (c.Destination == c1.Destination && c.Year != c1.Year) {
+                            let keys = Object.keys(c1).slice(4);
+                            keys.forEach((k) => {
+                                let weight = 0;
+                                if (k !== c.Destination) {
+                                    let source = {
+                                        sourceName: k,
+                                        destinationName: c.Destination,
+                                        radius: 2,
+                                        year: prev.Year + "-" + c1.Year,
+                                        sourceCentroid: data.find((e) => e.Destination === k).centroid,
+                                        destinationCentroid: c.centroid,
+                                    };
 
-                for (let o of yearIntervalData) {
-                    for (let c of data) {
-                        let prev = c;
+                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
 
-                        if (c.Year == 1995) break;
-                        let intervalData = {
-                            destination: {
-                                name: c.Destination,
-                                radius: 2,
-                                fillKey: "markers",
-                                centroid: c.centroid,
-                            },
-                            origins: [],
-                        };
-
-                        data.forEach((c1) => {
-                            if (c.Destination == c1.Destination && c.Year != c1.Year) {
-                                let keys = Object.keys(c1).slice(4);
-                                keys.forEach((k) => {
-                                    let weight = 0;
-                                    if (k !== c.Destination) {
-                                        let source = {
-                                            name: k,
-                                            radius: 2,
-                                            fillKey: "marker",
-                                            year: prev.Year + "-" + c1.Year,
-                                            centroid: data.find((e) => e.Destination === k).centroid,
-                                        };
-
-                                        if (!(k in c)) {
-                                            source.weight = c1[k];
-                                        } else {
-                                            weight = c1[k] - c[k];
-                                        }
-
-                                        let yearRange = o.yearRange.split("-");
-                                        if (prev.Year == +yearRange[0] && c1.Year == +yearRange[1]) {
-                                            if (weight > 1000) {
-                                                source.weight = weight;
-                                                intervalData.origins.push(source);
-                                            }
-                                        }
+                                    if (weight > 100000) {
+                                        source.weight = weight;
+                                        yearsData.push(source);
                                     }
-                                });
-                                prev = c1;
-                            }
-                        });
-                        o.yearData.push(intervalData);
-                    }
+                                }
+                            });
+                            prev = c1;
+                        }
+                    });
                 }
 
                 if (!map.selectAll(".arch-container")._groups[0].length) {
                     map.append("g").attr("class", "arch-container");
                 }
 
-                let arcList = [];
-
-                for (let yearObj of yearIntervalData) {
-                    yearObj.yearData = yearObj.yearData.filter((destData) => destData.origins.length != 0);
-                    for (let i of yearObj.yearData) {
-                        for (let src of i.origins) {
-                            let temp = {};
-                            Object.assign(temp, src);
-                            temp.destination = i.destination.name;
-                            temp.destinationCentroid = i.destination.centroid;
-                            temp.sourceCentroid = temp.centroid;
-                            delete temp.centroid;
-                            arcList.push(temp);
-                        }
-                    }
-                }
-
-                let i = 0;
-                // update(map, arcList, 0);
-                // setInterval(function () {
-                //     map.selectAll(".arch-path").remove();
-                //     for (let i = 0; i < yearsInterval.length; i++) {
-
-                update(map, arcList, 0);
-
-                //     map.select(".arch-container")
-                //         .selectAll(".arch-path")
-                //         .data(data)
-                //         .enter()
-                //         .append("path")
-                //         .attr("class", "arch-path")
-                //         .style("stroke-linecap", "round")
-                //         .attr("stroke", "red")
-                //         .attr("fill", "none")
-                //         .attr("stroke-width", 0.6)
-                //         .attr("d", (d) => {
-                //             return defineArc(d.sourceCentroid, d.destinationCentroid);
-                //         })
-                //         .transition()
-                //         .duration(5000)
-                //         .attrTween("stroke-dasharray", tweenDash)
-                //         .end();
-
-                //         if (i < arcList.length - 1) {
-                //             i++;
-                //             map.selectAll(".arch-path").remove();
-                //         } else {
-                //             i = 0;
-                //             map.selectAll(".arch-path").remove();
-                //         }
-                // }
-
-                // style("fill", function () {
-                //     var length = this.getTotalLength();
-                //     this.style.transition = this.style.WebkitTransition = "none";
-                //     this.style.strokeDasharray = length / 4 + " " + (length + 10);
-                //     this.style.strokeDashoffset = length;
-                //     this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 1000ms ease-out";
-                //     this.style.strokeDashoffset = -length;
-
-                //     map.selectAll(".arch-path")
-                //         .append("svg:path")
-                //         .attr("class", "arch-arrow")
-                //         .transition()
-                //         .ease(d3.easeLinear)
-                //         .attrTween("transform", translateAlong(this, 1));
-                //     return "none";
-                // });
-                //     }
-                //     if (j == yearIntervalData.length - 1) {
-                //         j = 0;
-                //     } else {
-                //         j++;
-                //     }
-                //     console.log("interval passed");
-                // }, 6000);
+                drawArcs(map, 0);
             });
         };
 
@@ -309,8 +212,6 @@
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map-group");
-            let svgMapPaths = svgMap.append("g").attr("id", "paths");
-
             let zoomMap = d3
                 .zoom()
                 .scaleExtent([1, 10])
@@ -329,8 +230,7 @@
 
             return {
                 data: geoJson,
-                element: svgMapPaths,
-                arcs: svgMap,
+                element: svgMap,
                 path: geoPath,
                 projection: mapProjection,
             };
@@ -342,16 +242,16 @@
                 .attr("d", _path)
                 .attr("class", "countries")
                 .attr("id", (d) => d.id)
-                .attr("fill", "gray")
-                .attr("stroke", "black");
+                .attr("fill", "#b0b0b0")
+                .attr("stroke", "#a0a0a0");
         };
 
-        let svgGroup;
-        let svgMapWidth;
-        let svgMapHeight;
-
         let drawMap = (geoObject) => {
+            if (!geoObject.element.selectAll(".map-container")._groups[0].length) {
+                geoObject.element.append("g").attr("class", "map-container");
+            }
             geoObject.element
+                .select(".map-container")
                 .selectAll("path")
                 .data(geoObject.data)
                 .join(
@@ -359,47 +259,8 @@
                     (exit) => exit.remove()
                 );
 
-            drawArcs(geoObject.arcs);
+            initArcs(geoObject.element);
         };
-
-        // let drawMap = (data) => {
-        //     let mapContainer = d3.select("#map");
-        //     let svgWidth = mapContainer.node().getBoundingClientRect().width;
-        //     let svgHeight = mapContainer.node().getBoundingClientRect().height;
-        //     projection = d3
-        //         .geoMercator()
-        //         .scale(170)
-        //         .translate([svgWidth / 2, svgHeight / 2 + 128]);
-
-        //     data.forEach((d) => {
-        //         if (isBadCountry(d.properties)) return;
-
-        //         d.properties.props["C"] = projection(d3.geoCentroid(d));
-        //     });
-
-        //     let path = d3.geoPath().projection(projection);
-
-        //     let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
-        //     svgGroup = svgMap.append("g");
-        //     svgGroup
-        //         .selectAll("path")
-        //         .data(data)
-        //         .enter()
-        //         .append("path")
-        //         .attr("d", path)
-        //         .attr("stroke-width", 0.1)
-        //         .attr("class", "countries-home")
-        //         .attr("id", (d) => d.id)
-        //         .on("click", (e, d) => {
-        //             console.log(e);
-        //             console.log(d);
-        //         });
-
-        //     svgMap.call(zoom);
-        //     svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
-
-        //     drawArcs(svgGroup);
-        // };
 
         let zoom = d3
             .zoom()
