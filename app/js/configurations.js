@@ -23,6 +23,10 @@ const WORLD_MAP = data_json_folder + "/world_map.json";
 const image_folder = "app/img/";
 
 const image_countries_folder = image_folder + "countries";
+const image_home_folder      = image_folder + "home";
+
+const IC_PLAY  = image_home_folder + "/play.svg";
+const IC_PAUSE = image_home_folder + "/pause.svg";
 
 const IMAGE_COUNTRIES_OUTLINES_FOLDER = image_countries_folder + "/outlines";
 const IMAGE_COUNTIRES_FLAGS_FOLDER = image_countries_folder + "/flags";

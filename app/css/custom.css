@@ -743,3 +743,7 @@ Navbar
     stroke: #a6cee3;
     stroke-width: 2.5;
 }
+
+.pointer {
+    cursor: pointer;
+}

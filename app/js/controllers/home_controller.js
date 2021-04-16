@@ -15,12 +15,47 @@
         let geoData;
         let projection;
 
+        $scope.playPauseBtn = null;
+        $scope.isRunning = true;
+
+        $scope.yearIntervalData = null;
+
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
         };
 
         dataService.loadWorldMap().then((data) => {
+            // TODO: Enter, update and exit cycle
             drawMap(data);
+
+            $scope.playPauseBtn = IC_PAUSE;
+            $scope.$apply();
+
+            document.getElementById("playpause-btn")
+                    .addEventListener("click", () => {
+                        const isPaused = $scope.playPauseBtn === IC_PAUSE;
+
+                        $scope.playPauseBtn = isPaused
+                            ? IC_PLAY : IC_PAUSE;
+                        $scope.isRunning = !isPaused;
+                        $scope.$apply();
+                    });
+        });
+
+        $scope.$watch('isRunning', (newVal, oldVal) => {
+            if (newVal != oldVal) {
+                if (!newVal) {
+                    // TODO: Pause the map simulation
+                } else {
+                    // TODO: Unpause the map simulation
+                }
+            }
+        });
+
+        $scope.$watch('yearIntervalData', (newVal, oldVal) => {
+            if (newVal != oldVal) {
+                console.log("Updated interval data");
+            }
         });
 
         const defineArc = (source, target) => {
@@ -129,6 +164,8 @@
                         o.yearData.push(intervalData);
                     }
                 }
+
+                $scope.yearIntervalData = yearIntervalData;
 
                 if (!map.selectAll(".arch-container")._groups[0].length) {
                     map.append("g").attr("class", "arch-container");

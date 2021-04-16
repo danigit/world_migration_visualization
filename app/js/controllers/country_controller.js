@@ -297,10 +297,11 @@
                 .attr("class", type + "-labels")
                 .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
 
-            arc = d3
-                .arc()
+            arc = d3.arc()
                 .outerRadius(radius - 50)
                 .innerRadius(0);
+                // .padAngle(.03)
+                // .cornerRadius(4);
 
             return svg;
         };
