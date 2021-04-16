@@ -17,7 +17,7 @@ const world_countries_hierarchy = data_json_folder + "/world_countries_hierarchy
 const world_countries_vis_name = data_json_folder + "/world_countries_vis_name.json";
 
 // Path to TopoJSON world map
-const WORLD_MAP = data_json_folder + "/world_map.json";
+const WORLD_MAP = data_json_folder + "/world_map_1_5_simplification.json";
 
 // Path to image folders
 const image_folder = "app/img/";
