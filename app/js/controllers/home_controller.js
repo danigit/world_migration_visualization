@@ -12,15 +12,18 @@
 
     function homeController($scope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
-        let geoData;
         let projection;
 
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
         };
 
+        // dataService.loadWorldMap().then((data) => {
+        //     drawMap(data);
+        // });
         dataService.loadWorldMap().then((data) => {
-            drawMap(data);
+            $scope.geoObject = initMap(data);
+            drawMap($scope.geoObject);
         });
 
         const defineArc = (source, target) => {
@@ -59,7 +62,6 @@
                     targetY
                 );
             } else {
-                console.log(target);
                 return "M0,0,l0,0z";
             }
         };
@@ -89,6 +91,54 @@
                     return "translate(" + p.x + "," + p.y + ") " + rot_tran;
                 };
             };
+        };
+
+        function tweenDash() {
+            var length = this.getTotalLength();
+            this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 5000ms ease-out";
+            this.style.strokeDashoffset = -length;
+            this.style.opacity = 1;
+
+            var l = this.getTotalLength();
+            var i = d3.interpolateString("0," + l, l + "," + l);
+            return function (t) {
+                return i(t);
+            };
+        }
+
+        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
+
+        let update = (map, arcList, i) => {
+            let data = arcList.filter((arc) => arc.year == yearsInterval[i]);
+
+            map.selectAll(".arch-path").remove();
+            map.select(".arch-container")
+                .selectAll(".arch-path")
+                .data(data)
+                .enter()
+                .append("path")
+                .style("opacity", 0)
+                .attr("class", "arch-path")
+                .style("stroke-linecap", "round")
+                .attr("stroke", "red")
+                .attr("fill", "none")
+                .attr("stroke-width", 0.6)
+                .attr("d", (d) => {
+                    return defineArc(d.sourceCentroid, d.destinationCentroid);
+                })
+                .transition()
+                .duration(5000)
+                .attrTween("stroke-dasharray", tweenDash)
+                .end()
+                .then(() => {
+                    if (i < arcList.length - 1) {
+                        map.selectAll(".arch-path").remove();
+                        update(map, arcList, i + 1);
+                    } else {
+                        update(map, arcList, 0);
+                        map.selectAll(".arch-path").remove();
+                    }
+                });
         };
 
         /**
@@ -161,81 +211,195 @@
                     map.append("g").attr("class", "arch-container");
                 }
 
-                let yearData = yearIntervalData[0].yearData;
-                for (let i = 0; i < yearData.length; i++) {
-                    setInterval(() => {
-                        map.selectAll(".arch-container").remove();
-                        map.selectAll(".arch-container")
-                            .data(yearData[i].origins)
-                            .enter()
-                            .append("svg:path")
-                            .attr("class", "arc-path")
-                            .style("stroke-linecap", "round")
-                            .attr("stroke", "red")
-                            .attr("stroke-width", 0.6)
-                            .attr("d", (d) => defineArc(d.centroid, yearData[i].destination.centroid))
-                            .transition()
-                            .style("fill", function () {
-                                var length = this.getTotalLength();
-                                this.style.transition = this.style.WebkitTransition = "none";
-                                this.style.strokeDasharray = length / 4 + " " + (length + 10);
-                                this.style.strokeDashoffset = length;
-                                this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 2000ms ease-out";
-                                this.style.strokeDashoffset = -length;
+                let arcList = [];
 
-                                map.selectAll(".arch-container")
-                                    .append("svg:path")
-                                    .attr("class", "arch-arrow")
-                                    .transition()
-                                    .ease(d3.easeLinear)
-                                    .attrTween("transform", translateAlong(this, 1));
-                                return "none";
-                            });
-                    }, 5000);
+                for (let yearObj of yearIntervalData) {
+                    yearObj.yearData = yearObj.yearData.filter((destData) => destData.origins.length != 0);
+                    for (let i of yearObj.yearData) {
+                        for (let src of i.origins) {
+                            let temp = {};
+                            Object.assign(temp, src);
+                            temp.destination = i.destination.name;
+                            temp.destinationCentroid = i.destination.centroid;
+                            temp.sourceCentroid = temp.centroid;
+                            delete temp.centroid;
+                            arcList.push(temp);
+                        }
+                    }
                 }
+
+                let i = 0;
+                // update(map, arcList, 0);
+                // setInterval(function () {
+                //     map.selectAll(".arch-path").remove();
+                //     for (let i = 0; i < yearsInterval.length; i++) {
+
+                update(map, arcList, 0);
+
+                //     map.select(".arch-container")
+                //         .selectAll(".arch-path")
+                //         .data(data)
+                //         .enter()
+                //         .append("path")
+                //         .attr("class", "arch-path")
+                //         .style("stroke-linecap", "round")
+                //         .attr("stroke", "red")
+                //         .attr("fill", "none")
+                //         .attr("stroke-width", 0.6)
+                //         .attr("d", (d) => {
+                //             return defineArc(d.sourceCentroid, d.destinationCentroid);
+                //         })
+                //         .transition()
+                //         .duration(5000)
+                //         .attrTween("stroke-dasharray", tweenDash)
+                //         .end();
+
+                //         if (i < arcList.length - 1) {
+                //             i++;
+                //             map.selectAll(".arch-path").remove();
+                //         } else {
+                //             i = 0;
+                //             map.selectAll(".arch-path").remove();
+                //         }
+                // }
+
+                // style("fill", function () {
+                //     var length = this.getTotalLength();
+                //     this.style.transition = this.style.WebkitTransition = "none";
+                //     this.style.strokeDasharray = length / 4 + " " + (length + 10);
+                //     this.style.strokeDashoffset = length;
+                //     this.style.transition = this.style.WebkitTransition = "stroke-dashoffset 1000ms ease-out";
+                //     this.style.strokeDashoffset = -length;
+
+                //     map.selectAll(".arch-path")
+                //         .append("svg:path")
+                //         .attr("class", "arch-arrow")
+                //         .transition()
+                //         .ease(d3.easeLinear)
+                //         .attrTween("transform", translateAlong(this, 1));
+                //     return "none";
+                // });
+                //     }
+                //     if (j == yearIntervalData.length - 1) {
+                //         j = 0;
+                //     } else {
+                //         j++;
+                //     }
+                //     console.log("interval passed");
+                // }, 6000);
             });
+        };
+
+        let initMap = (worldData) => {
+            let mapContainer = d3.select("#map");
+            mapContainer.html("");
+
+            svgMapWidth = mapContainer.node().getBoundingClientRect().width;
+            svgMapHeight = mapContainer.node().getBoundingClientRect().height;
+
+            let svgPaddings = { top: 128, right: 0, bottom: 0, left: 0 };
+
+            let mapProjection = d3
+                .geoMercator()
+                .scale(170)
+                .translate([svgMapWidth / 2, svgMapHeight / 2 + svgPaddings.top]);
+
+            let geoPath = d3.geoPath().projection(mapProjection);
+
+            let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
+
+            let svgMap = svgMapContainer.append("g").attr("id", "map-group");
+            let svgMapPaths = svgMap.append("g").attr("id", "paths");
+
+            let zoomMap = d3
+                .zoom()
+                .scaleExtent([1, 10])
+                .on("zoom", (e) => svgMap.attr("transform", e.transform));
+
+            let geoJson = worldData;
+
+            geoJson.forEach((d) => {
+                if (isBadCountry(d.properties)) return;
+
+                d.properties.props["C"] = mapProjection(d3.geoCentroid(d));
+            });
+
+            svgMapContainer.call(zoomMap);
+            svgMapContainer.call(zoomMap.transform, () => d3.zoomIdentity.scale(1));
+
+            return {
+                data: geoJson,
+                element: svgMapPaths,
+                arcs: svgMap,
+                path: geoPath,
+                projection: mapProjection,
+            };
+        };
+
+        let _handleMapEnter = (_enter, _path) => {
+            _enter
+                .append("path")
+                .attr("d", _path)
+                .attr("class", "countries")
+                .attr("id", (d) => d.id)
+                .attr("fill", "gray")
+                .attr("stroke", "black");
         };
 
         let svgGroup;
+        let svgMapWidth;
+        let svgMapHeight;
 
-        let drawMap = (data) => {
-            let mapContainer = d3.select("#map");
-            let svgWidth = mapContainer.node().getBoundingClientRect().width;
-            let svgHeight = mapContainer.node().getBoundingClientRect().height;
-            projection = d3
-                .geoMercator()
-                .scale(170)
-                .translate([svgWidth / 2, svgHeight / 2 + 128]);
-
-            data.forEach((d) => {
-                if (isBadCountry(d.properties)) return;
-
-                d.properties.props["C"] = projection(d3.geoCentroid(d));
-            });
-
-            let path = d3.geoPath().projection(projection);
-
-            let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
-            svgGroup = svgMap.append("g");
-            svgGroup
+        let drawMap = (geoObject) => {
+            geoObject.element
                 .selectAll("path")
-                .data(data)
-                .enter()
-                .append("path")
-                .attr("d", path)
-                .attr("stroke-width", 0.1)
-                .attr("class", "countries-home")
-                .attr("id", (d) => d.id)
-                .on("click", (e, d) => {
-                    console.log(e);
-                    console.log(d);
-                });
+                .data(geoObject.data)
+                .join(
+                    (enter) => _handleMapEnter(enter, geoObject.path),
+                    (exit) => exit.remove()
+                );
 
-            svgMap.call(zoom);
-            svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
-
-            drawArcs(svgGroup);
+            drawArcs(geoObject.arcs);
         };
+
+        // let drawMap = (data) => {
+        //     let mapContainer = d3.select("#map");
+        //     let svgWidth = mapContainer.node().getBoundingClientRect().width;
+        //     let svgHeight = mapContainer.node().getBoundingClientRect().height;
+        //     projection = d3
+        //         .geoMercator()
+        //         .scale(170)
+        //         .translate([svgWidth / 2, svgHeight / 2 + 128]);
+
+        //     data.forEach((d) => {
+        //         if (isBadCountry(d.properties)) return;
+
+        //         d.properties.props["C"] = projection(d3.geoCentroid(d));
+        //     });
+
+        //     let path = d3.geoPath().projection(projection);
+
+        //     let svgMap = mapContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
+        //     svgGroup = svgMap.append("g");
+        //     svgGroup
+        //         .selectAll("path")
+        //         .data(data)
+        //         .enter()
+        //         .append("path")
+        //         .attr("d", path)
+        //         .attr("stroke-width", 0.1)
+        //         .attr("class", "countries-home")
+        //         .attr("id", (d) => d.id)
+        //         .on("click", (e, d) => {
+        //             console.log(e);
+        //             console.log(d);
+        //         });
+
+        //     svgMap.call(zoom);
+        //     svgMap.call(zoom.transform, () => d3.zoomIdentity.scale(1));
+
+        //     drawArcs(svgGroup);
+        // };
 
         let zoom = d3
             .zoom()
