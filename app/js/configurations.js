@@ -57,3 +57,5 @@ const LEGEND_SQUARE_DIM = 10;
 
 // the duration of the transitions
 const TRANSITION_DURATION = 1000;
+
+const HOME_MAP_YEAR_REPS  = 3;

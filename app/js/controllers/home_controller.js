@@ -12,14 +12,19 @@
 
     function homeController($scope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
-        let projection;
-        let svgGroup;
+
+        const ARCS_DURATION = 3*TRANSITION_DURATION;
+
         let svgMapWidth;
         let svgMapHeight;
+
         let yearsData = [];
-        let pressed = false;
-        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
-        let j = 0;
+
+        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005",
+                             "2005-2010", "2010-2015", "2015-2019"];
+
+        let yearIdx = 0;
+        let yearRep = 0;
 
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
@@ -33,6 +38,95 @@
                 .selectAll(".arch-path").interrupt();
         }
 
+        let resumedDuration = (currentElem) => {
+            let dashArray = localDashArray.get(currentElem);
+            let trajectoryEndpoints = dashArray.split(",").map(Number);
+
+            let elapsedPct = trajectoryEndpoints[0]
+                / trajectoryEndpoints[1];
+
+            return ARCS_DURATION*(1 - elapsedPct);
+        };
+
+        let _handleArcsRepetition = (map, arcElems) => {
+            if (yearRep == HOME_MAP_YEAR_REPS) {
+                yearRep = 0;
+                yearIdx++;
+
+                drawArcs(map);
+            } else {
+                yearRep++;
+
+                updateArcs(map, arcElems, true);
+            }
+        };
+
+        let resumeArcs = () => {
+            let map = $scope.geoObject.element;
+
+            let arcElems = map
+                .select(".arch-container")
+                .selectAll(".arch-path")
+                    .on("mouseover", null)
+                    .on("mouseout", null);
+
+            let arcElemsTrans = arcElems
+                .transition()
+                .duration(function() {
+                    return resumedDuration(this);
+                })
+                .ease(d3.easeLinear)
+                .attr("stroke", "red")
+                .attr("stroke-dashoffset", function () {
+                    return this.getTotalLength();
+                })
+                .attrTween("stroke-dasharray", function() {
+                    let dashArray = localDashArray.get(this);
+                    let startP    = dashArray.split(",").map(Number)[0];
+
+                    return tweenDash(this, startP);
+                })
+                .on("interrupt", function (d) {
+                    let currentElem = this;
+
+                    localDashArray.set(currentElem,
+                        d3.select(this).attr("stroke-dasharray"));
+
+                    d3.select(this).on("mouseover", function () {
+                        // TODO: Display arc source/origin
+                        let arcData = d;
+
+                        d3.select(this)
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", 3);
+
+                        d3.select(this)
+                            // .transition().duration(100)
+                            .attr("stroke-dasharray", this.getTotalLength() + ", 0");
+                    });
+
+                    d3.select(this).on("mouseout", function () {
+                        d3.select(this)
+                            .attr("stroke", "red")
+                            .attr("stroke-width", 1)
+                            .attr("stroke-dasharray",
+                                localDashArray.get(currentElem));
+
+                        d3.select(this)
+                            // .transition().duration(100)
+                            .attr("stroke-dashoffset", this.getTotalLength());
+                    });
+                })
+
+                arcElemsTrans.end().then(
+                    () => {
+                        _handleArcsRepetition(map, arcElems);
+                    },
+                    (e) => {
+                        console.log(e);
+                    }
+                );
+        }
 
         dataService.loadWorldMap().then((data) => {
             // TODO: Enter, update and exit cycle
@@ -56,9 +150,11 @@
         $scope.$watch('isRunning', (newVal, oldVal) => {
             if (newVal != oldVal) {
                 if (!newVal) {
+                    // TODO: Pause areachart tick
                     pauseArcs();
                 } else {
-                    // TODO: Unpause the map simulation
+                    // TODO: Resume areachart tick
+                    resumeArcs();
                 }
             }
         });
@@ -103,107 +199,38 @@
             }
         };
         
-        // i := Single year range iterations counter
-        // j := Different year ranges counter 
-        let drawArcs = (map, i) => {
-            if (j == 5) j = 0;
+        let drawArcs = (map) => {
+            if (yearIdx == yearsInterval.length  - 1) {
+                yearIdx = 0;
+                updateAreaChartTick(yearIdx);
+            }
 
             let yearData = yearsData.filter((arc) =>
-                arc.year == yearsInterval[j]);
+                arc.year == yearsInterval[yearIdx]);
 
             console.log("Update arcs", yearData.length);
 
             let arcElems = map.select(".arch-container")
                 .selectAll(".arch-path")
-                .data(yearData);
+                    .data(yearData)
+                .join("path")
+                    .attr("class", "arch-path")
+                    .attr("stroke-width", 1)
+                    .attr("stroke", "none")
+                    .attr("fill", "none")
+                    .attr("d", (d) => 
+                        defineArc(d.sourceCentroid,
+                            d.destinationCentroid))
+                    .attr("stroke-dashoffset", null)
+                    .attr("stroke-dasharray", null);
 
-            arcElems.exit().remove();
-
-            let arcElemsEnter = arcElems.enter()
-                .append("path")
-                .attr("class", "arch-path")
-                .attr("stroke-width", 1);
-
-            arcElems = arcElemsEnter
-                .merge(arcElems)
-                .attr("stroke", "none")
-                .attr("fill", "none")
-                .attr("d", (d) => 
-                    defineArc(d.sourceCentroid,
-                        d.destinationCentroid));
-                // .call(moveMigrants, i, map);
-
-            // console.log("init");
-            // map.select(".arch-container").selectAll(".arch-path").remove();
-            // if (j == 5) j = 0;
-            // let yearData = yearsData.filter((arc) => arc.year == yearsInterval[j]);
-            // console.log(yearData.length);
-            // map.select(".arch-container")
-            //     .selectAll(".arch-path")
-            //     .data(yearData)
-            //     .enter()
-            //     .append("path")
-            //     .attr("class", "arch-path")
-            //     .attr("stroke", "none")
-            //     .attr("fill", "none")
-            //     .attr("stroke-width", 1)
-            //     .attr("d", (d) => {
-            //         return defineArc(d.sourceCentroid, d.destinationCentroid);
-            //     });
-
-            update(map, arcElems, i);
+            updateArcs(map, arcElems);
         };
 
-        // function moveMigrants(d3Selection, _i, mapSelection) {
-        //     let arcElemsTrans = d3Selection
-        //         .transition()
-        //         .duration(5000)
-        //         .attr("stroke", "red")
-        //         .attr("stroke-dashoffset", function () {
-        //             return this.getTotalLength();
-        //         })
-        //         .attrTween("stroke-dasharray", tweenDash)
-        //         .on("interrupt", function () {
-        //             let currentElem = this;
-        //             d3.select(this).on("mouseover", function () {
-        //                 let arcData = d3.select(this).datum();
-        //                 d3.select(this).attr("stroke", "blue");
-        //                 localDashArray.set(currentElem, d3.select(this).attr("stroke-dasharray"));
-        //                 d3.select(this)
-        //                     // .transition()
-        //                     // .duration(100)
-        //                     .attr("stroke-dasharray", this.getTotalLength() + ", 0");
-        //             });
+        function tweenDash(node, startP) {
+            var l = node.getTotalLength();
+            var i = d3.interpolateString(`${startP},` + l, l + "," + l);
 
-        //             d3.select(this).on("mouseout", function () {
-        //                 d3.select(this).attr("stroke", "red");
-        //                 d3.select(this).attr("stroke-dasharray", localDashArray.get(currentElem));
-        //                 d3.select(this)
-        //                     // .transition().duration(100)
-        //                     .attr("stroke-dashoffset", this.getTotalLength());
-        //             });
-        //         })
-        // 
-        //         arcElemsTrans.end().then(
-        //             () => {
-        //                 console.log("Update - then", _i, j);
-        //                 if (_i > 1) {
-        //                     j++;
-        //                     drawArcs(mapSelection, 0);
-        //                 } else {
-        //                     moveMigrants(d3Selection, _i + 1,
-        //                                  mapSelection);
-        //                 }
-        //             },
-        //             (e) => {
-        //                 console.log(e);
-        //             }
-        //         );
-        // }
-
-        function tweenDash() {
-            var l = this.getTotalLength();
-            var i = d3.interpolateString("0," + l, l + "," + l);
             return function (t) {
                 return i(t);
             };
@@ -211,33 +238,48 @@
 
         let localDashArray = d3.local();
 
-        let update = (map, arcElems, i) => {
-            console.log("Update");
-            // map.select(".arch-container")
-            //     .selectAll(".arch-path")
+        let updateArcs = (map, arcElems,
+                          delayTrans=false) => {
+            // console.log("Update");
+
             let arcElemsTrans = arcElems
                 .transition()
-                .duration(5000)
+                .ease(d3.easeLinear)
+                .duration(ARCS_DURATION)
+                .delay(!delayTrans ? 0 : 500)
                 .attr("stroke", "red")
                 .attr("stroke-dashoffset", function () {
                     return this.getTotalLength();
                 })
-                .attrTween("stroke-dasharray", tweenDash)
-                .on("interrupt", function () {
+                .attrTween("stroke-dasharray", function() {
+                    return tweenDash(this, 0);
+                })
+                .on("interrupt", function (d) {
                     let currentElem = this;
+
+                    localDashArray.set(currentElem,
+                        d3.select(this).attr("stroke-dasharray"));
+
                     d3.select(this).on("mouseover", function () {
-                        let arcData = d3.select(this).datum();
-                        d3.select(this).attr("stroke", "blue");
-                        localDashArray.set(currentElem, d3.select(this).attr("stroke-dasharray"));
+                        // TODO: Display arc source/origin
+                        let arcData = d;
+
                         d3.select(this)
-                            // .transition()
-                            // .duration(100)
+                            .attr("stroke", "blue")
+                            .attr("stroke-width", 3);
+
+                        d3.select(this)
+                            // .transition().duration(100)
                             .attr("stroke-dasharray", this.getTotalLength() + ", 0");
                     });
 
                     d3.select(this).on("mouseout", function () {
-                        d3.select(this).attr("stroke", "red");
-                        d3.select(this).attr("stroke-dasharray", localDashArray.get(currentElem));
+                        d3.select(this)
+                            .attr("stroke", "red")
+                            .attr("stroke-width", 1)
+                            .attr("stroke-dasharray",
+                                localDashArray.get(currentElem));
+
                         d3.select(this)
                             // .transition().duration(100)
                             .attr("stroke-dashoffset", this.getTotalLength());
@@ -246,13 +288,7 @@
 
                 arcElemsTrans.end().then(
                     () => {
-                        console.log("Update - then", i, j);
-                        if (i > 1) {
-                            j++;
-                            drawArcs(map, 0);
-                        } else {
-                            update(map, arcElems, i + 1);
-                        }
+                        _handleArcsRepetition(map, arcElems);
                     },
                     (e) => {
                         console.log(e);
@@ -301,7 +337,7 @@
                     map.append("g").attr("class", "arch-container");
                 }
 
-                drawArcs(map, 0);
+                drawArcs(map);
             });
         };
 
@@ -374,15 +410,8 @@
             initArcs(geoObject.element);
         };
 
-        let zoom = d3
-            .zoom()
-            .scaleExtent([1, 10])
-            .on("zoom", (event) => {
-                svgGroup.attr("transform", event.transform);
-            });
-
         // TODO: Remove dummy area chart data
-        let data = [
+        let dummyData = [
             { year: "1990", value: 5000 },
             { year: "1995", value: 15000 },
             { year: "2000", value: 2000 },
@@ -392,7 +421,7 @@
             { year: "2019", value: 15000 },
         ];
 
-        let drawAreaChart = () => {
+        let drawAreaChart = (data) => {
             let margin = { left: 50, right: 10, top: 10, bottom: 20 };
             let areaChartContainer = d3.select("#home-line-chart");
             let svgWidth = areaChartContainer.node().getBoundingClientRect().width - margin.left - margin.right;
@@ -473,6 +502,10 @@
             area_a.enter().append("path").attr("d", areaGenerator(data)).attr("class", "area-chart");
         };
 
-        drawAreaChart();
+        let updateAreaChartTick = (_yearIdx) => {
+
+        };
+
+        drawAreaChart(dummyData);
     }
 })();
