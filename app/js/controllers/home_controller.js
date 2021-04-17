@@ -25,7 +25,9 @@
         let yearIdx = 0;
         let yearRep = 0;
 
+        let localDashArray = d3.local();
         let countries;
+        let homeInfoBox;
 
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
@@ -60,6 +62,71 @@
             }
         };
 
+        let arcsMouseOver = (path, d, source, destination, homeInfoBox) => {
+            d3.select("#" + source.id)
+                .transition()
+                .delay(400)
+                .attr("fill", HOVERED_COLOR)
+                .attr("stroke", "#63b3d4");
+            d3.select("#" + destination.id)
+                .transition()
+                .delay(400)
+                .attr("fill", HOVERED_COLOR)
+                .attr("stroke", "#63b3d4");
+            d3.select(path).attr("stroke", "#0093c4").style("stroke-linecap", "round").attr("stroke-width", 5);
+
+            d3.select(path)
+                .transition()
+                .duration(500)
+                .attr("stroke-dasharray", path.getTotalLength() + ", 0");
+
+            $scope.geoObject.element
+                .selectAll(".arch-path")
+                .filter((c) => {
+                    return !(c.sourceName === d.sourceName && c.destinationName === d.destinationName);
+                })
+                .transition()
+                .duration(200)
+                .style("opacity", 0.1);
+
+            d3.select(path).style("opacity", 1);
+
+            homeInfoBox.innerHTML = `
+                        <div class="width-100 color-white font-size-medium">
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Source:</div><div class="text-right width-100">${
+                            d.sourceName
+                        }</div></div>
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Destination:</div><div class="text-right width-100"> ${
+                            d.destinationName
+                        }</div></div>
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Migration:</div><div class="text-right width-100"> ${transformNumberFormat(
+                            d.weight
+                        )}</div></div>
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Years:</div><div class="text-right width-100"> ${
+                            d.year
+                        }</div></div>
+                        </div>
+                        `;
+        };
+
+        let arcsMouseOut = (path, source, destination, homeInfoBox) => {
+            d3.select("#" + source.id)
+                .interrupt()
+                .attr("fill", HOME_COUNTRY_COLOR)
+                .attr("stroke", HOME_COUNTRY_MAP_STROKE);
+            d3.select("#" + destination.id)
+                .interrupt()
+                .attr("fill", HOME_COUNTRY_COLOR)
+                .attr("stroke", HOME_COUNTRY_MAP_STROKE);
+
+            d3.select(path).attr("stroke", "red").attr("stroke-width", 2).attr("stroke-dasharray", localDashArray.get(path));
+
+            d3.select(path).interrupt().attr("stroke-dashoffset", path.getTotalLength());
+
+            $scope.geoObject.element.selectAll(".arch-path").interrupt().transition().duration(200).style("opacity", 1);
+            homeInfoBox.innerHTML = "Information on hover will be shown here";
+        };
+
         // FIXME: handle split on undefined (dashArray)
         let resumeArcs = () => {
             let map = $scope.geoObject.element;
@@ -83,30 +150,16 @@
                     return tweenDash(this, startP);
                 })
                 .on("interrupt", function (d) {
-                    let currentElem = this;
-
-                    localDashArray.set(currentElem, d3.select(this).attr("stroke-dasharray"));
+                    let source = countries.find((c) => c.properties.name === d.sourceName);
+                    let destination = countries.find((c) => c.properties.name === d.destinationName);
+                    localDashArray.set(this, d3.select(this).attr("stroke-dasharray"));
 
                     d3.select(this).on("mouseover", function () {
-                        // TODO: Display arc source/origin
-                        let arcData = d;
-
-                        d3.select(this).attr("stroke", "blue").attr("stroke-width", 3);
-
-                        d3.select(this)
-                            // .transition().duration(100)
-                            .attr("stroke-dasharray", this.getTotalLength() + ", 0");
+                        arcsMouseOver(this, d, source, destination, homeInfoBox);
                     });
 
                     d3.select(this).on("mouseout", function () {
-                        d3.select(this)
-                            .attr("stroke", "red")
-                            .attr("stroke-width", 1)
-                            .attr("stroke-dasharray", localDashArray.get(currentElem));
-
-                        d3.select(this)
-                            // .transition().duration(100)
-                            .attr("stroke-dashoffset", this.getTotalLength());
+                        arcsMouseOut(this, source, destination, homeInfoBox);
                     });
                 });
 
@@ -122,7 +175,6 @@
 
         dataService.loadWorldMap().then((data) => {
             // TODO: Enter, update and exit cycle
-            console.log(data);
             countries = data;
             $scope.geoObject = initMap(data);
             drawMap($scope.geoObject);
@@ -137,15 +189,15 @@
                 $scope.isRunning = !isPaused;
                 $scope.$apply();
             });
+
+            homeInfoBox = document.querySelector("#home-info-div");
         });
 
         $scope.$watch("isRunning", (newVal, oldVal) => {
             if (newVal != oldVal) {
                 if (!newVal) {
-                    // TODO: Pause areachart tick
                     pauseArcs();
                 } else {
-                    // TODO: Resume areachart tick
                     resumeArcs();
                 }
             }
@@ -226,8 +278,6 @@
             };
         }
 
-        let localDashArray = d3.local();
-
         let updateArcs = (map, arcElems, delayTrans = false) => {
             // console.log("Update");
 
@@ -244,73 +294,16 @@
                     return tweenDash(this, 0);
                 })
                 .on("interrupt", function (d) {
-                    let currentElem = this;
-                    let homeInfoArc = document.querySelector("#home-info-div");
                     let source = countries.find((c) => c.properties.name === d.sourceName);
                     let destination = countries.find((c) => c.properties.name === d.destinationName);
-                    localDashArray.set(currentElem, d3.select(this).attr("stroke-dasharray"));
+                    localDashArray.set(this, d3.select(this).attr("stroke-dasharray"));
 
                     d3.select(this).on("mouseover", function () {
-                        d3.select("#" + source.id)
-                            .transition()
-                            .delay(400)
-                            .attr("fill", HOVERED_COLOR)
-                            .attr("stroke", "#63b3d4");
-                        d3.select("#" + destination.id)
-                            .transition()
-                            .delay(400)
-                            .attr("fill", HOVERED_COLOR)
-                            .attr("stroke", "#63b3d4");
-                        d3.select(this).attr("stroke", "#0093c4").style("stroke-linecap", "round").attr("stroke-width", 5);
-
-                        d3.select(this)
-                            .transition()
-                            .duration(500)
-                            .attr("stroke-dasharray", this.getTotalLength() + ", 0");
-
-                        $scope.geoObject.element
-                            .selectAll(".arch-path")
-                            .filter((c) => c != d)
-                            .transition()
-                            .duration(200)
-                            .style("opacity", 0.1);
-
-                        homeInfoArc.innerHTML = `
-                        <div class="width-100 color-white font-size-medium">
-                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Source:</div><div>${
-                            d.sourceName
-                        }</div></div>
-                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Destination:</div><div> ${
-                            d.destinationName
-                        }</div></div>
-                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Migration:</div><div> ${transformNumberFormat(
-                            d.weight
-                        )}</div></div>
-                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Years:</div><div> ${
-                            d.year
-                        }</div></div>
-                        </div>
-                        `;
+                        arcsMouseOver(this, d, source, destination, homeInfoBox);
                     });
 
                     d3.select(this).on("mouseout", function () {
-                        d3.select("#" + source.id)
-                            .interrupt()
-                            .attr("fill", HOME_COUNTRY_COLOR)
-                            .attr("stroke", HOME_COUNTRY_MAP_STROKE);
-                        d3.select("#" + destination.id)
-                            .interrupt()
-                            .attr("fill", HOME_COUNTRY_COLOR)
-                            .attr("stroke", HOME_COUNTRY_MAP_STROKE);
-                        d3.select(this)
-                            .attr("stroke", "red")
-                            .attr("stroke-width", 2)
-                            .attr("stroke-dasharray", localDashArray.get(currentElem));
-
-                        d3.select(this).interrupt().attr("stroke-dashoffset", this.getTotalLength());
-
-                        $scope.geoObject.element.selectAll(".arch-path").interrupt().transition().duration(200).style("opacity", 1);
-                        homeInfoArc.innerHTML = "Information on hover will be shown here";
+                        arcsMouseOut(this, source, destination, homeInfoBox);
                     });
                 });
 
@@ -421,10 +414,19 @@
                 .attr("fill", HOME_COUNTRY_COLOR)
                 .attr("stroke", HOME_COUNTRY_MAP_STROKE)
                 .on("mouseover", (e, d) => {
-                    d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR);
+                    d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR).attr("stroke", "#63b3d4");
+                    homeInfoBox.innerHTML = `
+                    <div>
+                        <div class="display-flex">
+                            <img width="40" height="30" class="margin-left-20px" src="${d.properties.flagPath}">
+                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${d.properties.name}</div>
+                        </div>
+                    </div>
+                    `;
                 })
                 .on("mouseout", (e, d) => {
-                    d3.select(e.target).transition().duration(100).attr("fill", HOME_COUNTRY_COLOR);
+                    d3.select(e.target).transition().duration(100).attr("fill", HOME_COUNTRY_COLOR).attr("stroke", HOME_COUNTRY_MAP_STROKE);
+                    homeInfoBox.innerHTML = "Information on hover will be shown here";
                 });
         };
 
