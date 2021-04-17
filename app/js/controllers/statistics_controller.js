@@ -55,7 +55,6 @@
 
         const BAD_COUNTRY_COLOR = "#ff5952";
         const HIGHLIGHTED_COLOR = "#ff9316";
-        const HOVERED_COLOR = "#800080";
 
         const colorScheme = d3.schemeBlues[9];
         let colorScale, colorTicks;
