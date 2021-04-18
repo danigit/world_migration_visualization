@@ -1,4 +1,4 @@
-    (function () {
+(function () {
     "use strict";
 
     // reloading the angular module
@@ -97,7 +97,7 @@
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map");
-            svgMap.append("g").classed("legends", true);
+            svgMapContainer.append("g").classed("legends", true);
             // let svgGraticule = svgMapContainer.append("g")
             //         .attr('id', 'graticule');
 
@@ -120,6 +120,7 @@
             return {
                 data: geoJson,
                 element: svgMap,
+                mapContainer: svgMapContainer,
                 path: geoPath,
                 projection: mapProjection,
             };
@@ -290,10 +291,10 @@
             colorTicks = colorScale.ticks(9);
             // console.log(colorTicks.map(d => colorScale(d)));
 
-            const rectWidth = 25;
+            const rectWidth = 35;
             const rectMargin = 25;
 
-            geoObject.element
+            geoObject.mapContainer
                 .select(".legends")
                 .selectAll(".legend")
                 .data(colorTicks)
@@ -305,6 +306,7 @@
                             .classed("legend", true)
                             .attr("width", rectWidth)
                             .attr("height", 20)
+                            .attr("stroke", "#000000")
                             .style("fill", (d) => colorScale(d))
                             .attr(
                                 "transform",
@@ -312,11 +314,26 @@
                                     "translate(" +
                                     (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
                                     ", " +
-                                    (svgMapHeight - 25) +
+                                    (svgMapHeight - 45) +
                                     ")"
                             );
+
+                        return enter
+                            .append("text")
+                            .attr("stroke", "white")
+                            .attr("font-size", "10px")
+                            .attr(
+                                "transform",
+                                (d, i) =>
+                                    "translate(" +
+                                    (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin + 10) +
+                                    ", " +
+                                    (svgMapHeight - 10) +
+                                    ")"
+                            )
+                            .text((d) => transformNumberFormat(d));
                     },
-                    (update) =>
+                    (update) => {
                         update
                             .style("fill", (d) => colorScale(d))
                             .attr(
@@ -325,20 +342,20 @@
                                     "translate(" +
                                     (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
                                     ", " +
-                                    (svgMapHeight - 25) +
+                                    (svgMapHeight - 45) +
                                     ")"
-                            ),
+                            );
+                    },
                     (exit) => exit.remove()
                 );
 
-            geoObject.element
+            geoObject.mapContainer
                 .select(".legends")
                 .selectAll(".legend-unk")
                 .data([colorTicks.length])
                 .join(
                     (enter) => {
-                        return enter
-
+                        enter
                             .append("rect")
                             .classed("legend-unk", true)
                             .attr("width", rectWidth)
@@ -346,13 +363,23 @@
                             .style("fill", BAD_COUNTRY_COLOR)
                             .attr(
                                 "transform",
-                                (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 25) + ")"
+                                (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
                             );
+
+                        enter
+                            .append("text")
+                            .attr("stroke", "white")
+                            .attr("font-size", "10px")
+                            .attr(
+                                "transform",
+                                (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin + 10) + ", " + (svgMapHeight - 10) + ")"
+                            )
+                            .text("N.A.");
                     },
                     (update) =>
                         update.attr(
                             "transform",
-                            (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 25) + ")"
+                            (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
                         )
                 );
         };

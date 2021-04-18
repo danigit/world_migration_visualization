@@ -351,9 +351,7 @@
                 () => {
                     _handleArcsRepetition(map, arcElems);
                 },
-                (e) => {
-                    console.log(e);
-                }
+                (e) => {}
             );
 
             // arcElems.style("filter", "url(#glow)");
