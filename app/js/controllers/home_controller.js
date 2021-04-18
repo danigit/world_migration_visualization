@@ -18,9 +18,10 @@
         let svgMapWidth;
         let svgMapHeight;
 
-        let yearsData = [];
+        let migrationMagnitudeColors = ["#FF3333", "#F1860C", "#C5B409", "#F8FF42", "F6F990"];
 
         let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
+        let yearsData = [];
 
         let yearIdx = 0;
         let yearRep = 0;
@@ -28,6 +29,7 @@
         let localDashArray = d3.local();
         let countries;
         let homeInfoBox;
+        let zoomMap;
 
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
@@ -38,6 +40,7 @@
 
         let pauseArcs = () => {
             $scope.geoObject.element.selectAll(".arch-path").interrupt();
+            $scope.geoObject.element.selectAll("circle").interrupt();
         };
 
         let resumedDuration = (currentElem) => {
@@ -119,7 +122,10 @@
                 .attr("fill", HOME_COUNTRY_COLOR)
                 .attr("stroke", HOME_COUNTRY_MAP_STROKE);
 
-            d3.select(path).attr("stroke", "red").attr("stroke-width", 2).attr("stroke-dasharray", localDashArray.get(path));
+            d3.select(path)
+                .attr("stroke", getMigrationColor(d3.select(path).data()[0].weight))
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", localDashArray.get(path));
 
             d3.select(path).interrupt().attr("stroke-dashoffset", path.getTotalLength());
 
@@ -139,7 +145,7 @@
                     return resumedDuration(this);
                 })
                 .ease(d3.easeLinear)
-                .attr("stroke", "red")
+                .attr("stroke", (d) => getMigrationColor(d.weight))
                 .attr("stroke-dashoffset", function () {
                     return this.getTotalLength();
                 })
@@ -251,8 +257,6 @@
 
             let yearData = yearsData.filter((arc) => arc.year == yearsInterval[yearIdx]);
 
-            console.log("Update arcs", yearData.length);
-
             let arcElems = map
                 .select(".arch-container")
                 .selectAll(".arch-path")
@@ -278,19 +282,55 @@
             };
         }
 
-        let updateArcs = (map, arcElems, delayTrans = false) => {
-            // console.log("Update");
+        let drawCentroids = (geoObject, destinations, show) => {
+            if (show) {
+                // createGlows(geoObject.element);
+                const geoCentroids = geoObject.element
+                    .selectAll("circle")
+                    .data(geoObject.data.filter((d) => destinations.some((dd) => dd === d.properties.name)));
 
+                geoCentroids
+                    .join("circle")
+                    .attr("fill", "#63b3d4")
+                    .style("fill-opacity", 0.5)
+                    .attr("stroke", "#63b3d4")
+                    .attr("cx", (d) => d.properties.props.C[0])
+                    .attr("cy", (d) => d.properties.props.C[1])
+                    .transition()
+                    .duration(ARCS_DURATION / 2)
+                    .attr("r", 5)
+                    .transition()
+                    .duration(ARCS_DURATION / 2)
+                    .attr("r", 2);
+
+                // geoCentroids.style("filter", "url(#glow)");
+            }
+        };
+
+        let removeCentroids = (geoObject) => {
+            geoObject.element.selectAll("circle").remove();
+        };
+
+        let updateArcs = (map, arcElems, delayTrans = false) => {
+            let destinations = [];
+            arcElems.each((d) => {
+                if (!destinations.includes(d.destinationName)) destinations.push(d.destinationName);
+            });
+
+            removeCentroids($scope.geoObject);
+            drawCentroids($scope.geoObject, destinations, delayTrans);
             let arcElemsTrans = arcElems
                 .transition()
                 .ease(d3.easeLinear)
                 .duration(ARCS_DURATION)
                 .delay(!delayTrans ? 0 : 500)
-                .attr("stroke", "red")
+                .attr("stroke", (d) => {
+                    return getMigrationColor(d.weight);
+                })
                 .attr("stroke-dashoffset", function () {
                     return this.getTotalLength();
                 })
-                .attrTween("stroke-dasharray", function () {
+                .attrTween("stroke-dasharray", function (d) {
                     return tweenDash(this, 0);
                 })
                 .on("interrupt", function (d) {
@@ -315,6 +355,34 @@
                     console.log(e);
                 }
             );
+
+            // arcElems.style("filter", "url(#glow)");
+        };
+
+        const createGlows = (map) => {
+            const defs = map.append("defs");
+            const filter = defs.append("filter").attr("id", "glow");
+
+            filter.append("feGaussianBlur").attr("class", "blur").attr("stdDeviation", "7").attr("result", "coloredBlur");
+
+            const feMerge = filter.append("feMerge");
+
+            feMerge.append("feMergeNode").attr("in", "coloredBlur");
+            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+        };
+
+        let getMigrationColor = (weight) => {
+            if (weight > 5000000) {
+                return migrationMagnitudeColors[0];
+            } else if (weight > 1000000) {
+                return migrationMagnitudeColors[1];
+            } else if (weight > 100000) {
+                return migrationMagnitudeColors[2];
+            } else if (weight > 1000) {
+                return migrationMagnitudeColors[3];
+            } else {
+                return migrationMagnitudeColors[4];
+            }
         };
 
         /**
@@ -332,16 +400,16 @@
                             keys.forEach((k) => {
                                 let weight = 0;
                                 if (k !== c.Destination) {
+                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
                                     let source = {
                                         sourceName: k,
                                         destinationName: c.Destination,
                                         radius: 2,
+                                        fill: getMigrationColor(weight),
                                         year: prev.Year + "-" + c1.Year,
                                         sourceCentroid: data.find((e) => e.Destination === k).centroid,
                                         destinationCentroid: c.centroid,
                                     };
-
-                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
 
                                     if (weight > 100000) {
                                         source.weight = weight;
@@ -358,10 +426,10 @@
                     map.append("g").attr("class", "arch-container");
                 }
 
+                // createGlows($scope.geoObject.element);
                 drawArcs(map);
             });
         };
-
         let initMap = (worldData) => {
             let mapContainer = d3.select("#map");
             mapContainer.html("");
@@ -381,7 +449,7 @@
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map-group");
-            let zoomMap = d3
+            zoomMap = d3
                 .zoom()
                 .scaleExtent([1, 10])
                 .on("zoom", (e) => svgMap.attr("transform", e.transform));
