@@ -11,13 +11,13 @@
      * Function that handle the menu interaction
      * @type {string[]}
      */
-    menuController.$inject = ["$scope", "$mdSidenav", "dataService"];
+    menuController.$inject = ["$scope", "$rootScope", "$mdSidenav", "dataService"];
 
-    function menuController($scope, $mdSidenav, dataService) {
+    function menuController($scope, $rootScope, $mdSidenav, dataService) {
         $scope.isSideMenuOpened = true;
         $scope.searchSource = "";
         $scope.searchDestination = "";
-        $scope.genderFilterValue = "menu-male";
+        $rootScope.genderFilterValue = "menu-all";
         $scope.regionFilterValue = "menu-continent";
         $scope.continents = dataService.continents;
         dataService.countries.then((data) => ($scope.countries = data));
@@ -54,15 +54,17 @@
         /**
          * Function that updates the statistics
          */
-        let updateStatistics = () => {};
+        let updateMap = () => {
+            
+        };
 
         /**
          * Function that handles the click on the gender radio group filter in the menu
          * @param {string} value
          */
         $scope.handleGenderClick = function (value) {
-            $scope.genderFilterValue = value;
-            updateStatistics();
+            $rootScope.genderFilterValue = value;
+           //updateStatistics();
         };
 
         /**

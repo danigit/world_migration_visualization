@@ -850,9 +850,10 @@
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 
-        let getCountries_totMigrByOriginDest = (countries, columnsArray = ["Year", "Destination", "Total"]) => {
-            return data_service.totMigrByOriginDest.then((data) =>
-                data_service.filterColumn(
+        let getCountries_totMigrByOriginDest = (countries, columnsArray = ["Year", "Destination", "Total"], genderFilterValue="menu-all") => {
+
+            let dataRetrievalFunc = function (data) {
+                return data_service.filterColumn(
                     data_service.filterDataMulti(
                         data,
                         countries.map((c) => c.name),
@@ -860,8 +861,19 @@
                         2019
                     ),
                     columnsArray
-                )
-            );
+                );
+            };
+
+            switch (genderFilterValue) {
+                case "menu-all":
+                    return data_service.totMigrByOriginDest.then((data) => dataRetrievalFunc(data));
+                case "menu-male":
+                    return data_service.maleMigrByOriginDest.then((data) => dataRetrievalFunc(data));
+                case "menu-female":
+                    return data_service.femaleMigrByOriginDest.then((data) => dataRetrievalFunc(data));
+            }
+
+            return data_service.totMigrByOriginDest.then((data) => dataRetrievalFunc(data));
         };
 
         let getCountries_totPopulationByAgeSex = (countries) => {
@@ -986,31 +998,33 @@
             });
         };
 
-        data_service.getCountriesInwardOutwardMigrants = () => {
+        data_service.getCountriesInwardOutwardMigrants = (genderFilterValue) => {
             return data_service.countries.then((countries) => {
                 let filteredCountries = countries.filter((c) => c.props.C != undefined);
                 let countryNames = filteredCountries.map((country) => country.name);
 
-                return getCountries_totMigrByOriginDest(filteredCountries, ["Year", "Destination", "Total"].concat(countryNames)).then(
-                    (data) => {
-                        return data.map((obj) => {
-                            let result = {};
-                            let centroid = countries.find((c) => c.name === obj.Destination);
-                            result["centroid"] = centroid.props.C;
+                let migrantsPreProcessing = function (data) {
+                    return data.map((obj) => {
+                        let result = {};
+                        let centroid = countries.find((c) => c.name === obj.Destination);
+                        result["centroid"] = centroid.props.C;
 
-                            for (let key in obj) {
-                                if (obj[key] === "" || obj[key] === "-") continue;
-                                else if (key !== "Destination") {
-                                    result[key] = +obj[key];
-                                } else {
-                                    result[key] = obj[key];
-                                }
+                        for (let key in obj) {
+                            if (obj[key] === "" || obj[key] === "-") continue;
+                            else if (key !== "Destination") {
+                                result[key] = +obj[key];
+                            } else {
+                                result[key] = obj[key];
                             }
+                        }
 
-                            return result;
-                        });
-                    }
-                );
+                        return result;
+                    });
+                };
+
+                    return getCountries_totMigrByOriginDest(filteredCountries, ["Year", "Destination", "Total"].concat(countryNames), genderFilterValue).then(
+                        (data) => migrantsPreProcessing(data)
+                    );
             });
         };
 
