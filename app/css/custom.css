@@ -181,6 +181,10 @@ DISPLAY
     width: 55px !important;
 }
 
+.width-60-px {
+    width: 60px !important;
+}
+
 .width-30-px {
     width: 30px !important;
 }
@@ -306,6 +310,10 @@ MARGINS
 
 .margin-top-5-px {
     margin-top: 5px !important;
+}
+
+.margin-top-3-px {
+    margin-top: 3px !important;
 }
 
 .margin-top-10-px {
@@ -614,8 +622,16 @@ OTHER
     vertical-align: middle;
 }
 
+.top-5-px {
+    top: 5px;
+}
+
 .bottom-0 {
     bottom: 0 !important;
+}
+
+.right-0 {
+    right: 0;
 }
 
 md-optgroup label {

@@ -15,9 +15,9 @@
                         <h1 class="md-toolbar-tools color-white font-size-medium text-bold">
                             Visualization settings
                         </h1>
-                        <div ng-click="toggleMenu()" class="margin-right-10-px cursor-pointer outline-none">
+                        <!-- <div ng-click="toggleMenu()" class="margin-right-10-px cursor-pointer outline-none">
                             <img src="app/img/close-menu.png" alt="Close Menu" title="Close Menu" />
-                        </div>
+                        </div> -->
                     </md-toolbar>
                     <div layout="column">
                         <civ class="width-100">
@@ -111,6 +111,10 @@
                             <rzslider rz-slider-model="sliderYears.minValue" rz-slider-high="sliderYears.maxValue"
                                 rz-slider-options="sliderYears.options"></rzslider>
                         </div>
+                        <hr class="menu-divider width-100 margin-top-40-px" />
+                        <div id="home-info-div" class="font-size-small margin-top-5-px color-lightgray">
+                            Information on hover will be shown here
+                        </div>
                     </md-content>
                 </md-sidenav>
             </section>
@@ -121,7 +125,7 @@
             <div id="map" class="height-80 width-100 min-height-400-px background-dark">
             </div>
             <div layout="column" id="footer" class="height-20 width-100 background-gray">
-                <!-- <div id="feeds" layout="row" class="margin-top-10-px height-20 position-relative">
+                <div id="feeds" layout="row" class="margin-top-10-px height-20 position-relative">
                     <div label="row">
                         <div class="migration-flow-label background-gray">Large-flow Migration</div>
                         <div id="triangle-right">
@@ -129,9 +133,10 @@
                     </div>
                     <feed-chip ng-repeat="feedObject in feeds" ng-model="feedModel" feed="feedObject" index="$index">
                     </feed-chip>
-                </div> -->
-                <div>
-                    <img id="playpause-btn" ng-src="{{playPauseBtn}}" style="width: 48px; height: 48px;" class="float-right margin-right-10-px pointer">
+                </div>
+                <div class="background-gray width-60-px position-absolute right-0 margin-top-5-px">
+                    <img id="playpause-btn" ng-src="{{playPauseBtn}}" style="width: 48px; height: 48px;"
+                        class="float-right margin-right-10-px margin-top-3-px pointer zindex-100">
                 </div>
 
                 <div id="home-line-chart" class="height-80 display-block"></div>

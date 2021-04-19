@@ -13,19 +13,23 @@
     function homeController($scope, $rootScope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
 
-
-        const ARCS_DURATION = 3*TRANSITION_DURATION;
+        const ARCS_DURATION = 3 * TRANSITION_DURATION;
 
         let svgMapWidth;
         let svgMapHeight;
 
-        let yearsData = [];
+        let migrationMagnitudeColors = ["#FF3333", "#F1860C", "#C5B409", "#F8FF42", "F6F990"];
 
-        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005",
-                             "2005-2010", "2010-2015", "2015-2019"];
+        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
+        let yearsData = [];
 
         let yearIdx = 0;
         let yearRep = 0;
+
+        let localDashArray = d3.local();
+        let countries;
+        let homeInfoBox;
+        let zoomMap;
 
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
@@ -35,18 +39,17 @@
         };
 
         let pauseArcs = () => {
-            $scope.geoObject.element
-                .selectAll(".arch-path").interrupt();
-        }
+            $scope.geoObject.element.selectAll(".arch-path").interrupt();
+            $scope.geoObject.element.selectAll("circle").interrupt();
+        };
 
         let resumedDuration = (currentElem) => {
             let dashArray = localDashArray.get(currentElem);
             let trajectoryEndpoints = dashArray.split(",").map(Number);
 
-            let elapsedPct = trajectoryEndpoints[0]
-                / trajectoryEndpoints[1];
+            let elapsedPct = trajectoryEndpoints[0] / trajectoryEndpoints[1];
 
-            return ARCS_DURATION*(1 - elapsedPct);
+            return ARCS_DURATION * (1 - elapsedPct);
         };
 
         let _handleArcsRepetition = (map, arcElems) => {
@@ -62,99 +65,145 @@
             }
         };
 
+        let arcsMouseOver = (path, d, source, destination, homeInfoBox) => {
+            d3.select("#" + source.id)
+                .transition()
+                .delay(400)
+                .attr("fill", HOVERED_COLOR)
+                .attr("stroke", "#63b3d4");
+            d3.select("#" + destination.id)
+                .transition()
+                .delay(400)
+                .attr("fill", HOVERED_COLOR)
+                .attr("stroke", "#63b3d4");
+            d3.select(path).attr("stroke", "#0093c4").style("stroke-linecap", "round").attr("stroke-width", 5);
+
+            d3.select(path)
+                .transition()
+                .duration(500)
+                .attr("stroke-dasharray", path.getTotalLength() + ", 0");
+
+            $scope.geoObject.element
+                .selectAll(".arch-path")
+                .filter((c) => {
+                    return !(c.sourceName === d.sourceName && c.destinationName === d.destinationName);
+                })
+                .transition()
+                .duration(200)
+                .style("opacity", 0.1);
+
+            d3.select(path).style("opacity", 1);
+
+            homeInfoBox.innerHTML = `
+                        <div class="width-100 color-white font-size-medium">
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Source:</div><div class="text-right width-100">${
+                            d.sourceName
+                        }</div></div>
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Destination:</div><div class="text-right width-100"> ${
+                            d.destinationName
+                        }</div></div>
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Migration:</div><div class="text-right width-100"> ${transformNumberFormat(
+                            d.weight
+                        )}</div></div>
+                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Years:</div><div class="text-right width-100"> ${
+                            d.year
+                        }</div></div>
+                        </div>
+                        `;
+        };
+
+        let arcsMouseOut = (path, source, destination, homeInfoBox) => {
+            d3.select("#" + source.id)
+                .interrupt()
+                .attr("fill", HOME_COUNTRY_COLOR)
+                .attr("stroke", HOME_COUNTRY_MAP_STROKE);
+            d3.select("#" + destination.id)
+                .interrupt()
+                .attr("fill", HOME_COUNTRY_COLOR)
+                .attr("stroke", HOME_COUNTRY_MAP_STROKE);
+
+            d3.select(path)
+                .attr("stroke", getMigrationColor(d3.select(path).data()[0].weight))
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", localDashArray.get(path));
+
+            d3.select(path).interrupt().attr("stroke-dashoffset", path.getTotalLength());
+
+            $scope.geoObject.element.selectAll(".arch-path").interrupt().transition().duration(200).style("opacity", 1);
+            homeInfoBox.innerHTML = "Information on hover will be shown here";
+        };
+
+        // FIXME: handle split on undefined (dashArray)
         let resumeArcs = () => {
             let map = $scope.geoObject.element;
 
-            let arcElems = map
-                .select(".arch-container")
-                .selectAll(".arch-path")
-                    .on("mouseover", null)
-                    .on("mouseout", null);
+            let arcElems = map.select(".arch-container").selectAll(".arch-path").on("mouseover", null).on("mouseout", null);
 
             let arcElemsTrans = arcElems
                 .transition()
-                .duration(function() {
+                .duration(function () {
                     return resumedDuration(this);
                 })
                 .ease(d3.easeLinear)
-                .attr("stroke", "red")
+                .attr("stroke", (d) => getMigrationColor(d.weight))
                 .attr("stroke-dashoffset", function () {
                     return this.getTotalLength();
                 })
-                .attrTween("stroke-dasharray", function() {
+                .attrTween("stroke-dasharray", function () {
                     let dashArray = localDashArray.get(this);
-                    let startP    = dashArray.split(",").map(Number)[0];
+                    let startP = dashArray.split(",").map(Number)[0];
 
                     return tweenDash(this, startP);
                 })
                 .on("interrupt", function (d) {
-                    let currentElem = this;
-
-                    localDashArray.set(currentElem,
-                        d3.select(this).attr("stroke-dasharray"));
+                    let source = countries.find((c) => c.properties.name === d.sourceName);
+                    let destination = countries.find((c) => c.properties.name === d.destinationName);
+                    localDashArray.set(this, d3.select(this).attr("stroke-dasharray"));
 
                     d3.select(this).on("mouseover", function () {
-                        // TODO: Display arc source/origin
-                        let arcData = d;
-
-                        d3.select(this)
-                            .attr("stroke", "blue")
-                            .attr("stroke-width", 3);
-
-                        d3.select(this)
-                            // .transition().duration(100)
-                            .attr("stroke-dasharray", this.getTotalLength() + ", 0");
+                        arcsMouseOver(this, d, source, destination, homeInfoBox);
                     });
 
                     d3.select(this).on("mouseout", function () {
-                        d3.select(this)
-                            .attr("stroke", "red")
-                            .attr("stroke-width", 1)
-                            .attr("stroke-dasharray",
-                                localDashArray.get(currentElem));
-
-                        d3.select(this)
-                            // .transition().duration(100)
-                            .attr("stroke-dashoffset", this.getTotalLength());
+                        arcsMouseOut(this, source, destination, homeInfoBox);
                     });
-                })
+                });
 
-                arcElemsTrans.end().then(
-                    () => {
-                        _handleArcsRepetition(map, arcElems);
-                    },
-                    (e) => {
-                        console.log(e);
-                    }
-                );
-        }
+            arcElemsTrans.end().then(
+                () => {
+                    _handleArcsRepetition(map, arcElems);
+                },
+                (e) => {
+                    console.log(e);
+                }
+            );
+        };
 
         dataService.loadWorldMap().then((data) => {
             // TODO: Enter, update and exit cycle
+            countries = data;
             $scope.geoObject = initMap(data);
             drawMap($scope.geoObject);
 
             $scope.playPauseBtn = IC_PAUSE;
             $scope.$apply();
 
-            document.getElementById("playpause-btn")
-                    .addEventListener("click", () => {
-                        const isPaused = $scope.playPauseBtn === IC_PAUSE;
+            document.getElementById("playpause-btn").addEventListener("click", () => {
+                const isPaused = $scope.playPauseBtn === IC_PAUSE;
 
-                        $scope.playPauseBtn = isPaused
-                            ? IC_PLAY : IC_PAUSE;
-                        $scope.isRunning = !isPaused;
-                        $scope.$apply();
-                    });
+                $scope.playPauseBtn = isPaused ? IC_PLAY : IC_PAUSE;
+                $scope.isRunning = !isPaused;
+                $scope.$apply();
+            });
+
+            homeInfoBox = document.querySelector("#home-info-div");
         });
 
-        $scope.$watch('isRunning', (newVal, oldVal) => {
+        $scope.$watch("isRunning", (newVal, oldVal) => {
             if (newVal != oldVal) {
                 if (!newVal) {
-                    // TODO: Pause areachart tick
                     pauseArcs();
                 } else {
-                    // TODO: Resume areachart tick
                     resumeArcs();
                 }
             }
@@ -199,31 +248,27 @@
                 return "M0,0,l0,0z";
             }
         };
-        
+
         let drawArcs = (map) => {
-            if (yearIdx == yearsInterval.length  - 1) {
+            if (yearIdx == yearsInterval.length - 1) {
                 yearIdx = 0;
                 updateAreaChartTick(yearIdx);
             }
 
-            let yearData = yearsData.filter((arc) =>
-                arc.year == yearsInterval[yearIdx]);
+            let yearData = yearsData.filter((arc) => arc.year == yearsInterval[yearIdx]);
 
-            console.log("Update arcs", yearData.length);
-
-            let arcElems = map.select(".arch-container")
+            let arcElems = map
+                .select(".arch-container")
                 .selectAll(".arch-path")
-                    .data(yearData)
+                .data(yearData)
                 .join("path")
-                    .attr("class", "arch-path")
-                    .attr("stroke-width", 1)
-                    .attr("stroke", "none")
-                    .attr("fill", "none")
-                    .attr("d", (d) => 
-                        defineArc(d.sourceCentroid,
-                            d.destinationCentroid))
-                    .attr("stroke-dashoffset", null)
-                    .attr("stroke-dasharray", null);
+                .attr("class", "arch-path")
+                .attr("stroke-width", 2)
+                .attr("stroke", "none")
+                .attr("fill", "none")
+                .attr("d", (d) => defineArc(d.sourceCentroid, d.destinationCentroid))
+                .attr("stroke-dashoffset", null)
+                .attr("stroke-dasharray", null);
 
             updateArcs(map, arcElems);
         };
@@ -237,64 +282,105 @@
             };
         }
 
-        let localDashArray = d3.local();
+        let drawCentroids = (geoObject, destinations, show) => {
+            if (show) {
+                // createGlows(geoObject.element);
+                const geoCentroids = geoObject.element
+                    .selectAll("circle")
+                    .data(geoObject.data.filter((d) => destinations.some((dd) => dd === d.properties.name)));
 
-        let updateArcs = (map, arcElems,
-                          delayTrans=false) => {
-            // console.log("Update");
+                geoCentroids
+                    .join("circle")
+                    .attr("fill", "#63b3d4")
+                    .style("fill-opacity", 0.5)
+                    .attr("stroke", "#63b3d4")
+                    .attr("cx", (d) => d.properties.props.C[0])
+                    .attr("cy", (d) => d.properties.props.C[1])
+                    .transition()
+                    .duration(ARCS_DURATION / 2)
+                    .attr("r", 5)
+                    .transition()
+                    .duration(ARCS_DURATION / 2)
+                    .attr("r", 2);
 
+                // geoCentroids.style("filter", "url(#glow)");
+            }
+        };
+
+        let removeCentroids = (geoObject) => {
+            geoObject.element.selectAll("circle").remove();
+        };
+
+        let updateArcs = (map, arcElems, delayTrans = false) => {
+            let destinations = [];
+            arcElems.each((d) => {
+                if (!destinations.includes(d.destinationName)) destinations.push(d.destinationName);
+            });
+
+            removeCentroids($scope.geoObject);
+            drawCentroids($scope.geoObject, destinations, delayTrans);
             let arcElemsTrans = arcElems
                 .transition()
                 .ease(d3.easeLinear)
                 .duration(ARCS_DURATION)
                 .delay(!delayTrans ? 0 : 500)
-                .attr("stroke", "red")
+                .attr("stroke", (d) => {
+                    return getMigrationColor(d.weight);
+                })
                 .attr("stroke-dashoffset", function () {
                     return this.getTotalLength();
                 })
-                .attrTween("stroke-dasharray", function() {
+                .attrTween("stroke-dasharray", function (d) {
                     return tweenDash(this, 0);
                 })
                 .on("interrupt", function (d) {
-                    let currentElem = this;
-
-                    localDashArray.set(currentElem,
-                        d3.select(this).attr("stroke-dasharray"));
+                    let source = countries.find((c) => c.properties.name === d.sourceName);
+                    let destination = countries.find((c) => c.properties.name === d.destinationName);
+                    localDashArray.set(this, d3.select(this).attr("stroke-dasharray"));
 
                     d3.select(this).on("mouseover", function () {
-                        // TODO: Display arc source/origin
-                        let arcData = d;
-
-                        d3.select(this)
-                            .attr("stroke", "blue")
-                            .attr("stroke-width", 3);
-
-                        d3.select(this)
-                            // .transition().duration(100)
-                            .attr("stroke-dasharray", this.getTotalLength() + ", 0");
+                        arcsMouseOver(this, d, source, destination, homeInfoBox);
                     });
 
                     d3.select(this).on("mouseout", function () {
-                        d3.select(this)
-                            .attr("stroke", "red")
-                            .attr("stroke-width", 1)
-                            .attr("stroke-dasharray",
-                                localDashArray.get(currentElem));
-
-                        d3.select(this)
-                            // .transition().duration(100)
-                            .attr("stroke-dashoffset", this.getTotalLength());
+                        arcsMouseOut(this, source, destination, homeInfoBox);
                     });
-                })
+                });
 
-                arcElemsTrans.end().then(
-                    () => {
-                        _handleArcsRepetition(map, arcElems);
-                    },
-                    (e) => {
-                        console.log(e);
-                    }
-                );
+            arcElemsTrans.end().then(
+                () => {
+                    _handleArcsRepetition(map, arcElems);
+                },
+                (e) => {}
+            );
+
+            // arcElems.style("filter", "url(#glow)");
+        };
+
+        const createGlows = (map) => {
+            const defs = map.append("defs");
+            const filter = defs.append("filter").attr("id", "glow");
+
+            filter.append("feGaussianBlur").attr("class", "blur").attr("stdDeviation", "7").attr("result", "coloredBlur");
+
+            const feMerge = filter.append("feMerge");
+
+            feMerge.append("feMergeNode").attr("in", "coloredBlur");
+            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+        };
+
+        let getMigrationColor = (weight) => {
+            if (weight > 5000000) {
+                return migrationMagnitudeColors[0];
+            } else if (weight > 1000000) {
+                return migrationMagnitudeColors[1];
+            } else if (weight > 100000) {
+                return migrationMagnitudeColors[2];
+            } else if (weight > 1000) {
+                return migrationMagnitudeColors[3];
+            } else {
+                return migrationMagnitudeColors[4];
+            }
         };
 
         /**
@@ -313,16 +399,16 @@
                             keys.forEach((k) => {
                                 let weight = 0;
                                 if (k !== c.Destination) {
+                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
                                     let source = {
                                         sourceName: k,
                                         destinationName: c.Destination,
                                         radius: 2,
+                                        fill: getMigrationColor(weight),
                                         year: prev.Year + "-" + c1.Year,
                                         sourceCentroid: data.find((e) => e.Destination === k).centroid,
                                         destinationCentroid: c.centroid,
                                     };
-
-                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
 
                                     if (weight > 100000) {
                                         source.weight = weight;
@@ -339,10 +425,10 @@
                     map.append("g").attr("class", "arch-container");
                 }
 
+                // createGlows($scope.geoObject.element);
                 drawArcs(map);
             });
         };
-
         let initMap = (worldData) => {
             let mapContainer = d3.select("#map");
             mapContainer.html("");
@@ -362,7 +448,7 @@
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map-group");
-            let zoomMap = d3
+            zoomMap = d3
                 .zoom()
                 .scaleExtent([1, 10])
                 .on("zoom", (e) => svgMap.attr("transform", e.transform));
@@ -392,8 +478,23 @@
                 .attr("d", _path)
                 .attr("class", "countries")
                 .attr("id", (d) => d.id)
-                .attr("fill", "#b0b0b0")
-                .attr("stroke", "#a0a0a0");
+                .attr("fill", HOME_COUNTRY_COLOR)
+                .attr("stroke", HOME_COUNTRY_MAP_STROKE)
+                .on("mouseover", (e, d) => {
+                    d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR).attr("stroke", "#63b3d4");
+                    homeInfoBox.innerHTML = `
+                    <div>
+                        <div class="display-flex">
+                            <img width="40" height="30" class="margin-left-20px" src="${d.properties.flagPath}">
+                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${d.properties.name}</div>
+                        </div>
+                    </div>
+                    `;
+                })
+                .on("mouseout", (e, d) => {
+                    d3.select(e.target).transition().duration(100).attr("fill", HOME_COUNTRY_COLOR).attr("stroke", HOME_COUNTRY_MAP_STROKE);
+                    homeInfoBox.innerHTML = "Information on hover will be shown here";
+                });
         };
 
         let drawMap = (geoObject) => {
@@ -504,9 +605,7 @@
             area_a.enter().append("path").attr("d", areaGenerator(data)).attr("class", "area-chart");
         };
 
-        let updateAreaChartTick = (_yearIdx) => {
-
-        };
+        let updateAreaChartTick = (_yearIdx) => {};
 
         drawAreaChart(dummyData);
 
