@@ -8,9 +8,9 @@
      * Function that handlle the user login
      */
 
-    homeController.$inject = ["$scope", "$state", "dataService", "feedService"];
+    homeController.$inject = ["$scope", "$rootScope", "$state", "dataService", "feedService"];
 
-    function homeController($scope, $state, dataService, feedService) {
+    function homeController($scope, $rootScope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
 
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
@@ -388,7 +388,8 @@
          * @param {object} map
          */
         let initArcs = (map) => {
-            dataService.getCountriesInwardOutwardMigrants().then((data) => {
+            dataService.getCountriesInwardOutwardMigrants($rootScope.genderFilterValue).then((data) => {
+                console.log("data is: ", data);
                 for (let c of data) {
                     let prev = c;
                     if (c.Year == 1995) break;
@@ -607,5 +608,15 @@
         let updateAreaChartTick = (_yearIdx) => {};
 
         drawAreaChart(dummyData);
+
+        $rootScope.$watch('genderFilterValue', (newVal, oldVal) => {
+            if (newVal !== oldVal) {
+                pauseArcs();
+                yearsData = [];
+                // PROPOSAL: restart the number of repetitions from scratch if you filter by gender
+                yearRep = 0;
+                initArcs($scope.geoObject.element);
+            }
+        });
     }
 })();
