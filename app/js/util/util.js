@@ -12,6 +12,8 @@ function resizeMenuPanel(isMenuOpened) {
     }
 }
 
+let parseDate = d3.timeParse("%Y");
+
 /**
  * Functions that changes the number format in "k", "M" notation
  * example 1000 -> 1k

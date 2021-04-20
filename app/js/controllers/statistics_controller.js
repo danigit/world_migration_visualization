@@ -178,7 +178,6 @@
                 d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR);
 
                 if (isBadCountry(d.properties)) {
-                    console.log("Unknown country:", d.id);
                     $scope.hoveredCountry = {
                         visName: "Unknown country",
                     };

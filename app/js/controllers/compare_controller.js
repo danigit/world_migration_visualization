@@ -21,9 +21,11 @@
         $scope.searchSource = "";
 
         let commonStructure;
-        let lineChartStructure;
+        let lineRateOfChangeChartStructure;
+        let lineRefugeesStructure;
         let firsCommonStructureCall = true;
-        let firstLineChartStructureCall = true;
+        let firstRateOfChangeLineChartStructureCall = true;
+        let firstRefugeesLineChartStructureCall = true;
         let color = d3.scaleOrdinal(d3.schemePaired);
         let countryColors = ["#1f78b4", "#a6cee3"];
         let margins = { top: 20, bottom: 60, left: 20, right: 20 };
@@ -33,7 +35,6 @@
         let sliderMin = 1990;
         let sliderMax = 2019;
         let consideredYears = dataService.getActiveYears(sliderMin, sliderMax);
-        let parseDate = d3.timeParse("%Y");
 
         // object that contain the statistics values for the left countries
         $scope.countryLeftStatisticsValues = {
@@ -199,12 +200,24 @@
             dataService.getRateOfChange($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue).then((data) => {
                 data = preprocessRateOfChange(data).map((d) => ({ label: parseDate(d.label.split("-")[1]), value: +d.value }));
                 dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
-                    if (firstLineChartStructureCall) {
-                        lineChartStructure = initializeLineChart(data, minMax, "change-rate-container");
-                        firstLineChartStructureCall = false;
+                    if (firstRateOfChangeLineChartStructureCall) {
+                        lineRateOfChangeChartStructure = initializeRateOfChangeLineChart(data, minMax, "change-rate-container");
+                        firstRateOfChangeLineChartStructureCall = false;
                     }
-                    drawLineChart(data, "left-line-chart", "left-line-chart-class");
+                    drawRateOfChangeLineChart(data, "left-line-chart", "left-line-chart-class");
                 });
+            });
+
+            dataService.getEstimatedRefugeesByYear($scope.selectedCountry.left.name, $scope.genderFilterValue).then((data) => {
+                if (firstRefugeesLineChartStructureCall) {
+                    lineRefugeesStructure = initializeRefugeesLineChart(
+                        data,
+                        [d3.min(data, (d) => d.value), d3.max(data, (d) => d.value)],
+                        "refugees-container"
+                    );
+                    firstRefugeesLineChartStructureCall = false;
+                }
+                drawRefugeesLineChart(data, "left-refugees", "left-line-chart-class");
             });
 
             // getting the country migrants age statistics
@@ -331,12 +344,24 @@
             dataService.getRateOfChange($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue).then((data) => {
                 data = preprocessRateOfChange(data).map((d) => ({ label: parseDate(d.label.split("-")[1]), value: d.value }));
                 dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
-                    if (firstLineChartStructureCall) {
-                        lineChartStructure = initializeLineChart(data, minMax, "change-rate-container");
-                        firstLineChartStructureCall = false;
+                    if (firstRateOfChangeLineChartStructureCall) {
+                        lineRateOfChangeChartStructure = initializeRateOfChangeLineChart(data, minMax, "change-rate-container");
+                        firstRateOfChangeLineChartStructureCall = false;
                     }
-                    drawLineChart(data, "right-line-chart", "right-line-chart-class");
+                    drawRateOfChangeLineChart(data, "right-line-chart", "right-line-chart-class");
                 });
+            });
+
+            dataService.getEstimatedRefugeesByYear($scope.selectedCountry.right.name, $scope.genderFilterValue).then((data) => {
+                if (firstRefugeesLineChartStructureCall) {
+                    lineRefugeesStructure = initializeRefugeesLineChart(
+                        data,
+                        [d3.min(data, (d) => d.value), d3.max(data, (d) => d.value)],
+                        "refugees-container"
+                    );
+                    firstRefugeesLineChartStructureCall = false;
+                }
+                drawRefugeesLineChart(data, "right-refugees", "right-line-chart-class");
             });
 
             dataService
@@ -555,7 +580,7 @@
          * @param {string} lineChartId
          * @returns
          */
-        let initializeLineChart = (data, minMax, container) => {
+        let initializeRateOfChangeLineChart = (data, minMax, container) => {
             let lineChartContainer = d3.select("#" + container);
 
             let svg = lineChartContainer
@@ -627,13 +652,14 @@
          * @param {object} structure
          * @param {string} lineClass
          */
-        let drawLineChart = (data, structure, lineClass) => {
+        let drawRateOfChangeLineChart = (data, structure, lineClass) => {
+            console.log(data);
             let lineGenerator = d3
                 .line()
-                .x((d) => lineChartStructure.xScale(d.label))
-                .y((d) => lineChartStructure.yScale(d.value));
+                .x((d) => lineRateOfChangeChartStructure.xScale(d.label))
+                .y((d) => lineRateOfChangeChartStructure.yScale(d.value));
 
-            lineChartStructure.lineChartStructure
+            lineRateOfChangeChartStructure.lineChartStructure
                 .select("." + structure)
                 .selectAll("path")
                 .data([data])
@@ -658,7 +684,7 @@
                     (exit) => exit.remove()
                 );
 
-            lineChartStructure.lineChartStructure
+            lineRateOfChangeChartStructure.lineChartStructure
                 .select(".year-circles")
                 .selectAll("." + lineClass + "year-circle")
                 .data(data)
@@ -669,16 +695,148 @@
                             .attr("class", lineClass + "year-circle " + lineClass)
                             .attr("fill", "none")
                             .attr("stroke", countryColors[0])
-                            .attr("cx", (d) => lineChartStructure.xScale(d.label))
-                            .attr("cy", (d) => lineChartStructure.yScale(d.value))
+                            .attr("cx", (d) => lineRateOfChangeChartStructure.xScale(d.label))
+                            .attr("cy", (d) => lineRateOfChangeChartStructure.yScale(d.value))
                             .attr("r", 3);
                     },
                     (update) =>
                         update
                             .transition()
                             .duration(TRANSITION_DURATION)
-                            .attr("cx", (d) => lineChartStructure.xScale(d.label))
-                            .attr("cy", (d) => lineChartStructure.yScale(d.value)),
+                            .attr("cx", (d) => lineRateOfChangeChartStructure.xScale(d.label))
+                            .attr("cy", (d) => lineRateOfChangeChartStructure.yScale(d.value)),
+                    (exit) => exit.remove()
+                );
+        };
+
+        /**
+         * Function that initialize the svg containing for the refugees lineChart for the selected country
+         * @param {string} container
+         * @param {object} margin
+         * @param {string} lineChartId
+         * @returns
+         */
+        let initializeRefugeesLineChart = (data, minMax, container) => {
+            let refugeesContainer = d3.select("#" + container);
+
+            let svg = refugeesContainer
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+
+            svg.append("g").attr("transform", `translate(${margins.left}, 0)`).attr("class", "left-refugees");
+            svg.append("g").attr("transform", `translate(${margins.left}, 0)`).attr("class", "right-refugees");
+
+            let xScale = d3
+                .scaleTime()
+                .domain([d3.timeYear.offset(data[0].year, -1), d3.timeYear.offset(data[6].year, +1)])
+                .range([margins.left, width - margins.right - 15]);
+
+            console.log(minMax);
+            let yScale = d3
+                .scaleLinear()
+                .domain([minMax[0], minMax[1]])
+                .range([height - margins.bottom - margins.top, 0]);
+
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
+                .style("font-size", "10px")
+                .attr("class", "axis-dark-cyan")
+                .call(d3.axisBottom(xScale).ticks(data.length))
+                .selectAll("text")
+                .attr("transform", "rotate(25)")
+                .attr("text-anchor", "start");
+
+            svg.append("g")
+                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .style("font-size", "10px")
+                .attr("class", "grid-lines y-axis")
+                .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0).ticks(8).tickFormat(d3.format(".2s")));
+
+            // inserting the circles
+            svg.append("g").attr("transform", `translate(${margins.left}, 0)`).attr("class", "year-circles");
+
+            let legend = svg
+                .selectAll(".legend")
+                .data([$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName])
+                .enter()
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", (_, i) => `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`);
+
+            legend
+                .append("rect")
+                .attr("x", width + LEGEND_SQUARE_DIM)
+                .attr("width", LEGEND_SQUARE_DIM)
+                .attr("height", LEGEND_SQUARE_DIM)
+                .style("fill", (_, i) => countryColors[i]);
+
+            legend
+                .append("text")
+                .attr("x", width + 40)
+                .attr("y", LEGEND_SQUARE_DIM)
+                .attr("font-size", "small")
+                .style("text-anchor", "start")
+                .text((d) => d);
+
+            return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
+        };
+
+        /**
+         * Function that creates the svg structure for the line chart plot
+         * @param {array} data
+         * @param {object} structure
+         * @param {string} lineClass
+         */
+        let drawRefugeesLineChart = (data, structure, lineClass) => {
+            console.log(data);
+            let lineGenerator = d3
+                .line()
+                .x((d) => lineRefugeesStructure.xScale(d.year))
+                .y((d) => lineRefugeesStructure.yScale(d.value));
+
+            lineRefugeesStructure.lineChartStructure
+                .select("." + structure)
+                .selectAll("path")
+                .data([data])
+                .join(
+                    (enter) =>
+                        enter
+                            .append("path")
+                            .attr("class", lineClass)
+                            .attr("d", (d) => lineGenerator(d)),
+                    (update) =>
+                        update.call((update) =>
+                            update
+                                .transition()
+                                .duration(TRANSITION_DURATION)
+                                .attr("d", (d) => lineGenerator(d))
+                        ),
+                    (exit) => exit.remove()
+                );
+
+            lineRefugeesStructure.lineChartStructure
+                .select(".year-circles")
+                .selectAll("." + lineClass + "year-circle")
+                .data(data)
+                .join(
+                    (enter) => {
+                        enter
+                            .append("circle")
+                            .attr("class", lineClass + "year-circle " + lineClass)
+                            .attr("fill", "none")
+                            .attr("stroke", countryColors[0])
+                            .attr("cx", (d) => lineRefugeesStructure.xScale(d.year))
+                            .attr("cy", (d) => lineRefugeesStructure.yScale(d.value))
+                            .attr("r", 3);
+                    },
+                    (update) =>
+                        update
+                            .transition()
+                            .duration(TRANSITION_DURATION)
+                            .attr("cx", (d) => lineRefugeesStructure.xScale(d.year))
+                            .attr("cy", (d) => lineRefugeesStructure.yScale(d.value)),
                     (exit) => exit.remove()
                 );
         };

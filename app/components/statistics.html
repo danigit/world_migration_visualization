@@ -82,8 +82,8 @@
                                     class="margin-top-bottom-auto margin-right-20-px" ng-if="hoveredCountry.flagPath">
                                 <div class="font-size-medium color-darkcyan margin-top-bottom-auto"
                                     ng-if="hoveredCountry.visName">
-                                    {{hoveredCountry.visName}} - <span class="color-orange">
-                                        {{hoveredCountry.continent}}</span>
+                                    {{hoveredCountry.visName}} <span ng-if="hoveredCountry.continent"> - </span><span
+                                        class="color-orange"> {{hoveredCountry.continent}}</span>
                                 </div>
                             </div>
                             <hr ng-if="hoveredCountry.visName" class="menu-divider margin-top-none margin-bottom-20-px">
@@ -94,14 +94,19 @@
                             </div>
                         </div>
                         <div class="padding-lr-20-px margin-right-20-px width-60 text-justify">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Blanditiis repudiandae quidem esse
-                            ea illo labore assumenda laborum iste temporibus quasi, quos amet tempora veritatis ex culpa
-                            cum voluptatibus accusamus, commodi quaerat? Voluptatibus quibusdam nihil nulla, consequatur
-                            quod velit quia reiciendis?
+
+                            According to the Migration and Remittances Factbook 2011, 3% of the world population (more
+                            than 215 million people) live in a country other than the one they were born in.
+                            <hr class="menu-divider margin-top-bottom-5-px">
+                            In 2010, refugees and asylum-seekers made up 8% (16.3 million) of international migrants.
+                            <hr class="menu-divider margin-top-bottom-5-px">
+                            Relative to world population size, more people were migrating around the end of the 19th
+                            Century than they are now.
                         </div>
                         <div
                             class="color-white margin-top-5-px margin-right-10-px font-size-small background-darkgray padding-10-px width-30 height-100 text-justify">
-                            Ranking of the <span class="color-green">Top 5</span> and <span class="color-red">Flop 5</span> countries in the world listed according to the selected metric.</div>
+                            Ranking of the <span class="color-green">Top 5</span> and <span class="color-red">Flop
+                                5</span> countries in the world listed according to the selected metric.</div>
                     </div>
                 </div>
                 <div class="width-300-px height-100">

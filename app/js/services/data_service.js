@@ -560,6 +560,24 @@
         };
 
         /**
+         * Function that returns the estimate refugees by year
+         * @param {string} selectedCountry
+         * @param {number} yearsColumns
+         * @param {number} selectedGender
+         * @returns {promise}
+         */
+        data_service.getEstimatedRefugeesByYear = (selectedCountry, selectedGender) => {
+            return data_service.estimatedRefugees.then((data) => {
+                let selectedCountryData = getSelectedCountryData(data, selectedCountry)[0];
+                let countryKeys = Object.keys(selectedCountryData).slice(1, 8);
+                return countryKeys.map((c, i) => ({
+                    year: parseDate(c.split("_")[0]),
+                    value: +selectedCountryData[c],
+                }));
+            });
+        };
+
+        /**
          * Function that returns the global rank statistics for each country
          * @param {number} yearMin
          * @param {number} yearMax
@@ -850,8 +868,11 @@
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 
-        let getCountries_totMigrByOriginDest = (countries, columnsArray = ["Year", "Destination", "Total"], genderFilterValue="menu-all") => {
-
+        let getCountries_totMigrByOriginDest = (
+            countries,
+            columnsArray = ["Year", "Destination", "Total"],
+            genderFilterValue = "menu-all"
+        ) => {
             let dataRetrievalFunc = function (data) {
                 return data_service.filterColumn(
                     data_service.filterDataMulti(
@@ -1022,9 +1043,11 @@
                     });
                 };
 
-                    return getCountries_totMigrByOriginDest(filteredCountries, ["Year", "Destination", "Total"].concat(countryNames), genderFilterValue).then(
-                        (data) => migrantsPreProcessing(data)
-                    );
+                return getCountries_totMigrByOriginDest(
+                    filteredCountries,
+                    ["Year", "Destination", "Total"].concat(countryNames),
+                    genderFilterValue
+                ).then((data) => migrantsPreProcessing(data));
             });
         };
 
