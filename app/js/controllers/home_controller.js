@@ -26,6 +26,8 @@
         let yearIdx = 0;
         let yearRep = 0;
 
+        $scope.weightThreshold = 100000;
+
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
 
@@ -128,10 +130,11 @@
                 );
         }
 
-        dataService.loadWorldMap().then((data) => {
-            // TODO: Enter, update and exit cycle
-            $scope.geoObject = initMap(data);
+        dataService.loadWorldMap().then((worldJson) => {
+            $scope.geoObject = initMap(worldJson);
             drawMap($scope.geoObject);
+
+            drawAreaChart(yearsData);
 
             $scope.playPauseBtn = IC_PAUSE;
             $scope.$apply();
@@ -304,7 +307,12 @@
             dataService.getCountriesInwardOutwardMigrants().then((data) => {
                 for (let c of data) {
                     let prev = c;
+
+                    // All the countries need to be grabbed once,
+                    // so when c.Year moves to 1995 it means that
+                    // we have already visited all the countries
                     if (c.Year == 1995) break;
+
                     data.forEach((c1) => {
                         if (c.Destination == c1.Destination && c.Year != c1.Year) {
                             let keys = Object.keys(c1).slice(4);
@@ -312,6 +320,8 @@
                                 let weight = 0;
                                 if (k !== c.Destination) {
                                     let source = {
+                                        prevTot: prev.Total,
+                                        nextTot: c1.Total,
                                         sourceName: k,
                                         destinationName: c.Destination,
                                         radius: 2,
@@ -320,9 +330,9 @@
                                         destinationCentroid: c.centroid,
                                     };
 
-                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
+                                    weight = !(k in c) ? c1[k] : c1[k] - c[k];
 
-                                    if (weight > 100000) {
+                                    if (weight >= $scope.weightThreshold) {
                                         source.weight = weight;
                                         yearsData.push(source);
                                     }
@@ -404,108 +414,99 @@
                 .data(geoObject.data)
                 .join(
                     (enter) => _handleMapEnter(enter, geoObject.path),
-                    (exit) => exit.remove()
+                    (exit)  => exit.remove()
                 );
 
             initArcs(geoObject.element);
         };
 
-        // TODO: Remove dummy area chart data
-        let dummyData = [
-            { year: "1990", value: 5000 },
-            { year: "1995", value: 15000 },
-            { year: "2000", value: 2000 },
-            { year: "2005", value: 8000 },
-            { year: "2010", value: 10000 },
-            { year: "2015", value: 20000 },
-            { year: "2019", value: 15000 },
-        ];
+        let drawAreaChart = (_yearsData) => {
+            console.log(_yearsData);
 
-        let drawAreaChart = (data) => {
-            let margin = { left: 50, right: 10, top: 10, bottom: 20 };
-            let areaChartContainer = d3.select("#home-line-chart");
-            let svgWidth = areaChartContainer.node().getBoundingClientRect().width - margin.left - margin.right;
-            let svgHeight = areaChartContainer.node().getBoundingClientRect().height - margin.top - margin.bottom;
 
-            let parseDate = d3.timeParse("%Y");
-            data.forEach(function (d) {
-                d.year = parseDate(d.year);
-            });
 
-            // creating the x axis generator
-            let x = d3
-                .scaleTime()
-                .domain([d3.timeMonth.offset(data[0].year, -4), d3.timeMonth.offset(data[6].year, +2)]) //parseDate("1990"), parseDate("2020")])
-                .range([0, svgWidth - margin.right]);
+            // let margin = { left: 50, right: 10, top: 10, bottom: 20 };
+            // let areaChartContainer = d3.select("#home-area-chart");
+            // let svgWidth = areaChartContainer.node().getBoundingClientRect().width - margin.left - margin.right;
+            // let svgHeight = areaChartContainer.node().getBoundingClientRect().height - margin.top - margin.bottom;
 
-            // creating the y axis generator
-            let y = d3
-                .scaleLinear()
-                .domain([0, d3.max(data, (d) => d.value)])
-                .range([svgHeight - margin.top - margin.bottom, 0]);
+            // let parseDate = d3.timeParse("%Y");
+            // data.forEach(function (d) {
+            //     d.year = parseDate(d.year);
+            // });
 
-            // crating the area generator
-            let areaGenerator = d3
-                .area()
-                .x((d, i) => x(d.year))
-                .y1((d) => y(d.value))
-                .y0(svgHeight - margin.top - margin.bottom);
+            // // creating the x axis generator
+            // let x = d3
+            //     .scaleTime()
+            //     .domain([d3.timeMonth.offset(data[0].year, -4), d3.timeMonth.offset(data[6].year, +2)]) //parseDate("1990"), parseDate("2020")])
+            //     .range([0, svgWidth - margin.right]);
 
-            // creating the svg element
-            let svgAreaChart = areaChartContainer
-                .append("svg")
-                .attr("width", svgWidth + margin.left)
-                .attr("height", svgHeight)
-                .append("g")
-                .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+            // // creating the y axis generator
+            // let y = d3
+            //     .scaleLinear()
+            //     .domain([0, d3.max(data, (d) => d.value)])
+            //     .range([svgHeight - margin.top - margin.bottom, 0]);
 
-            // inserting the y axis
-            svgAreaChart
-                .append("g")
-                .attr("class", "axis-dark-cyan")
-                .call(d3.axisLeft(y).tickFormat(d3.format(".2s")));
+            // // crating the area generator
+            // let areaGenerator = d3
+            //     .area()
+            //     .x((d, i) => x(d.year))
+            //     .y1((d) => y(d.value))
+            //     .y0(svgHeight - margin.top - margin.bottom);
 
-            // inserting the x axis
-            svgAreaChart
-                .append("g")
-                .attr("class", "axis-dark-cyan")
-                .attr("transform", "translate(0, " + (svgHeight - margin.top - margin.bottom) + ")")
-                .call(d3.axisBottom(x).ticks(data.length));
+            // // creating the svg element
+            // let svgAreaChart = areaChartContainer
+            //     .append("svg")
+            //     .attr("width", svgWidth + margin.left)
+            //     .attr("height", svgHeight)
+            //     .append("g")
+            //     .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
 
-            // inserting the circles
-            svgAreaChart
-                .append("g")
-                .selectAll(".year-circle")
-                .data(data)
-                .enter()
-                .append("circle")
-                .attr("class", "year-circle")
-                .attr("cx", (d) => x(d.year))
-                .attr("cy", (d) => y(d.value))
-                .attr("r", 5);
+            // // inserting the y axis
+            // svgAreaChart
+            //     .append("g")
+            //     .attr("class", "axis-dark-cyan")
+            //     .call(d3.axisLeft(y).tickFormat(d3.format(".2s")));
 
-            // inserting the years lines
-            svgAreaChart
-                .append("g")
-                .selectAll(".year-line")
-                .data(data)
-                .enter()
-                .append("line")
-                .attr("class", "year-line")
-                .attr("y1", y.range()[0])
-                .attr("y2", y.range()[1])
-                .attr("x1", (d) => x(d.year))
-                .attr("x2", (d) => x(d.year));
+            // // inserting the x axis
+            // svgAreaChart
+            //     .append("g")
+            //     .attr("class", "axis-dark-cyan")
+            //     .attr("transform", "translate(0, " + (svgHeight - margin.top - margin.bottom) + ")")
+            //     .call(d3.axisBottom(x).ticks(data.length));
 
-            let area_a = svgAreaChart.selectAll("path").data(data);
+            // // inserting the circles
+            // svgAreaChart
+            //     .append("g")
+            //     .selectAll(".year-circle")
+            //     .data(data)
+            //     .enter()
+            //     .append("circle")
+            //     .attr("class", "year-circle")
+            //     .attr("cx", (d) => x(d.year))
+            //     .attr("cy", (d) => y(d.value))
+            //     .attr("r", 5);
 
-            area_a.enter().append("path").attr("d", areaGenerator(data)).attr("class", "area-chart");
+            // // inserting the years lines
+            // svgAreaChart
+            //     .append("g")
+            //     .selectAll(".year-line")
+            //     .data(data)
+            //     .enter()
+            //     .append("line")
+            //     .attr("class", "year-line")
+            //     .attr("y1", y.range()[0])
+            //     .attr("y2", y.range()[1])
+            //     .attr("x1", (d) => x(d.year))
+            //     .attr("x2", (d) => x(d.year));
+
+            // let area_a = svgAreaChart.selectAll("path").data(data);
+
+            // area_a.enter().append("path").attr("d", areaGenerator(data)).attr("class", "area-chart");
         };
 
         let updateAreaChartTick = (_yearIdx) => {
 
         };
-
-        drawAreaChart(dummyData);
     }
 })();
