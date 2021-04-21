@@ -161,6 +161,13 @@ DISPLAY
     width: 250px;
 }
 
+.width-220-px {
+    width: 220px;
+}
+
+.width-210-px {
+    width: 210px;
+}
 .width-200-px {
     width: 200px;
 }

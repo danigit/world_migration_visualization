@@ -1061,6 +1061,30 @@
             });
         };
 
+        data_service.getFeedData = (selectedYear) => {
+            return data_service.countries.then((countries) => {
+
+                return data_service.totMigrByOriginDest.then(data => {
+                    
+                    let countryNames = countries.map(country => country.name);
+                    data = data.filter(countryData => countryNames.includes(countryData["Destination"]) && 
+                        +countryData["Year"]===selectedYear)
+                        .map(countryData => 
+                            ({
+                                title:countries[countryNames.indexOf(countryData.Destination)].visName,
+                                value:+countryData["Total"]
+                                }
+                            ));
+
+                    // descending order
+                    data.sort((a, b) => +b.value - +a.value);
+
+                    return data;
+                }); 
+                
+            });
+        };
+
         data_service.getWorldStatistics = () => {
             return data_service.countries.then((countries) => {
                 let numCountries = countries.length;

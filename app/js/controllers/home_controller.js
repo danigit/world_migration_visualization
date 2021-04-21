@@ -11,8 +11,8 @@
     homeController.$inject = ["$scope", "$state", "dataService", "feedService"];
 
     function homeController($scope, $state, dataService, feedService) {
-        $scope.feeds = feedService.feeds;
-
+         // feedService.feeds;
+        $scope.feeds = [];
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
 
         let svgMapWidth;
@@ -641,6 +641,30 @@
                     $scope.playPauseBtn = IC_PAUSE;
                 }
             }
+        });
+
+
+        dataService.getFeedData(2019).then(data => {
+            console.log("returned data is ", data)
+
+            let top5feeds = data.slice(0, 5);
+
+            top5feeds.forEach(top5Feed => {
+                top5Feed.image = "app/img/home/up.png";
+                top5Feed.value = transformNumberFormat(top5Feed.value, false, 0);
+            });
+
+            let flop5feeds = data.slice(data.length - 5, data.length)
+                .reverse();
+
+            flop5feeds.forEach(flop5Feed => {
+                flop5Feed.image = "app/img/home/down.png";
+                flop5Feed.value = transformNumberFormat(flop5Feed.value, false, 0);
+            });
+                    
+            $scope.feeds = [...top5feeds,...flop5feeds];
+
+            console.log("scope feeds ", $scope.feeds);
         });
     }
 })();
