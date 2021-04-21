@@ -4,12 +4,12 @@ Please note: Fix display resolution to 1080p!
 
 - Ensure pan-and-zoom actions do not cut information out of the dynamic map
 
-- Implement filters logic
-- Clarify magnitude filter functionality
+- Implement filters source/destination filter and arc magnitude filter
+- Clarify magnitude filter functionality 
 - Implement Top 5 inward/outward carousel
 - Add a 'How to read' section in the bottom-left blank space
 - Implement vertical bar to control current visualization
-- Implement the connection map with a threshold for the number of arcs
+- Declare constant in project to change the threshold for arc weight filtering
 
 ## World page
 
@@ -90,11 +90,11 @@ Please note: Fix display resolution to 1080p!
 -- Steal metrics labels from Daniel's resources
 -- Investigate hover coloring malfunctions on the statistics maps
 -- Add inward label on the statistics page barchart
-- remove the legend from inside the map
-- country top 5 green label
+-- remove the legend from inside the map
+-- country top 5 green label
 
 
 
 
-- plot with country refugees
+-- plot with country refugees
 - Discard ".." from reduce function in the statistics page
