@@ -627,9 +627,7 @@
 
         drawAreaChart(dummyData);
 
-        $scope.$watch('genderFilterValue', (newVal, oldVal) => {
-
-            console.log("GenderFilterValue is ", $scope.genderFilterValue);
+        $rootScope.$watch("genderFilterValue", (newVal, oldVal) => {
             if (newVal !== oldVal) {
 
                 yearsData = [];

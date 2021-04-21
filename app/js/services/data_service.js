@@ -566,14 +566,24 @@
          * @param {number} selectedGender
          * @returns {promise}
          */
-        data_service.getEstimatedRefugeesByYear = (selectedCountry, selectedGender) => {
+        data_service.getEstimatedRefugeesByYear = (selectedCountryLeft, selectedCountryRight) => {
             return data_service.estimatedRefugees.then((data) => {
-                let selectedCountryData = getSelectedCountryData(data, selectedCountry)[0];
-                let countryKeys = Object.keys(selectedCountryData).slice(1, 8);
-                return countryKeys.map((c, i) => ({
+                let selectedCountryDataLeft = getSelectedCountryData(data, selectedCountryLeft)[0];
+                let selectedCountryDataRight = getSelectedCountryData(data, selectedCountryRight)[0];
+                let countryLeftKeys = Object.keys(selectedCountryDataLeft).slice(1, 8);
+                let countryRightKeys = Object.keys(selectedCountryDataRight).slice(1, 8);
+                let result = { left: [], right: [] };
+                result.left = countryLeftKeys.map((c, i) => ({
                     year: parseDate(c.split("_")[0]),
-                    value: +selectedCountryData[c],
+                    value: isNaN(+selectedCountryDataLeft[c]) ? 0 : +selectedCountryDataLeft[c],
                 }));
+
+                result.right = countryRightKeys.map((c, i) => ({
+                    year: parseDate(c.split("_")[0]),
+                    value: isNaN(+selectedCountryDataRight[c]) ? 0 : +selectedCountryDataRight[c],
+                }));
+
+                return result;
             });
         };
 
