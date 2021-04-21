@@ -8,9 +8,9 @@
      * Function that handlle the user login
      */
 
-    homeController.$inject = ["$scope", "$rootScope", "$state", "dataService", "feedService"];
+    homeController.$inject = ["$scope", "$state", "dataService", "feedService"];
 
-    function homeController($scope, $rootScope, $state, dataService, feedService) {
+    function homeController($scope, $state, dataService, feedService) {
         $scope.feeds = feedService.feeds;
 
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
@@ -30,12 +30,24 @@
         let countries;
         let homeInfoBox;
         let zoomMap;
+        let isPaused;
 
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
 
+        $scope.genderFilterValue = "menu-all";
+
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
+        };
+
+        /**
+         * Function that handles the click on the gender radio group filter in the menu
+         * @param {string} value
+         */
+        $scope.handleGenderClick = function (value) {
+            $scope.genderFilterValue = value;
+            console.log($scope.genderFilterValue);
         };
 
         let pauseArcs = () => {
@@ -189,17 +201,23 @@
             $scope.$apply();
 
             document.getElementById("playpause-btn").addEventListener("click", () => {
-                const isPaused = $scope.playPauseBtn === IC_PAUSE;
+                isPaused = $scope.playPauseBtn === IC_PAUSE;
 
                 $scope.playPauseBtn = isPaused ? IC_PLAY : IC_PAUSE;
-                $scope.isRunning = !isPaused;
+
+                if (isPaused) {
+                    pauseArcs();
+                } else {
+                    resumeArcs();
+                }
+                // $scope.isRunning = !isPaused;
                 $scope.$apply();
             });
 
             homeInfoBox = document.querySelector("#home-info-div");
         });
 
-        $scope.$watch("isRunning", (newVal, oldVal) => {
+        /* $scope.$watch("isRunning", (newVal, oldVal) => {
             if (newVal != oldVal) {
                 if (!newVal) {
                     pauseArcs();
@@ -207,7 +225,7 @@
                     resumeArcs();
                 }
             }
-        });
+        }); */
 
         const defineArc = (source, target) => {
             if (source && target) {
@@ -388,7 +406,7 @@
          * @param {object} map
          */
         let initArcs = (map) => {
-            dataService.getCountriesInwardOutwardMigrants($rootScope.genderFilterValue).then((data) => {
+            dataService.getCountriesInwardOutwardMigrants($scope.genderFilterValue).then((data) => {
                 console.log("data is: ", data);
                 for (let c of data) {
                     let prev = c;
@@ -399,7 +417,7 @@
                             keys.forEach((k) => {
                                 let weight = 0;
                                 if (k !== c.Destination) {
-                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
+                                    weight = !(k in c) ? c1[k] : c1[k] - c[k];
                                     let source = {
                                         sourceName: k,
                                         destinationName: c.Destination,
@@ -609,13 +627,21 @@
 
         drawAreaChart(dummyData);
 
-        $rootScope.$watch('genderFilterValue', (newVal, oldVal) => {
+        $scope.$watch('genderFilterValue', (newVal, oldVal) => {
+
+            console.log("GenderFilterValue is ", $scope.genderFilterValue);
             if (newVal !== oldVal) {
-                pauseArcs();
+
                 yearsData = [];
-                // PROPOSAL: restart the number of repetitions from scratch if you filter by gender
                 yearRep = 0;
+
+                pauseArcs();
+
                 initArcs($scope.geoObject.element);
+
+                if (isPaused) {
+                    $scope.playPauseBtn = IC_PAUSE;
+                }
             }
         });
     }
