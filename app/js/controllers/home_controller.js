@@ -399,7 +399,7 @@
                             keys.forEach((k) => {
                                 let weight = 0;
                                 if (k !== c.Destination) {
-                                    weight = !(c in c) ? (weight = c1[k]) : c1[k] - c[k];
+                                    weight = !(k in c) ? c1[k] : c1[k] - c[k];
                                     let source = {
                                         sourceName: k,
                                         destinationName: c.Destination,
@@ -609,7 +609,7 @@
 
         drawAreaChart(dummyData);
 
-        $rootScope.$watch('genderFilterValue', (newVal, oldVal) => {
+        $rootScope.$watch("genderFilterValue", (newVal, oldVal) => {
             if (newVal !== oldVal) {
                 pauseArcs();
                 yearsData = [];
