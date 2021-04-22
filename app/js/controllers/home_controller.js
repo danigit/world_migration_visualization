@@ -8,10 +8,10 @@
      * Function that handlle the user login
      */
 
-    homeController.$inject = ["$scope", "$rootScope", "$state", "dataService", "feedService"];
+    homeController.$inject = ["$scope", "$state", "dataService", "feedService", "$rootScope"];
 
-    function homeController($scope, $rootScope, $state, dataService, feedService) {
-        $scope.feeds = feedService.feeds;
+    function homeController($scope, $state, dataService, feedService, $rootScope) {
+        $scope.yearFeeds = [];
 
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
 
@@ -35,6 +35,7 @@
         let countries;
         let homeInfoBox;
         let zoomMap;
+        let isPaused;
 
         let areaChartObject = null;
 
@@ -156,8 +157,18 @@
             }
         }
 
+        $scope.genderFilterValue = "menu-all";
+
         let isBadCountry = (props) => {
             return !props || !(props instanceof Country);
+        };
+
+        /**
+         * Function that handles the click on the gender radio group filter in the menu
+         * @param {string} genderVal
+         */
+        $scope.handleGenderClick = function (genderVal) {
+            $scope.genderFilterValue = genderVal;
         };
 
         let pauseArcs = () => {
@@ -321,10 +332,16 @@
             $scope.$apply();
 
             document.getElementById("playpause-btn").addEventListener("click", () => {
-                const isPaused = $scope.playPauseBtn === IC_PAUSE;
+                isPaused = $scope.playPauseBtn === IC_PAUSE;
 
                 $scope.playPauseBtn = isPaused ? IC_PLAY : IC_PAUSE;
-                $scope.isRunning = !isPaused;
+
+                if (isPaused) {
+                    pauseArcs();
+                } else {
+                    resumeArcs();
+                }
+                // $scope.isRunning = !isPaused;
                 $scope.$apply();
             });
 
@@ -341,7 +358,7 @@
             homeInfoBox = document.querySelector("#home-info-div");
         });
 
-        $scope.$watch("isRunning", (newVal, oldVal) => {
+        /* $scope.$watch("isRunning", (newVal, oldVal) => {
             if (newVal != oldVal) {
                 if (!newVal) {
                     pauseArcs();
@@ -349,7 +366,7 @@
                     resumeArcs();
                 }
             }
-        });
+        }); */
 
         const defineArc = (source, target) => {
             if (source && target) {
@@ -940,16 +957,39 @@
                         isActive(d, true));
         };
 
-        $rootScope.$watch('genderFilterValue', (newVal, oldVal) => {
+        $scope.$watch("genderFilterValue", (newVal, oldVal) => {
             if (newVal !== oldVal) {
-                pauseArcs();
-
-                // PROPOSAL: Restart the number of repetitions
-                // from scratch if you filter by gender
+                yearsData = [];
                 yearRep = 0;
 
+                pauseArcs();
+
                 initArcs($scope.geoObject.element);
+
+                if (isPaused) {
+                    $scope.playPauseBtn = IC_PAUSE;
+                }
             }
+        });
+
+        // TODO: Get feed data for relevant year
+        dataService.getFeedData(2019).then(data => {
+            let top5feeds = data.slice(0, 5);
+
+            top5feeds.forEach(top5Feed => {
+                top5Feed.image = "app/img/home/up.png";
+                top5Feed.value = transformNumberFormat(top5Feed.value, false, 0);
+            });
+
+            let flop5feeds = data.slice(data.length - 5, data.length)
+                .reverse();
+
+            flop5feeds.forEach(flop5Feed => {
+                flop5Feed.image = "app/img/home/down.png";
+                flop5Feed.value = transformNumberFormat(flop5Feed.value, false, 0);
+            });
+                    
+            $scope.yearFeeds = [...top5feeds,...flop5feeds];
         });
     }
 })();

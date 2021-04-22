@@ -178,7 +178,6 @@
                 d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR);
 
                 if (isBadCountry(d.properties)) {
-                    console.log("Unknown country:", d.id);
                     $scope.hoveredCountry = {
                         visName: "Unknown country",
                     };
@@ -296,18 +295,13 @@
 
             geoObject.mapContainer
                 .select(".legends")
-                .selectAll(".legend")
+                .selectAll(".legend-group")
                 .data(colorTicks)
                 .join(
                     (enter) => {
-                        enter
+                        let groups = enter
                             .append("g")
-                            .append("rect")
-                            .classed("legend", true)
-                            .attr("width", rectWidth)
-                            .attr("height", 20)
-                            .attr("stroke", "#000000")
-                            .style("fill", (d) => colorScale(d))
+                            .attr("class", "legend-group")
                             .attr(
                                 "transform",
                                 (d, i) =>
@@ -318,69 +312,76 @@
                                     ")"
                             );
 
-                        return enter
+                        groups
+                            .append("rect")
+                            .classed("legend", true)
+                            .attr("width", rectWidth)
+                            .attr("height", 20)
+                            .attr("stroke", "#000000")
+                            .style("fill", (d) => colorScale(d));
+
+                        groups
                             .append("text")
                             .attr("stroke", "white")
                             .attr("font-size", "10px")
-                            .attr(
-                                "transform",
-                                (d, i) =>
-                                    "translate(" +
-                                    (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin + 10) +
-                                    ", " +
-                                    (svgMapHeight - 10) +
-                                    ")"
-                            )
-                            .text((d) => transformNumberFormat(d));
+                            .attr("transform", "translate(10, 35)")
+                            .text((d) => transformNumberFormat(d, false, 0, $scope.selectedMetric));
                     },
+
                     (update) => {
-                        update
-                            .style("fill", (d) => colorScale(d))
-                            .attr(
-                                "transform",
-                                (d, i) =>
-                                    "translate(" +
-                                    (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
-                                    ", " +
-                                    (svgMapHeight - 45) +
-                                    ")"
-                            );
+                        update.attr(
+                            "transform",
+                            (d, i) =>
+                                "translate(" +
+                                (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
+                                ", " +
+                                (svgMapHeight - 45) +
+                                ")"
+                        );
+                        update.each(function (d, i) {
+                            let group = d3.select(this);
+                            group.select("text").text(transformNumberFormat(d, false, 0, $scope.selectedMetric));
+
+                            group.select("rect").style("fill", colorScale(d));
+                        });
                     },
                     (exit) => exit.remove()
                 );
 
             geoObject.mapContainer
                 .select(".legends")
-                .selectAll(".legend-unk")
+                .selectAll(".legend-group-unk")
                 .data([colorTicks.length])
                 .join(
                     (enter) => {
-                        enter
-                            .append("rect")
-                            .classed("legend-unk", true)
-                            .attr("width", rectWidth)
-                            .attr("height", 20)
-                            .style("fill", BAD_COUNTRY_COLOR)
+                        let unknownGroup = enter
+                            .append("g")
+                            .attr("class", "legend-group-unk")
                             .attr(
                                 "transform",
                                 (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
                             );
 
-                        enter
+                        unknownGroup
+                            .append("rect")
+                            .classed("legend-unk", true)
+                            .attr("width", rectWidth)
+                            .attr("height", 20)
+                            .style("fill", BAD_COUNTRY_COLOR);
+
+                        unknownGroup
                             .append("text")
                             .attr("stroke", "white")
                             .attr("font-size", "10px")
-                            .attr(
-                                "transform",
-                                (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin + 10) + ", " + (svgMapHeight - 10) + ")"
-                            )
+                            .attr("transform", (d) => "translate(10, 35)")
                             .text("N.A.");
                     },
-                    (update) =>
+                    (update) => {
                         update.attr(
                             "transform",
-                            (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
-                        )
+                            (d, i) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
+                        );
+                    }
                 );
         };
 

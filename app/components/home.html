@@ -56,7 +56,7 @@
                             list below.</div>
                         </div>
                     </div>
-                    <hr class="menu-divider width-100" />
+                    <hr class="menu-divider" />
                     <md-content layout-margin class="background-darkteal width-100 height-100 margin-none">
                         <div class="width-90 margin-auto">
                             <radio-button-group selected-button="genderFilterValue"
@@ -64,15 +64,15 @@
                                 buttons="genderButtons" radio-buttons-class="'md-button'" class="background-darkteal">
                             </radio-button-group>
                         </div>
-                        <hr class="menu-divider width-100" />
+                        <!-- <hr class="menu-divider width-100" />
                         <div class="width-90 margin-auto">
                             <radio-button-group selected-button="regionFilterValue"
                                 handle-button="handleRegionClick(buttonValue)" ng-model="regionFilterValue"
                                 buttons="regionButtons" radio-buttons-class="'md-button'">
                             </radio-button-group>
-                        </div>
+                        </div> -->
 
-                        <hr class="menu-divider width-100" />
+                        <hr class="menu-divider" />
 
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
                             <label>Select sources...</label>
@@ -89,7 +89,7 @@
                                     {{country.visName}}</md-option>
                             </md-select>
                         </md-input-container>
-                        <hr class="menu-divider width-100" />
+                        <hr class="menu-divider" />
                         <md-input-container id="destination-selector" class="width-90 display-block margin-auto">
                             <label>Select destinations...</label>
                             <md-select ng-model="selectedCountries.destination" md-on-close="clearSearch()" multiple>
@@ -105,7 +105,7 @@
                                     {{country.visName}}</md-option>
                             </md-select>
                         </md-input-container>
-                        <hr class="menu-divider width-100" />
+                        <hr class="menu-divider" />
                         <div layout="row">
                             <svg width="100%" height="50px">
                                 <g width="100%">
@@ -133,12 +133,12 @@
                             </svg>
                         </div>
                         <hr class="menu-divider width-100" />
-                        <div class="width-80 margin-auto color-white"><label>Restrict time span</label></div>
+                        <!-- <div class="width-80 margin-auto color-white"><label>Restrict time span</label></div>
                         <div id="home-slider" class="width-80 margin-auto">
                             <rzslider rz-slider-model="sliderYears.minValue" rz-slider-high="sliderYears.maxValue"
                                 rz-slider-options="sliderYears.options"></rzslider>
-                        </div>
-                        <hr class="menu-divider width-100 margin-top-40-px" />
+                        </div> -->
+                        <!-- <hr class="menu-divider width-100 margin-top-40-px" /> -->
                         <div id="home-info-div" class="font-size-small margin-top-5-px color-lightgray">
                             Information on hover will be shown here
                         </div>
@@ -158,7 +158,7 @@
                         <div id="triangle-right">
                         </div>
                     </div>
-                    <feed-chip ng-repeat="feedObject in feeds" ng-model="feedModel" feed="feedObject" index="$index">
+                    <feed-chip ng-repeat="feedObject in yearFeeds" ng-model="feedModel" feed="feedObject" index="$index">
                     </feed-chip>
                 </div>
                 <div id="playpause-btn-container" class="background-gray hide width-35-px position-absolute right-0 margin-top-10-px padding-lr-10-px">
