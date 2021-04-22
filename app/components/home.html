@@ -105,8 +105,8 @@
                                         class="header-search-box md-text padding-left-10px"
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
-                                <md-option ng-value="country.name"
-                                    ng-repeat="country in countries | filter: searchSource"
+                                <md-option ng-value="country"
+                                    ng-repeat="country in countries | filter: searchDestination"
                                     ng-class="{'margin-top-50-px' : $first}">
                                     {{country.visName}}</md-option>
                             </md-select>
@@ -160,7 +160,7 @@
             <div layout="column" id="footer" class="height-20 width-100 background-gray">
                 <div id="feeds" layout="row" class="margin-top-10-px height-20 position-relative">
                     <div label="row">
-                        <div class="migration-flow-label background-gray">Large-flow Migration</div>
+                        <div class="migration-flow-label background-gray">Large-flow Migrations</div>
                         <div id="triangle-right">
                         </div>
                     </div>

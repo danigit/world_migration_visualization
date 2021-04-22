@@ -8,9 +8,9 @@
      * Function that handlle the user login
      */
 
-    homeController.$inject = ["$scope", "$state", "dataService", "feedService", "$rootScope"];
+    homeController.$inject = ["$scope", "$state", "dataService", "feedService"];
 
-    function homeController($scope, $state, dataService, feedService, $rootScope) {
+    function homeController($scope, $state, dataService, feedService) {
         $scope.yearFeeds = [];
 
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
@@ -35,7 +35,7 @@
         let countries;
         let homeInfoBox;
         let zoomMap;
-        let isPaused;
+        let isPaused = false;
 
         let areaChartObject = null;
 
@@ -52,13 +52,16 @@
 
         let _handleOnSelectionChanged = () => {
             if (selectionChanged) {
-                if ($scope.isRunning) pauseArcs();
+                if (!isPaused)
+                    pauseArcs();
 
-                yearsData_origDest = filterOrigDest(yearsData);
+                initArcs($scope.geoObject.element, false);
 
                 drawAreaChart(areaChartObject, yearsData_origDest);
 
-                if ($scope.isRunning) resumeArcs();
+                if (isPaused) {
+                    $scope.playPauseBtn = IC_PAUSE;
+                }
             }
         };
 
@@ -69,7 +72,13 @@
             $scope.searchSource = "";
             $scope.searchDestination = "";
 
+            // TODO: Check whole arrays in selectedCountries
+
             _handleOnSelectionChanged();
+        };
+
+        $scope.updateSearch = (event) => {
+            event.stopPropagation();
         };
 
         let selectionChanged = false;
@@ -550,20 +559,23 @@
                             if (k !== c.Destination) {
                                 weight = !(k in c) ? c1[k] : c1[k] - prev[k];
 
-                                let source = {
-                                    prevTot: prev[k],
-                                    nextTot: c1[k],
-                                    sourceName: k,
-                                    destinationName: c.Destination,
-                                    radius: 2,
-                                    fill: getMigrationColor(weight),
-                                    year: prev.Year + "-" + c1.Year,
-                                    sourceCentroid: ioData.find((e) => e.Destination === k).centroid,
-                                    destinationCentroid: c.centroid,
-                                    weight: weight,
-                                };
+                                if (!isNaN(weight)) {
+                                    let source = {
+                                        prevTot: prev[k],
+                                        nextTot: c1[k],
+                                        sourceName: k,
+                                        destinationName: c.Destination,
+                                        radius: 2,
+                                        fill: getMigrationColor(weight),
+                                        year: prev.Year + "-" + c1.Year,
+                                        sourceCentroid: ioData.find((e) =>
+                                                e.Destination === k).centroid,
+                                        destinationCentroid: c.centroid,
+                                        weight: weight
+                                    };
 
-                                _yearsData.push(source);
+                                    _yearsData.push(source);
+                                }
                             }
                         });
                         prev = c1;
@@ -578,17 +590,22 @@
          * Function that draws the migration on the map
          * @param {object} map
          */
-        let initArcs = (mapElem) => {
-            dataService.getCountriesInwardOutwardMigrants($rootScope.genderFilterValue).then((ioData) => {
-                yearsData = [];
-                yearsData_origDest = [];
+        let initArcs = (mapElem, loadData=true) => {
+            dataService.getCountriesInwardOutwardMigrants(
+                $scope.genderFilterValue).then((ioData) => {
+                if (loadData) {
+                    yearsData = [];
 
-                yearsData = extractYearsData(ioData);
+                    yearsData = extractYearsData(ioData);
+                }
+
+                yearRep = 0;
 
                 if (!mapElem.selectAll(".arch-container")._groups[0].length) {
                     mapElem.append("g").attr("class", "arch-container");
                 }
 
+                yearsData_origDest = [];
                 yearsData_origDest = filterOrigDest(yearsData);
 
                 drawAreaChart(areaChartObject, yearsData_origDest);
@@ -710,6 +727,12 @@
                 .classed("hide", true)
                 .attr("transform", "translate(0, " + (svgHeight - svgMargins.top - svgMargins.bottom) + ")");
 
+            // Append area chart group
+            svgAreaChart
+                .append("g")
+                    .classed("group-area-chart", true)
+                    .classed("hide", true);
+
             // Append the circles group
             svgAreaChart.append("g").classed("group-circles", true).classed("hide", true);
 
@@ -811,7 +834,11 @@
                 .y1((d) => yScale(d.totVal))
                 .y0(y0Height);
 
-            let acElem = acObject.element.selectAll(".area-chart").data([singleYearsData]);
+            let acElem = acObject.element
+                .select(".group-area-chart")
+                    .classed("hide", false)
+                .selectAll(".area-chart")
+                    .data([singleYearsData]);
 
             acElem.exit().remove();
 
@@ -885,10 +912,10 @@
 
         $scope.$watch("genderFilterValue", (newVal, oldVal) => {
             if (newVal !== oldVal) {
-                yearsData = [];
-                yearRep = 0;
+                // yearRep = 0;
 
-                pauseArcs();
+                if (!isPaused)
+                    pauseArcs();
 
                 initArcs($scope.geoObject.element);
 
@@ -907,7 +934,8 @@
                 top5Feed.value = transformNumberFormat(top5Feed.value, false, 0);
             });
 
-            let flop5feeds = data.slice(data.length - 5, data.length).reverse();
+            let flop5feeds = data.slice(data.length - 5,
+                    data.length).reverse();
 
             flop5feeds.forEach((flop5Feed) => {
                 flop5Feed.image = "app/img/home/down.png";

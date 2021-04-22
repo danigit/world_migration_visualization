@@ -75,7 +75,6 @@
 
         // $scope.updateSearch = (event) => {
         //     event.stopPropagation();
-        //     console.log(event);
         // };
     }
 })();
