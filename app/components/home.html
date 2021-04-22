@@ -22,7 +22,7 @@
                             </md-button>
                         </civ>
                         <div
-                            class="filters-container margin-lr-auto font-size-small color-lightgray clear-float border-radius-10px">
+                            class="filters-container margin-lr-auto font-size-small color-lightgray clear-float border-radius-10px overflow-auto max-height-150-px">
                             <!-- <md-content>
                                 <md-list id="select-sources" class="hide">
                                     <md-subheader class="md-no-sticky">Sources</md-subheader>
@@ -52,8 +52,12 @@
                                 </md-list>
                             </md-content> -->
 
-                            <div id="sources-tooltip" class="display-none">
-                                <md-chips ng-model="selectedSources"></md-chips>
+                            <div id="sources-tooltip" class="display-none width-100">
+                                Sources
+                                <md-chips ng-model="selectedSources" readonly="false" md-removable="false"
+                                    class="width-100" md-on-select="remove($chip, true)">
+                                    {{$chip}}
+                                </md-chips>
                             </div>
                             <div id="destinations-tooltip" class="display-none">
                                 <md-chips ng-model="selectedDestinations"></md-chips>

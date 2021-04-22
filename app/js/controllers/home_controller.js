@@ -46,14 +46,15 @@
             source: [],
             destination: [],
         };
+        $scope.selectedSources = [];
+        $scope.selectedDestinations = [];
 
         $scope.searchSource = "";
         $scope.searchDestination = "";
 
         let _handleOnSelectionChanged = () => {
             if (selectionChanged) {
-                if (!isPaused)
-                    pauseArcs();
+                if (!isPaused) pauseArcs();
 
                 initArcs($scope.geoObject.element, false);
 
@@ -568,10 +569,9 @@
                                         radius: 2,
                                         fill: getMigrationColor(weight),
                                         year: prev.Year + "-" + c1.Year,
-                                        sourceCentroid: ioData.find((e) =>
-                                                e.Destination === k).centroid,
+                                        sourceCentroid: ioData.find((e) => e.Destination === k).centroid,
                                         destinationCentroid: c.centroid,
-                                        weight: weight
+                                        weight: weight,
                                     };
 
                                     _yearsData.push(source);
@@ -590,9 +590,8 @@
          * Function that draws the migration on the map
          * @param {object} map
          */
-        let initArcs = (mapElem, loadData=true) => {
-            dataService.getCountriesInwardOutwardMigrants(
-                $scope.genderFilterValue).then((ioData) => {
+        let initArcs = (mapElem, loadData = true) => {
+            dataService.getCountriesInwardOutwardMigrants($scope.genderFilterValue).then((ioData) => {
                 if (loadData) {
                     yearsData = [];
 
@@ -728,10 +727,7 @@
                 .attr("transform", "translate(0, " + (svgHeight - svgMargins.top - svgMargins.bottom) + ")");
 
             // Append area chart group
-            svgAreaChart
-                .append("g")
-                    .classed("group-area-chart", true)
-                    .classed("hide", true);
+            svgAreaChart.append("g").classed("group-area-chart", true).classed("hide", true);
 
             // Append the circles group
             svgAreaChart.append("g").classed("group-circles", true).classed("hide", true);
@@ -836,9 +832,9 @@
 
             let acElem = acObject.element
                 .select(".group-area-chart")
-                    .classed("hide", false)
+                .classed("hide", false)
                 .selectAll(".area-chart")
-                    .data([singleYearsData]);
+                .data([singleYearsData]);
 
             acElem.exit().remove();
 
@@ -914,8 +910,7 @@
             if (newVal !== oldVal) {
                 // yearRep = 0;
 
-                if (!isPaused)
-                    pauseArcs();
+                if (!isPaused) pauseArcs();
 
                 initArcs($scope.geoObject.element);
 
@@ -934,8 +929,7 @@
                 top5Feed.value = transformNumberFormat(top5Feed.value, false, 0);
             });
 
-            let flop5feeds = data.slice(data.length - 5,
-                    data.length).reverse();
+            let flop5feeds = data.slice(data.length - 5, data.length).reverse();
 
             flop5feeds.forEach((flop5Feed) => {
                 flop5Feed.image = "app/img/home/down.png";
@@ -953,11 +947,38 @@
             let sourcesDiv = document.querySelector("#sources-tooltip");
             let destinationsDiv = document.querySelector("#destinations-tooltip");
 
-            sourcesDiv.classList.remove("display-none");
-            destinationsDiv.classList.remove("display-none");
-
             $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
             $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
+
+            if ($scope.selectedSources.length != 0) sourcesDiv.classList.remove("display-none");
+            if ($scope.selectedDestinations.length != 0) sourcesDiv.classList.remove("display-none");
+        };
+
+        $scope.hideIfLast = (chip, source) => {
+            console.log(chip);
+        };
+
+        $scope.remove = function (chip, source) {
+            if (source) {
+                let sourcesDiv = document.querySelector("#sources-tooltip");
+                $scope.selectedSources = $scope.selectedSources.filter((c) => c !== chip);
+                if ($scope.selectedSources.length == 0) {
+                    sourcesDiv.classList.add("display-none");
+                }
+            } else {
+                let destinationsDiv = document.querySelector("#destinations-tooltip");
+                $scope.selectedDestinations = $scope.selectedDestinations.filter((c) => c !== chip);
+                if ($scope.selectedDestinations.length == 0) {
+                    destinationsDiv.classList.add("display-none");
+                }
+            }
+
+            if ($scope.selectedSources.length == 0 && $scope.selectedDestinations.length == 0) {
+                let textNoFilters = d3.select("#text-no-filters");
+                textNoFilters.classed("hide", false);
+            }
+            // $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
+            // $scope.filters.splice(idx, 1);
         };
     }
 })();
