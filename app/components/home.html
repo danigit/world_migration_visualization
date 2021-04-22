@@ -18,42 +18,49 @@
                     </md-toolbar>
                     <div layout="column">
                         <civ class="width-100">
-                            <md-button id="clear-all" class="color-white font-size-small float-right">Clear all</md-button>
+                            <md-button id="clear-all" class="color-white font-size-small float-right">Clear all
+                            </md-button>
                         </civ>
                         <div
                             class="filters-container margin-lr-auto font-size-small color-lightgray clear-float border-radius-10px">
-                            <md-content>
+                            <!-- <md-content>
                                 <md-list id="select-sources" class="hide">
-                                   <md-subheader class = "md-no-sticky">Sources</md-subheader>
-                                   <md-list-item class = "md-1-line"
-                                        ng-repeat = "(i, orig) in selectedCountries.source">
-                                      
-                                        <div class = "md-list-item-text">
+                                    <md-subheader class="md-no-sticky">Sources</md-subheader>
+                                    <md-list-item class="md-1-line" ng-repeat="(i, orig) in selectedCountries.source">
+
+                                        <div class="md-list-item-text">
                                             <p>{{orig.visName}}</p>
                                             <img src="app/img/home/cancel-black.svg" width="16" height="16">
                                         </div>
-                
-                                      <md-divider ng-if = "!$last"></md-divider>
-                                   </md-list-item>
+
+                                        <md-divider ng-if="!$last"></md-divider>
+                                    </md-list-item>
                                 </md-list>
 
                                 <md-list id="select-destinations" class="hide">
-                                    <md-subheader class = "md-no-sticky">Destinations</md-subheader>
-                                    <md-list-item class = "md-1-line"
-                                        ng-repeat = "(i, dest) in selectedCountries.destination">
-                                       
-                                        <div class = "md-list-item-text">
+                                    <md-subheader class="md-no-sticky">Destinations</md-subheader>
+                                    <md-list-item class="md-1-line"
+                                        ng-repeat="(i, dest) in selectedCountries.destination">
+
+                                        <div class="md-list-item-text">
                                             <p>{{dest.visName}}</p>
                                             <img src="app/img/home/cancel-black.svg" width="16" height="16">
                                         </div>
-                                       
-                                       <md-divider ng-if = "!$last"></md-divider>
+
+                                        <md-divider ng-if="!$last"></md-divider>
                                     </md-list-item>
-                                 </md-list>
-                            </md-content>
+                                </md-list>
+                            </md-content> -->
+
+                            <div id="sources-tooltip" class="display-none">
+                                <md-chips ng-model="selectedSources"></md-chips>
+                            </div>
+                            <div id="destinations-tooltip" class="display-none">
+                                <md-chips ng-model="selectedDestinations"></md-chips>
+                            </div>
 
                             <div id="text-no-filters">No active filters. Please select a filter from the
-                            list below.</div>
+                                list below.</div>
                         </div>
                     </div>
                     <hr class="menu-divider" />
@@ -76,15 +83,14 @@
 
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
                             <label>Select sources...</label>
-                            <md-select ng-model="selectedCountries.source" md-on-close="clearSearch()" multiple>
+                            <md-select ng-model="selectedCountries.source" md-on-close="selectionClosed()" multiple>
                                 <md-select-header class="select-header-search-box background-white zindex-100">
                                     <input ng-model="searchSource" aria-label="Source filter" type="search"
                                         placeholder="Search a country..."
                                         class="header-search-box md-text padding-left-10px"
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
-                                <md-option ng-value="country"
-                                    ng-repeat="country in countries | filter: searchSource"
+                                <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
                                     ng-class="{'margin-top-50-px' : $first}">
                                     {{country.visName}}</md-option>
                             </md-select>
@@ -158,10 +164,12 @@
                         <div id="triangle-right">
                         </div>
                     </div>
-                    <feed-chip ng-repeat="feedObject in yearFeeds" ng-model="feedModel" feed="feedObject" index="$index">
+                    <feed-chip ng-repeat="feedObject in yearFeeds" ng-model="feedModel" feed="feedObject"
+                        index="$index">
                     </feed-chip>
                 </div>
-                <div id="playpause-btn-container" class="background-gray hide width-35-px position-absolute right-0 margin-top-10-px padding-lr-10-px">
+                <div id="playpause-btn-container"
+                    class="background-gray hide width-35-px position-absolute right-0 margin-top-10-px padding-lr-10-px">
                     <img id="playpause-btn" ng-src="{{playPauseBtn}}"
                         class="float-right pointer zindex-100 parent-size">
                 </div>

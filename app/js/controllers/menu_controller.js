@@ -18,7 +18,9 @@
 
         $scope.regionFilterValue = "menu-continent";
         $scope.continents = dataService.continents;
-        dataService.countries.then((data) => { $scope.countries = data; });
+        dataService.countries.then((data) => {
+            $scope.countries = data;
+        });
         $scope.genderButtons = dataService.genderButtons;
         $scope.regionButtons = dataService.regionButtons;
         // $scope.selectedCountries = {
@@ -52,9 +54,7 @@
         /**
          * Function that updates the statistics
          */
-        let updateMap = () => {
-            
-        };
+        let updateMap = () => {};
 
         /**
          * Function that handles the click on the region radio group filter in the menu
@@ -73,8 +73,9 @@
             resizeMenuPanel($scope.isSideMenuOpened);
         };
 
-        $scope.updateSearch = (event) => {
-            event.stopPropagation();
-        };
+        // $scope.updateSearch = (event) => {
+        //     event.stopPropagation();
+        //     console.log(event);
+        // };
     }
 })();
