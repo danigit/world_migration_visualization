@@ -52,11 +52,19 @@
                 });
         };
 
+        /**
+         * Remove Other South and Other North migrants from Total
+         * as those countries are not better specified.
+         */
+        let removeOtherSouth_OtherNorth = (data_origDest) => {
+            data_origDest.forEach(row => {
+                let otherCountries = +row["Other South"] + +row["Other North"];
+                row["Total"] = +row["Total"] - otherCountries;
+            });
+        };
+
         // load data from all csv files
         data_service.countriesClassByRegion = data_service.loadCsv(countries_classes_by_region);
-        data_service.totMigrByOriginDest = data_service.loadCsv(total_migrants_by_origin_and_destination);
-        data_service.maleMigrByOriginDest = data_service.loadCsv(male_migrants_by_origin_and_destination);
-        data_service.femaleMigrByOriginDest = data_service.loadCsv(female_migrants_by_origin_and_destination);
         data_service.estimatedRefugees = data_service.loadCsv(estimated_refugees);
         data_service.totMigrByAgeSex = data_service.loadCsv(total_migrants_by_age_and_sex);
         data_service.totPopulationByAgeSex = data_service.loadCsv(total_population_by_age_and_sex);
@@ -64,6 +72,27 @@
         data_service.migrPercDistributionAgeSex = data_service.loadCsv(migrants_percentage_distribution_by_age_and_sex);
         data_service.totMigrRateOfChange = data_service.loadCsv(migrants_annual_rate_of_change);
         data_service.worldCountriesHierarchy = data_service.loadJson(world_countries_hierarchy);
+
+        data_service.totMigrByOriginDest = data_service.loadCsv(total_migrants_by_origin_and_destination)
+            .then(data_origDest => {                
+                removeOtherSouth_OtherNorth(data_origDest);
+
+                return data_origDest;
+            });
+
+        data_service.maleMigrByOriginDest = data_service.loadCsv(male_migrants_by_origin_and_destination)
+            .then(data_origDest => {                
+                removeOtherSouth_OtherNorth(data_origDest);
+
+                return data_origDest;
+            });
+
+        data_service.femaleMigrByOriginDest = data_service.loadCsv(female_migrants_by_origin_and_destination)
+            .then(data_origDest => {                
+                removeOtherSouth_OtherNorth(data_origDest);
+
+                return data_origDest;
+            });
 
         // variable that defines the ticks of the slider
         data_service.sliderYears = [
@@ -850,9 +879,10 @@
             return [1990, 1995, 2000, 2005, 2010, 2015, 2019].filter((year) => year >= +yearMin && year <= +yearMax);
         };
 
-        let getCountries_totMigrByOriginDest = (countries, columnsArray = ["Year", "Destination", "Total"]) => {
-            return data_service.totMigrByOriginDest.then((data) =>
-                data_service.filterColumn(
+        let getCountries_totMigrByOriginDest = (countries, columnsArray = ["Year", "Destination", "Total"], genderFilterValue="menu-all") => {
+
+            let dataRetrievalFunc = function (data) {
+                return data_service.filterColumn(
                     data_service.filterDataMulti(
                         data,
                         countries.map((c) => c.name),
@@ -860,8 +890,19 @@
                         2019
                     ),
                     columnsArray
-                )
-            );
+                );
+            };
+
+            switch (genderFilterValue) {
+                case "menu-all":
+                    return data_service.totMigrByOriginDest.then((data) => dataRetrievalFunc(data));
+                case "menu-male":
+                    return data_service.maleMigrByOriginDest.then((data) => dataRetrievalFunc(data));
+                case "menu-female":
+                    return data_service.femaleMigrByOriginDest.then((data) => dataRetrievalFunc(data));
+            }
+
+            return data_service.totMigrByOriginDest.then((data) => dataRetrievalFunc(data));
         };
 
         let getCountries_totPopulationByAgeSex = (countries) => {
@@ -986,31 +1027,33 @@
             });
         };
 
-        data_service.getCountriesInwardOutwardMigrants = () => {
+        data_service.getCountriesInwardOutwardMigrants = (genderFilterValue) => {
             return data_service.countries.then((countries) => {
                 let filteredCountries = countries.filter((c) => c.props.C != undefined);
                 let countryNames = filteredCountries.map((country) => country.name);
 
-                return getCountries_totMigrByOriginDest(filteredCountries, ["Year", "Destination", "Total"].concat(countryNames)).then(
-                    (data) => {
-                        return data.map((obj) => {
-                            let result = {};
-                            let centroid = countries.find((c) => c.name === obj.Destination);
-                            result["centroid"] = centroid.props.C;
+                let migrantsPreProcessing = function (data) {
+                    return data.map((obj) => {
+                        let result = {};
+                        let centroid = countries.find((c) => c.name === obj.Destination);
+                        result["centroid"] = centroid.props.C;
 
-                            for (let key in obj) {
-                                if (obj[key] === "" || obj[key] === "-") continue;
-                                else if (key !== "Destination") {
-                                    result[key] = +obj[key];
-                                } else {
-                                    result[key] = obj[key];
-                                }
+                        for (let key in obj) {
+                            if (obj[key] === "" || obj[key] === "-") continue;
+                            else if (key !== "Destination") {
+                                result[key] = +obj[key];
+                            } else {
+                                result[key] = obj[key];
                             }
+                        }
 
-                            return result;
-                        });
-                    }
-                );
+                        return result;
+                    });
+                };
+
+                    return getCountries_totMigrByOriginDest(filteredCountries, ["Year", "Destination", "Total"].concat(countryNames), genderFilterValue).then(
+                        (data) => migrantsPreProcessing(data)
+                    );
             });
         };
 

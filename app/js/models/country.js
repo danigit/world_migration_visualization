@@ -20,8 +20,17 @@ class Country {
         this.outlinePath = IMAGE_COUNTRIES_OUTLINES_FOLDER + '/' + visName + '.svg';
     }
 
-    isEqual(other) {
+    equals(other) {
         return (other instanceof Country)
             ? this.name === other.name : false;
+    }
+
+    static sort(c1, c2) {
+        return c1.name.localeCompare(c2.name);
+    }
+
+    static equals(c1, c2) {
+        return (c1 instanceof Country)
+            ? c1.equals(c2) : false;
     }
 }

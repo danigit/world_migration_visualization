@@ -23,7 +23,7 @@ const WORLD_MAP = data_json_folder + "/world_map_1_5_simplification.json";
 const image_folder = "app/img/";
 
 const image_countries_folder = image_folder + "countries";
-const image_home_folder      = image_folder + "home";
+const image_home_folder = image_folder + "home";
 
 const IC_PLAY  = image_home_folder + "/play.svg";
 const IC_PAUSE = image_home_folder + "/pause.svg";
@@ -58,4 +58,9 @@ const LEGEND_SQUARE_DIM = 10;
 // the duration of the transitions
 const TRANSITION_DURATION = 1000;
 
-const HOME_MAP_YEAR_REPS  = 3;
+const HOME_MAP_YEAR_REPS = 3;
+
+const HOVERED_COLOR = "#3b4248";
+
+const HOME_COUNTRY_MAP_STROKE = "#272f35";
+const HOME_COUNTRY_COLOR = "#191f24";

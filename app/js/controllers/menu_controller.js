@@ -11,22 +11,21 @@
      * Function that handle the menu interaction
      * @type {string[]}
      */
-    menuController.$inject = ["$scope", "$mdSidenav", "dataService"];
+    menuController.$inject = ["$scope", "$rootScope", "$mdSidenav", "dataService"];
 
-    function menuController($scope, $mdSidenav, dataService) {
+    function menuController($scope, $rootScope, $mdSidenav, dataService) {
         $scope.isSideMenuOpened = true;
-        $scope.searchSource = "";
-        $scope.searchDestination = "";
-        $scope.genderFilterValue = "menu-male";
+        
+        $rootScope.genderFilterValue = "menu-all";
         $scope.regionFilterValue = "menu-continent";
         $scope.continents = dataService.continents;
-        dataService.countries.then((data) => ($scope.countries = data));
+        dataService.countries.then((data) => { $scope.countries = data; });
         $scope.genderButtons = dataService.genderButtons;
         $scope.regionButtons = dataService.regionButtons;
-        $scope.selectedCountries = {
-            source: [],
-            destination: [],
-        };
+        // $scope.selectedCountries = {
+        //     source: [],
+        //     destination: [],
+        // };
 
         // variable that holds the values for the slider
         $scope.sliderYears = {
@@ -54,15 +53,17 @@
         /**
          * Function that updates the statistics
          */
-        let updateStatistics = () => {};
+        let updateMap = () => {
+            
+        };
 
         /**
          * Function that handles the click on the gender radio group filter in the menu
          * @param {string} value
          */
         $scope.handleGenderClick = function (value) {
-            $scope.genderFilterValue = value;
-            updateStatistics();
+            $rootScope.genderFilterValue = value;
+           //updateStatistics();
         };
 
         /**
@@ -80,14 +81,6 @@
         $scope.toggleMenu = () => {
             $scope.isSideMenuOpened = $scope.isSideMenuOpened ? false : true;
             resizeMenuPanel($scope.isSideMenuOpened);
-        };
-
-        /**
-         * Function that clears the search box in the source select filter
-         */
-        $scope.clearSearch = () => {
-            $scope.searchSource = "";
-            $scope.searchDestination = "";
         };
 
         $scope.updateSearch = (event) => {

@@ -90,16 +90,16 @@ const map = (obj, callable) => {
 * @param {array} a    The first array.
 * @param {array} b    The second array.
 */
-const equals = (a, b) => {
-    if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {
-        a = a.concat().sort();
-        b = b.concat().sort();
+// const equals = (a, b) => {
+//     if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {
+//         a = a.concat().sort();
+//         b = b.concat().sort();
 
-        return a.reduce((acc, e, i) => acc && e === b[i], true);
-    } else {
-        return false;
-    }
-};
+//         return a.reduce((acc, e, i) => acc && e === b[i], true);
+//     } else {
+//         return false;
+//     }
+// };
 
 /**
  * Wrapper of `d3.scaleLog` to produce a logarithmic scale from a (min, max) domain.
@@ -134,3 +134,35 @@ let preprocessRateOfChange = (data) => {
     let yValues = Object.values(data).map((value) => +value);
     return xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
 };
+
+/**
+ * Check whether two arrays are equal sets.
+ *
+ * @param {array} a    The first array.
+ * @param {array} b    The second array.
+ */
+function equals(a, b, sortFunc=null, equalsFunc=null) {
+    if (!Array.isArray(a)
+        || !Array.isArray(b)
+        || a.length !== b.length)
+        return false;
+
+    if (sortFunc === null) {
+        a.sort();
+        b.sort();
+    } else {
+        a.sort(sortFunc);
+        b.sort(sortFunc);
+    }
+
+    return a.every((v, i) => equalsFunc === null
+        ? v === b[i]
+        : equalsFunc(v, b[i]));
+}
+
+/**
+ * Filter out duplicates from an array.
+ */
+function unique(a) {
+    return [...new Set(a)];
+}
