@@ -73,8 +73,8 @@
             resizeMenuPanel($scope.isSideMenuOpened);
         };
 
-        $scope.updateSearch = (event) => {
-            event.stopPropagation();
-        };
+        // $scope.updateSearch = (event) => {
+        //     event.stopPropagation();
+        // };
     }
 })();
