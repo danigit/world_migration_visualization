@@ -47,11 +47,59 @@
             destination: [],
         };
 
+        let validCountries = {
+            source: [],
+            destination: []
+        }
+
         $scope.searchSource = "";
         $scope.searchDestination = "";
 
+        let checkValidSelection = () => {
+            return filterOrigDest(yearsData) != 0;
+        };
+
+        let checkChanged = () => {
+            let sourceChanged = !equals(
+                $scope.selectedCountries.source,
+                validCountries.source,
+                Country.sort, Country.equals);
+
+            let destinationChanged = !equals(
+                $scope.selectedCountries.destination,
+                validCountries.destination,
+                Country.sort, Country.equals);
+
+            return sourceChanged || destinationChanged;
+        }
+
+        let revertSelection = () => {
+            revertedSelection = true;
+
+            $scope.selectedCountries.source      = [...validCountries.source];
+            $scope.selectedCountries.destination = [...validCountries.destination];
+        }
+
         let _handleOnSelectionChanged = () => {
             if (selectionChanged) {
+                if (!checkValidSelection()) {
+                    // TODO: Display error in UI
+                    console.log("Invalid selection.\n"
+                            + "Reverting to previous state...");
+
+                    revertSelection();
+                    return;
+                }
+
+                if (!checkChanged()) {
+                    // TODO: Display message in UI
+                    console.log("Selection did not change.");
+                    return;
+                }
+
+                validCountries.source      = [...$scope.selectedCountries.source];
+                validCountries.destination = [...$scope.selectedCountries.destination];
+
                 if (!isPaused)
                     pauseArcs();
 
@@ -72,8 +120,6 @@
         $scope.clearSearch = () => {
             $scope.searchSource = "";
             $scope.searchDestination = "";
-
-            // TODO: Check whole arrays in selectedCountries
             
             _handleOnSelectionChanged();
         };
@@ -82,9 +128,15 @@
             event.stopPropagation();
         };
 
-        let selectionChanged = false;
+        let selectionChanged  = false;
+        let revertedSelection = false;
 
         $scope.$watch("selectedCountries.source", (newVal, oldVal) => {
+            if (revertedSelection) {
+                revertedSelection = false;
+                return;
+            }
+
             if (!equals(newVal, oldVal, Country.sort, Country.equals)) {
                 selectionChanged = true;
 
@@ -109,6 +161,11 @@
         });
 
         $scope.$watch("selectedCountries.destination", (newVal, oldVal) => {
+            if (revertedSelection) {
+                revertedSelection = false;
+                return;
+            }
+
             if (!equals(newVal, oldVal, Country.sort, Country.equals)) {
                 selectionChanged = true;
 
@@ -484,11 +541,14 @@
         let updateArcs = (map, arcElems, delayTrans = false) => {
             let destinations = [];
             arcElems.each((d) => {
-                if (!destinations.includes(d.destinationName)) destinations.push(d.destinationName);
+                if (!destinations.includes(d.destinationName))
+                    destinations.push(d.destinationName);
             });
 
             removeCentroids($scope.geoObject);
+
             drawCentroids($scope.geoObject, destinations, delayTrans);
+
             let arcElemsTrans = arcElems
                 .transition()
                 .ease(d3.easeLinear)
