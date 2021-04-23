@@ -51,8 +51,8 @@
 
         let validCountries = {
             source: [],
-            destination: []
-        }
+            destination: [],
+        };
 
         $scope.searchSource = "";
         $scope.searchDestination = "";
@@ -62,32 +62,30 @@
         };
 
         let checkChanged = () => {
-            let sourceChanged = !equals(
-                $scope.selectedCountries.source,
-                validCountries.source,
-                Country.sort, Country.equals);
+            let sourceChanged = !equals($scope.selectedCountries.source, validCountries.source, Country.sort, Country.equals);
 
             let destinationChanged = !equals(
                 $scope.selectedCountries.destination,
                 validCountries.destination,
-                Country.sort, Country.equals);
+                Country.sort,
+                Country.equals
+            );
 
             return sourceChanged || destinationChanged;
-        }
+        };
 
         let revertSelection = () => {
             revertedSelection = true;
 
-            $scope.selectedCountries.source      = [...validCountries.source];
+            $scope.selectedCountries.source = [...validCountries.source];
             $scope.selectedCountries.destination = [...validCountries.destination];
-        }
+        };
 
         let _handleOnSelectionChanged = () => {
             if (selectionChanged) {
                 if (!checkValidSelection()) {
                     // TODO: Display error in UI
-                    console.log("Invalid selection.\n"
-                            + "Reverting to previous state...");
+                    console.log("Invalid selection.\n" + "Reverting to previous state...");
 
                     revertSelection();
                     return;
@@ -99,11 +97,10 @@
                     return;
                 }
 
-                validCountries.source      = [...$scope.selectedCountries.source];
+                validCountries.source = [...$scope.selectedCountries.source];
                 validCountries.destination = [...$scope.selectedCountries.destination];
 
-                if (!isPaused)
-                    pauseArcs();
+                if (!isPaused) pauseArcs();
 
                 initArcs($scope.geoObject.element, false);
 
@@ -121,14 +118,13 @@
         $scope.clearSearch = () => {
             $scope.searchSource = "";
             $scope.searchDestination = "";
-            _handleOnSelectionChanged();
         };
 
         $scope.updateSearch = (event) => {
             event.stopPropagation();
         };
 
-        let selectionChanged  = false;
+        let selectionChanged = false;
         let revertedSelection = false;
 
         $scope.$watch("selectedCountries.source", (newVal, oldVal) => {
@@ -145,11 +141,7 @@
 
                 if (newVal.length == 0) {
                     selectorSources.classed("hide", true);
-
-                    if (selectedDest.length == 0) textNoFilters.classed("hide", false);
                 } else {
-                    if (selectedDest.length == 0) textNoFilters.classed("hide", true);
-
                     selectedOrig.sort(Country.sort);
                     selectorSources.classed("hide", false);
                 }
@@ -523,8 +515,7 @@
         let updateArcs = (map, arcElems, delayTrans = false) => {
             let destinations = [];
             arcElems.each((d) => {
-                if (!destinations.includes(d.destinationName))
-                    destinations.push(d.destinationName);
+                if (!destinations.includes(d.destinationName)) destinations.push(d.destinationName);
             });
 
             removeCentroids($scope.geoObject);
@@ -1006,39 +997,45 @@
         $scope.selectionClosed = () => {
             let sourcesDiv = document.querySelector("#sources-tooltip");
             let destinationsDiv = document.querySelector("#destinations-tooltip");
+            let textNoFilters = d3.select("#text-no-filters");
 
             $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
             $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
 
-            if ($scope.selectedSources.length != 0) sourcesDiv.classList.remove("display-none");
-            if ($scope.selectedDestinations.length != 0) sourcesDiv.classList.remove("display-none");
-        };
+            if ($scope.selectedSources.length != 0) {
+                sourcesDiv.classList.remove("display-none");
+                textNoFilters.classed("hide", true);
+            }
+            if ($scope.selectedDestinations.length != 0) {
+                destinationsDiv.classList.remove("display-none");
+                textNoFilters.classed("hide", true);
+            }
 
-        $scope.hideIfLast = (chip, source) => {
-            console.log(chip);
+            _handleOnSelectionChanged();
         };
 
         $scope.remove = function (chip, source) {
+            _handleOnSelectionChanged();
+            let textNoFilters = d3.select("#text-no-filters");
             if (source) {
                 let sourcesDiv = document.querySelector("#sources-tooltip");
                 $scope.selectedSources = $scope.selectedSources.filter((c) => c !== chip);
+                $scope.selectedCountries.source = $scope.selectedCountries.source.filter((c) => c.name !== chip);
                 if ($scope.selectedSources.length == 0) {
                     sourcesDiv.classList.add("display-none");
                 }
             } else {
                 let destinationsDiv = document.querySelector("#destinations-tooltip");
                 $scope.selectedDestinations = $scope.selectedDestinations.filter((c) => c !== chip);
+                $scope.selectedCountries.destination = $scope.selectedCountries.destination.filter((c) => c.name !== chip);
                 if ($scope.selectedDestinations.length == 0) {
                     destinationsDiv.classList.add("display-none");
                 }
             }
 
             if ($scope.selectedSources.length == 0 && $scope.selectedDestinations.length == 0) {
-                let textNoFilters = d3.select("#text-no-filters");
                 textNoFilters.classed("hide", false);
             }
-            // $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
-            // $scope.filters.splice(idx, 1);
         };
     }
 })();
