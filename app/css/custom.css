@@ -654,6 +654,10 @@ OTHER
     border: 1px solid black !important;
 }
 
+.border-1-gray {
+    border: 1px solid #2d2e2e !important;
+}
+
 .border-right-1-gray {
     border-right: 1px solid #2d2e2e;
 }
@@ -739,7 +743,7 @@ Navbar
 *******************************************************************/
 
 .active {
-    color: #ffffff !important;
+    color: #0093c4!important;
 }
 
 .inactive {
@@ -820,4 +824,8 @@ md-chip:hover {
 md-chip.md-focused {
     background: #e0e0e0 !important;
     color: grey!important;
+}
+
+.text-glow{
+    text-shadow: 0 0 10px #0093c4;
 }

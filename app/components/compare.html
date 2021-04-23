@@ -1,277 +1,282 @@
+<!-- File that defines the compare page html -->
 <div layout="column" class="parent-size max-width-1920-px margin-auto min-width-1520-px">
     <div ng-include="'app/commons/navbar.html'" onload="active='statistics'"></div>
 
-    <div layout="column" class="parent-size background-dark">
+    <div layout="column" class="width-100 background-dark">
+        <!-- Defining the world, country and compare menu -->
         <div class="width-30 margin-lr-auto margin-top-20-px">
             <radio-button-group selected-button="secondaryMenuSelectedValue"
                 handle-button="handleSecondaryMenuClick(buttonValue) " ng-model="secondaryMenuSelectedValue"
                 buttons="secondaryMenuButtons" radio-buttons-class="'md-button border-1'">
         </div>
-        <div layout="column">
-            <div layout="row" class="width-100">
-                <div class="width-25" layout="column">
 
-                    <div class="width-100">
-                        <div class="float-left margin-left-20px margin-top-20-px">
-                            <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
-                                class="display-block margin-lr-auto box-shadow-dark-gray border-radius-10px height-200-px width-200-px">
-                            <div class="color-white margin-top-20-px font-size-x-large text-center">
-                                {{selectedCountry.left.visName}}</div>
-                            <div
-                                class="color-white border-radius-10px background-darkgray width-80 margin-lr-auto font-size-small text-center padding-10-px margin-top-10-px">
-                                <div layout="column" class="width-100">
-                                    <div layout="row" class="width-100">
-                                        <div class="width-55-px text-right">Send</div>
-                                        <div class="color-green width-80-px">
-                                            {{leftSendToRight}}</div>
-                                        <div class="width-30-px text-left margin-right-20-px">to</div>
-                                        <div class="color-darkcyan">
-                                            {{selectedCountry.right.visName}}</div>
-                                    </div>
-                                    <div layout="row">
-                                        <div class="width-55-px text-right">Receive</div>
-                                        <div class="color-red width-80-px">
-                                            {{rightSendToLeft}}</div>
-                                        <div class="width-30-px text-left margin-right-20-px">from</div>
-                                        <div class="color-darkcyan">
-                                            {{selectedCountry.right.visName}}</div>
-                                    </div>
+        <!-- Div that holds the countries names and selection, the global rank and value statistics, and the gender filter -->
+        <div layout="row" class="width-100">
+            <!-- Left country container -->
+            <div class="width-25" layout="column">
+                <div class="width-100">
+                    <div class="float-left margin-left-20px margin-top-20-px">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.left.visName}}.svg"
+                            class="display-block margin-lr-auto box-shadow-dark-gray border-radius-10px height-200-px width-200-px">
+                        <div class="color-white margin-top-20-px font-size-x-large text-center">
+                            {{selectedCountry.left.visName}}
+                        </div>
+                        <div
+                            class="color-white border-radius-10px background-darkgray width-80 margin-lr-auto font-size-small text-center padding-10-px margin-top-10-px">
+                            <div layout="column" class="width-100">
+                                <div layout="row" class="width-100">
+                                    <div class="width-55-px text-right">Send</div>
+                                    <div class="color-green width-80-px">
+                                        {{leftSendToRight}}</div>
+                                    <div class="width-30-px text-left margin-right-20-px">to</div>
+                                    <div class="color-darkcyan">
+                                        {{selectedCountry.right.visName}}</div>
+                                </div>
+                                <div layout="row">
+                                    <div class="width-55-px text-right">Receive</div>
+                                    <div class="color-red width-80-px">
+                                        {{rightSendToLeft}}</div>
+                                    <div class="width-30-px text-left margin-right-20-px">from</div>
+                                    <div class="color-darkcyan">
+                                        {{selectedCountry.right.visName}}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div layout="column" class="width-50">
-                    <div layout="row" class="width-100 margin-lr-auto">
-                        <div class="compare-search-container width-25">
-                            <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
-                                <label>Select country...</label>
-                                <md-select ng-model="selectedCountry.left" ng-change="updateStatisticsLeft()"
-                                    md-on-close="clearSearch()">
-                                    <md-select-header class="select-header-search-box background-white zindex-100">
-                                        <input ng-model="searchSource" aria-label="Source filter" type="search"
-                                            placeholder="Search a country..."
-                                            class="header-search-box md-text padding-left-10px"
-                                            ng-keydown="updateSearch($event)" />
-                                    </md-select-header>
-                                    <md-option ng-value="country"
-                                        ng-repeat="country in countries | filter: searchSource"
-                                        ng-class="{'margin-top-50-px' : $first}">
-                                        {{country.visName}}</md-option>
-                                </md-select>
-                            </md-input-container>
+            <!-- Statistics container -->
+            <div layout="column" class="width-50">
+                <div layout="row" class="width-100 margin-lr-auto">
+                    <!-- Left country selection container -->
+                    <div class="compare-search-container width-25">
+                        <md-input-container id="compare-selector-right" class="width-90 display-block margin-auto">
+                            <label>Select country...</label>
+                            <md-select ng-model="selectedCountry.left" ng-change="updateStatisticsLeft()"
+                                md-on-close="clearSearch()">
+                                <md-select-header class="select-header-search-box background-white zindex-100">
+                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                        placeholder="Search a country..."
+                                        class="header-search-box md-text padding-left-10px"
+                                        ng-keydown="updateSearch($event)" />
+                                </md-select-header>
+                                <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
+                                    ng-class="{'margin-top-50-px' : $first}">
+                                    {{country.visName}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                    <div class="color-lightgray width-50 margin-lr-auto margin-top-20-px">
+                        <div class="font-size-small text-center">The bellow statistics are relative to the time span
                         </div>
-                        <div class="color-lightgray width-50 margin-lr-auto margin-top-20-px">
-                            <div class="font-size-small text-center">The bellow statistics are relative to the time span
+                        <div
+                            class="width-50 color-darkcyan text-bold margin-top-10-px text-center font-size-xx-large margin-lr-auto text-glow">
+                            1990-2010</div>
+                    </div>
+                    <!-- Right country selection container -->
+                    <div class="compare-search-container width-25">
+                        <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
+                            <label>Select country...</label>
+                            <md-select ng-model="selectedCountry.right" ng-change="updateStatisticsRight()"
+                                md-on-close="clearSearch()">
+                                <md-select-header class="select-header-search-box background-white zindex-100">
+                                    <input ng-model="searchSource" aria-label="Source filter" type="search"
+                                        placeholder="Search a country..."
+                                        class="header-search-box md-text padding-left-10px"
+                                        ng-keydown="updateSearch($event)" />
+                                </md-select-header>
+                                <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
+                                    ng-class="{'margin-top-50-px' : $first}">
+                                    {{country.visName}}</md-option>
+                            </md-select>
+                        </md-input-container>
+                    </div>
+                </div>
+                <!-- Gender filter container -->
+                <div class="width-50 margin-lr-auto margin-top-10-px height-5">
+                    <radio-button-group selected-button="genderFilterValue"
+                        handle-button="handleGenderClick(buttonValue) " ng-model="genderFilterValue"
+                        buttons="genderButtons" radio-buttons-class="'md-button border-1'">
+                </div>
+
+                <!-- Rank and value statistics container -->
+                <div class="margin-lr-20-px margin-top-20-px">
+                    <div class="width-340-px margin-auto">
+                        <div layout="row">
+                            <div class="float-left box-shadow-dark-gray margin-right-25-px"><img
+                                    class="country-image-thumbnail" src="{{selectedCountry.left.flagPath}}">
                             </div>
-                            <div
-                                class="width-50 color-darkcyan text-bold margin-top-10-px text-center font-size-xx-large margin-lr-auto">
-                                1990-2010</div>
-                        </div>
-                        <div class="compare-search-container width-25">
-                            <md-input-container id="compare-selector-left" class="width-90 display-block margin-auto">
-                                <label>Select country...</label>
-                                <md-select ng-model="selectedCountry.right" ng-change="updateStatisticsRight()"
-                                    md-on-close="clearSearch()">
-                                    <md-select-header class="select-header-search-box background-white zindex-100">
-                                        <input ng-model="searchSource" aria-label="Source filter" type="search"
-                                            placeholder="Search a country..."
-                                            class="header-search-box md-text padding-left-10px"
-                                            ng-keydown="updateSearch($event)" />
-                                    </md-select-header>
-                                    <md-option ng-value="country"
-                                        ng-repeat="country in countries | filter: searchSource"
-                                        ng-class="{'margin-top-50-px' : $first}">
-                                        {{country.visName}}</md-option>
-                                </md-select>
-                            </md-input-container>
-                        </div>
-                    </div>
-                    <div class="width-50 margin-lr-auto margin-top-10-px height-5">
-                        <radio-button-group selected-button="genderFilterValue"
-                            handle-button="handleGenderClick(buttonValue) " ng-model="genderFilterValue"
-                            buttons="genderButtons" radio-buttons-class="'md-button border-1'">
-                    </div>
-
-                    <div class="margin-lr-20-px margin-top-20-px">
-                        <div class="width-340-px margin-auto">
-                            <div layout="row">
-                                <div class="float-left box-shadow-dark-gray margin-right-25-px"><img
-                                        class="country-image-thumbnail" src="{{selectedCountry.left.flagPath}}">
-                                </div>
-                                <radio-button-group id="compare-info-group" selected-button="countryInfoValue"
-                                    handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
-                                    buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
-                                </radio-button-group>
+                            <radio-button-group id="compare-info-group" selected-button="countryInfoValue"
+                                handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
+                                buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
 
                                 <div class="float-right box-shadow-dark-gray margin-left-25-px"><img
                                         class="country-image-thumbnail" src="{{selectedCountry.right.flagPath}}">
                                 </div>
-                            </div>
                         </div>
-                        <div layout="row" class="margin-auto">
-                            <div layout="column" class="margin-auto">
-                                <div layout="row">
-                                    <div class="color-white margin-top-20-px margin-right-50-px">
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrationsGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrations', true, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryLeftStatisticsValues.totalImmigrations}}
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulation', true, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryLeftStatisticsValues.totalPopulation}}
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulation', true, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryLeftStatisticsValues.immigrationVsPopulation}} %
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAge', true, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryLeftStatisticsValues.immigrationAverageAge}} years
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigration', true, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryLeftStatisticsValues.refugeeVsImmigration}} %
-                                            </span>
-                                        </div>
+                    </div>
+                    <div layout="row" class="margin-auto">
+                        <div layout="column" class="margin-auto">
+                            <div layout="row">
+                                <div class="color-white margin-top-20-px margin-right-50-px">
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalImmigrationsGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalImmigrations', true, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryLeftStatisticsValues.totalImmigrations}}
+                                        </span>
                                     </div>
-                                    <div layout="column" class="color-white margin-top-20-px">
-                                        <div class="margin-auto padding-bottom-5px"><span class="font-size-small">Total
-                                                immigration</span>
-                                        </div>
-                                        <div class="margin-auto padding-bottom-5px"><span class="font-size-small">Total
-                                                population</span>
-                                        </div>
-                                        <div class="margin-auto padding-bottom-5px"><span
-                                                class="font-size-small">Immigration
-                                                vs.
-                                                Population</span>
-                                        </div>
-                                        <div class="margin-auto padding-bottom-5px"><span
-                                                class="font-size-small">Immigrants
-                                                average
-                                                age</span>
-                                        </div>
-                                        <div class="margin-auto padding-bottom-5px"><span
-                                                class="float-left font-size-small">Refugees
-                                                vs.
-                                                Immigrants</span>
-                                        </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalPopulationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryLeftStatisticsValues.totalPopulationGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalPopulation', true, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryLeftStatisticsValues.totalPopulation}}
+                                        </span>
                                     </div>
-                                    <div class="color-white margin-top-20-px margin-left-50-px">
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrationsGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalImmigrations', false, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryRightStatisticsValues.totalImmigrations}}
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryRightStatisticsValues.totalPopulationGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('totalPopulation', false, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryRightStatisticsValues.totalPopulation}}
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationVsPopulation', false, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryRightStatisticsValues.immigrationVsPopulation}} %
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('immigrationAverageAge', false, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryRightStatisticsValues.immigrationAverageAge}} years
-                                            </span>
-                                        </div>
-                                        <div class="width-100 padding-bottom-5px">
-                                            <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
-                                                {{globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank}}
-                                            </span>
-                                            <span ng-if="countryInfoValue === 'value'" class="font-size-small"
-                                                ng-class="comparisonWinner('refugeeVsImmigration', false, 'value') ? 'color-green' : 'color-red'">
-                                                {{countryRightStatisticsValues.refugeeVsImmigration}} %
-                                            </span>
-                                        </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryLeftStatisticsValues.immigrationVsPopulationGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationVsPopulation', true, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryLeftStatisticsValues.immigrationVsPopulation}} %
+                                        </span>
+                                    </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryLeftStatisticsValues.immigrationAverageAgeGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationAverageAge', true, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryLeftStatisticsValues.immigrationAverageAge}} years
+                                        </span>
+                                    </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', true, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryLeftStatisticsValues.refugeeVsImmigrationGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('refugeeVsImmigration', true, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryLeftStatisticsValues.refugeeVsImmigration}} %
+                                        </span>
+                                    </div>
+                                </div>
+                                <div layout="column" class="color-white margin-top-20-px">
+                                    <div class="margin-auto padding-bottom-5px"><span class="font-size-small">Total
+                                            immigration</span>
+                                    </div>
+                                    <div class="margin-auto padding-bottom-5px"><span class="font-size-small">Total
+                                            population</span>
+                                    </div>
+                                    <div class="margin-auto padding-bottom-5px"><span
+                                            class="font-size-small">Immigration
+                                            vs.
+                                            Population</span>
+                                    </div>
+                                    <div class="margin-auto padding-bottom-5px"><span class="font-size-small">Immigrants
+                                            average
+                                            age</span>
+                                    </div>
+                                    <div class="margin-auto padding-bottom-5px"><span
+                                            class="float-left font-size-small">Refugees
+                                            vs.
+                                            Immigrants</span>
+                                    </div>
+                                </div>
+                                <div class="color-white margin-top-20-px margin-left-50-px">
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalImmigrationsGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalImmigrations', false, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryRightStatisticsValues.totalImmigrations}}
+                                        </span>
+                                    </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalPopulationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryRightStatisticsValues.totalPopulationGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('totalPopulation', false, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryRightStatisticsValues.totalPopulation}}
+                                        </span>
+                                    </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationVsPopulationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryRightStatisticsValues.immigrationVsPopulationGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationVsPopulation', false, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryRightStatisticsValues.immigrationVsPopulation}} %
+                                        </span>
+                                    </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationAverageAgeGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryRightStatisticsValues.immigrationAverageAgeGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('immigrationAverageAge', false, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryRightStatisticsValues.immigrationAverageAge}} years
+                                        </span>
+                                    </div>
+                                    <div class="width-100 padding-bottom-5px">
+                                        <span ng-if="countryInfoValue === 'global_rank'" class="font-size-small"
+                                            ng-class="comparisonWinner('refugeeVsImmigrationGlobalRank', false, 'rank') ? 'color-green' : 'color-red'">
+                                            {{globalRankCountryRightStatisticsValues.refugeeVsImmigrationGlobalRank}}
+                                        </span>
+                                        <span ng-if="countryInfoValue === 'value'" class="font-size-small"
+                                            ng-class="comparisonWinner('refugeeVsImmigration', false, 'value') ? 'color-green' : 'color-red'">
+                                            {{countryRightStatisticsValues.refugeeVsImmigration}} %
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div layout="column" class="width-25">
-                    <div class="width-100">
-                        <div class="float-right margin-top-20-px margin-right-50-px">
-                            <img src="../../app/img/countries/outlines/{{selectedCountry.right.visName}}.svg"
-                                class="display-block margin-lr-auto box-shadow-dark-gray border-radius-10px height-200-px width-200-px">
-                            <div class="color-white margin-top-20-px font-size-x-large text-center">
-                                {{selectedCountry.right.visName}}</div>
-                            <div
-                                class="color-white border-radius-10px background-darkgray width-80 margin-auto font-size-small text-center padding-10-px margin-top-10-px">
-                                <div layout="column" class="width-100">
-                                    <div layout="row" class="width-100">
-                                        <div class="width-55-px text-right">Send</div>
-                                        <div class="color-green width-80-px">
-                                            {{rightSendToLeft}}</div>
-                                        <div class="width-30-px text-left margin-right-20-px">to</div>
-                                        <div class="color-darkcyan">
-                                            {{selectedCountry.left.visName}}</div>
-                                    </div>
-                                    <div layout="row">
-                                        <div class="width-55-px text-right">Receive</div>
-                                        <div class="color-red width-80-px">
-                                            {{leftSendToRight}}</div>
-                                        <div class="width-30-px margin-right-20-px">from</div>
-                                        <div class="color-darkcyan">
-                                            {{selectedCountry.left.visName}}</div>
-                                    </div>
+            <!-- Right country container -->
+            <div layout="column" class="width-25">
+                <div class="width-100">
+                    <div class="float-right margin-top-20-px margin-right-50-px">
+                        <img src="../../app/img/countries/outlines/{{selectedCountry.right.visName}}.svg"
+                            class="display-block margin-lr-auto box-shadow-dark-gray border-radius-10px height-200-px width-200-px">
+                        <div class="color-white margin-top-20-px font-size-x-large text-center">
+                            {{selectedCountry.right.visName}}</div>
+                        <div
+                            class="color-white border-radius-10px background-darkgray width-80 margin-auto font-size-small text-center padding-10-px margin-top-10-px">
+                            <div layout="column" class="width-100">
+                                <div layout="row" class="width-100">
+                                    <div class="width-55-px text-right">Send</div>
+                                    <div class="color-green width-80-px">
+                                        {{rightSendToLeft}}</div>
+                                    <div class="width-30-px text-left margin-right-20-px">to</div>
+                                    <div class="color-darkcyan">
+                                        {{selectedCountry.left.visName}}</div>
+                                </div>
+                                <div layout="row">
+                                    <div class="width-55-px text-right">Receive</div>
+                                    <div class="color-red width-80-px">
+                                        {{leftSendToRight}}</div>
+                                    <div class="width-30-px margin-right-20-px">from</div>
+                                    <div class="color-darkcyan">
+                                        {{selectedCountry.left.visName}}</div>
                                 </div>
                             </div>
                         </div>
@@ -279,61 +284,68 @@
                 </div>
             </div>
         </div>
-        <div class="width-100 margin-lr-auto"">
+
+        <!-- Children and brain drain statistics container -->
+        <div class="width-100 margin-lr-auto">
+            <!-- Left Country -->
             <div
-                class=" color-white display-inline-block margin-left-40-px border-radius-10px background-darkgray
-            margin-left-20 width-40 font-size-small text-center padding-10-px margin-top-10-px">
-            <div layout="column">
-                <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
-                        ng-mouseover="showLabelDescription('children', $event)">Children &ensp;</span> migration is
-                    <span class="color-darkcyan">&ensp;{{childLeftStatistics
-                        }}&ensp;</span> from a total
-                    of
-                    <span class="color-darkcyan">&ensp;{{totalLeftMigrants}}&ensp;</span> and represent
-                    <span class="color-darkcyan">&ensp;{{childrenLeftPercentage}}%&ensp;</span> of the country
-                    migration
+                class="color-white display-inline-block margin-left-40-px border-radius-10px background-darkgray margin-left-20 width-40 font-size-small text-center padding-10-px margin-top-10-px">
+                <div layout="column">
+                    <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
+                            ng-mouseover="showLabelDescription('children', $event)">Children &ensp;</span> migration is
+                        <span class="color-darkcyan">&ensp;{{childLeftStatistics
+                            }}&ensp;</span> from a total
+                        of
+                        <span class="color-darkcyan">&ensp;{{totalLeftMigrants}}&ensp;</span> and represent
+                        <span class="color-darkcyan">&ensp;{{childrenLeftPercentage}}%&ensp;</span> of the country
+                        migration
+                    </div>
+                    <hr class="menu-divider width-100 margin-top-10-px margin-bottom-10-px" />
+                    <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
+                            ng-mouseover="showLabelDescription('brain', $event)">Brain drain &ensp;</span> migration is
+                        <span class="color-darkcyan">&ensp;{{brainDrainLeftStatistics}}&ensp;</span> from a
+                        total of
+                        <span class="color-darkcyan">&ensp;{{totalLeftMigrants}}&ensp;</span>
+                        and represent <span class="color-darkcyan">&ensp;{{drainBrainLeftPercentage}}%&ensp;</span> of
+                        the
+                        country migration.
+                    </div>
                 </div>
-                <hr class="menu-divider width-100 margin-top-10-px margin-bottom-10-px" />
-                <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
-                        ng-mouseover="showLabelDescription('brain', $event)">Brain drain &ensp;</span> migration is
-                    <span class="color-darkcyan">&ensp;{{brainDrainLeftStatistics}}&ensp;</span> from a
-                    total of
-                    <span class="color-darkcyan">&ensp;{{totalLeftMigrants}}&ensp;</span>
-                    and represent <span class="color-darkcyan">&ensp;{{drainBrainLeftPercentage}}%&ensp;</span> of the
-                    country migration.
-                </div>
-                <div layout="row"></div>
             </div>
-        </div>
-        <div
-            class="color-white display-inline-block float-right margin-right-40-px border-radius-10px background-darkgray width-40 font-size-small text-center padding-10-px margin-top-10-px">
-            <div layout="column">
-                <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
-                        ng-mouseover="showLabelDescription('children', $event)">Children
-                        &ensp;</span> migration is <span class=" color-darkcyan">&ensp;{{childRightStatistics
-                        }}&ensp;</span> from a total
-                    of
-                    <span class="color-darkcyan">&ensp;{{totalRightMigrants}}&ensp;</span> and represent
-                    <span class="color-darkcyan">&ensp;{{childrenRightPercentage}}%&ensp;</span> of the country
-                    migration
+            <!-- Right country -->
+            <div class="color-white display-inline-block float-right margin-right-40-px border-radius-10px background-darkgray
+                    width-40 font-size-small text-center padding-10-px margin-top-10-px">
+                <div layout="column">
+                    <div layout="row">
+                        <span class="color-green" ng-mouseout="hideLabelDescription()"
+                            ng-mouseover="showLabelDescription('children', $event)">Children
+                            &ensp;</span> migration is <span class=" color-darkcyan">&ensp;{{childRightStatistics
+                            }}&ensp;</span> from a total of
+                        <span class="color-darkcyan">&ensp;{{totalRightMigrants}}&ensp;</span> and represent
+                        <span class="color-darkcyan">&ensp;{{childrenRightPercentage}}%&ensp;</span> of the country
+                        migration
+                    </div>
+                    <hr class="menu-divider width-100 margin-top-10-px margin-bottom-10-px" />
+                    <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
+                            ng-mouseover="showLabelDescription('brain', $event)">Brain
+                            drain
+                            &ensp;</span> migration is <span
+                            class="color-darkcyan">&ensp;{{brainDrainRightStatistics}}&ensp;</span> from a
+                        total of
+                        <span class="color-darkcyan">&ensp;{{totalRightMigrants}}&ensp;</span>
+                        and represent <span class="color-darkcyan">&ensp;{{drainBrainRightPercentage}}%&ensp;</span> of
+                        the
+                        country
+                        migration.
+                    </div>
                 </div>
-                <hr class="menu-divider width-100 margin-top-10-px margin-bottom-10-px" />
-                <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
-                        ng-mouseover="showLabelDescription('brain', $event)">Brain
-                        drain
-                        &ensp;</span> migration is <span
-                        class="color-darkcyan">&ensp;{{brainDrainRightStatistics}}&ensp;</span> from a
-                    total of
-                    <span class="color-darkcyan">&ensp;{{totalRightMigrants}}&ensp;</span>
-                    and represent <span class="color-darkcyan">&ensp;{{drainBrainRightPercentage}}%&ensp;</span> of the
-                    country
-                    migration.
-                </div>
-                <div layout="row"></div>
             </div>
         </div>
     </div>
+
+    <!-- Plots container -->
     <div layout="row">
+        <!-- Common migration plot container-->
         <div layout="column" class="width-33 height-100">
             <div class="margin-lr-40-px margin-top-40-px height-100">
                 <div class="color-orange padding-10-px">Common Migration Regions - <span
@@ -348,6 +360,7 @@
             </div>
         </div>
 
+        <!-- Rate of change plot container -->
         <div layout="column" class="width-33 height-100">
             <div class="margin-lr-40-px margin-top-40-px height-100">
                 <div class="color-orange padding-10-px">Trend comparison - <span
@@ -356,19 +369,22 @@
             </div>
         </div>
 
+        <!-- Refugees plot container -->
         <div layout="column" class="width-33 height-100">
             <div class="margin-lr-40-px margin-top-40-px height-100">
                 <div class="color-orange padding-10-px">Refugees comparison - <span class="color-white"></span> <span
                         class="color-white background-gray padding-5-px border-radius-5-px">Inward</span></div>
                 <div id="refugees-container"></div>
                 <div class="color-white margin-top-10-px font-size-small" layout="row">
-                    <div>This plot does not show the data for male and female individually</div>
+                    <div>This plot does not show the data for male and female individually because not available</div>
                 </div>
             </div>
         </div>
 
     </div>
+
+    <!-- Children and Brain drain tooltip container -->
     <div id="compare-tooltip"
-        class="display-none position-fixed font-size-medium padding-10-px border-radius-10px background-gray color-white">
+        class="display-none position-fixed font-size-small padding-10-px border-radius-10px background-gray color-white">
     </div>
 </div>

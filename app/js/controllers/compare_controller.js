@@ -8,9 +8,9 @@
      * Function that handle the compare page logic
      */
 
-    compareController.$inject = ["$scope", "$state", "dataService"];
+    compareController.$inject = ["$scope", "dataService"];
 
-    function compareController($scope, $state, dataService) {
+    function compareController($scope, dataService) {
         $scope.secondaryMenuSelectedValue = "compare";
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
@@ -20,14 +20,14 @@
         $scope.rightSendToLeft;
         $scope.searchSource = "";
 
+        // plots variables
         let commonStructure;
         let lineRateOfChangeChartStructure;
         let lineRefugeesStructure;
         let firsCommonStructureCall = true;
         let firstRateOfChangeLineChartStructureCall = true;
         let firstRefugeesLineChartStructureCall = true;
-        let color = d3.scaleOrdinal(d3.schemePaired);
-        let countryColors = ["#1f78b4", "#a6cee3"];
+        let countryColors = { left: "#1f78b4", right: "#a6cee3" };
         let margins = { top: 20, bottom: 60, left: 20, right: 20 };
         let width = 500 - margins.left - margins.right;
         let height = 300 - margins.top - margins.bottom;
@@ -75,9 +75,11 @@
         // getting the countries from the service
         dataService.countries.then((data) => {
             $scope.countries = data;
+
+            // setting the predefined countries
             $scope.selectedCountry = {
-                left: $scope.countries[0],
-                right: $scope.countries[1],
+                left: $scope.countries[101],
+                right: $scope.countries[70],
             };
 
             $scope.genderFilterValue = "menu-all";
@@ -88,10 +90,16 @@
 
         /**
          * Function that updates the statistics for the left country
+         * It is called when the left selector changes
          */
         $scope.updateStatisticsLeft = () => {
             dataService
-                .getGlobalRankStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getGlobalRankStatistics(
+                    $scope.selectedCountry.left.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.globalRankCountryLeftStatisticsValues.totalImmigrationsGlobalRank = setNotAvailable(
                         data.average_tot_migrants_global_rank,
@@ -118,7 +126,12 @@
 
             // getting the total migrants by origin and destination
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getTotMigrantsByOriginAndDestination(
+                    $scope.selectedCountry.left.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.countryLeftStatisticsValues.totalImmigrations = setNotAvailable(data, false);
                     $scope.$apply();
@@ -175,11 +188,13 @@
                 });
 
             // getting the mutual migration statistics
-            dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
-                $scope.leftSendToRight = transformNumberFormat(data.countryOneSend);
-                $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
-                $scope.$apply();
-            });
+            dataService
+                .getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .then((data) => {
+                    $scope.leftSendToRight = transformNumberFormat(data.countryOneSend, false, 0);
+                    $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend, false, 0);
+                    $scope.$apply();
+                });
 
             // getting the common regions destinations
             dataService
@@ -190,55 +205,89 @@
                 )
                 .then((data) => {
                     if (firsCommonStructureCall) {
-                        commonStructure = createCommonMigrationStructure(data);
+                        commonStructure = initializeCommonMigrationStructure(data);
                         firsCommonStructureCall = false;
                     }
-                    drawBarChart(data, commonStructure, [$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName]);
-                });
-
-            // getting the rate of change for the right country
-            dataService.getRateOfChange($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue).then((data) => {
-                data = preprocessRateOfChange(data).map((d) => ({ label: parseDate(d.label.split("-")[1]), value: +d.value }));
-                dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
-                    if (firstRateOfChangeLineChartStructureCall) {
-                        lineRateOfChangeChartStructure = initializeRateOfChangeLineChart(data, minMax, "change-rate-container");
-                        firstRateOfChangeLineChartStructureCall = false;
-                    }
-                    drawRateOfChangeLineChart(data, "left-line-chart", "left-line-chart-class", [
+                    drawBarChart(data, commonStructure, [
                         $scope.selectedCountry.left.visName,
                         $scope.selectedCountry.right.visName,
                     ]);
                 });
-            });
 
-            dataService.getEstimatedRefugeesByYear($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
-                console.log($scope.selectedCountry.left.name);
-                if (firstRefugeesLineChartStructureCall) {
-                    lineRefugeesStructure = initializeRefugeesLineChart(data, "refugees-container");
-                    firstRefugeesLineChartStructureCall = false;
-                }
-                drawRefugeesLineChart(data, "left-refugees", "left-line-chart-class", "left", [
-                    $scope.selectedCountry.left.visName,
-                    $scope.selectedCountry.right.visName,
-                ]);
-            });
-
-            // getting the country migrants age statistics
+            // getting the rate of change for the left country
             dataService
-                .getChildBrainDrainStatistics($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getRateOfChange($scope.selectedCountry.left.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .then((data) => {
+                    data = Object.keys(data).map((k) => ({ label: parseDate(k), value: data[k] }));
+                    dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
+                        if (firstRateOfChangeLineChartStructureCall) {
+                            lineRateOfChangeChartStructure = initializeRateOfChangeLineChart(
+                                data,
+                                minMax,
+                                "change-rate-container"
+                            );
+                            firstRateOfChangeLineChartStructureCall = false;
+                        }
+                        drawRateOfChangeLineChart(data, "left-line-chart", "left-line-chart-class", [
+                            $scope.selectedCountry.left.visName,
+                            $scope.selectedCountry.right.visName,
+                        ]);
+                    });
+                });
+
+            // getting the estimated refugees by year for both countries
+            dataService
+                .getEstimatedRefugeesByYear($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .then((data) => {
+                    console.log($scope.selectedCountry.left.name);
+                    if (firstRefugeesLineChartStructureCall) {
+                        lineRefugeesStructure = initializeRefugeesLineChart(data, "refugees-container");
+                        firstRefugeesLineChartStructureCall = false;
+                    }
+                    drawRefugeesLineChart(data, "left-refugees", "left-line-chart-class", "left", [
+                        $scope.selectedCountry.left.visName,
+                        $scope.selectedCountry.right.visName,
+                    ]);
+                });
+
+            // getting brain drain and child statistics for the left country
+            dataService
+                .getChildBrainDrainStatistics(
+                    $scope.selectedCountry.left.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.childLeftStatistics = transformNumberFormat(data["0-14"], false, 0);
-                    $scope.childrenLeftPercentage = transformNumberFormat((data["0-14"] / data["Total"]) * 100, false, 0);
+                    $scope.childrenLeftPercentage = transformNumberFormat(
+                        (data["0-14"] / data["Total"]) * 100,
+                        false,
+                        0
+                    );
                     $scope.totalLeftMigrants = transformNumberFormat(data["Total"], false, 0);
                     $scope.brainDrainLeftStatistics = transformNumberFormat(data["20-34"], false, 0);
-                    $scope.drainBrainLeftPercentage = transformNumberFormat((data["20-34"] / data["Total"]) * 100, false, 0);
+                    $scope.drainBrainLeftPercentage = transformNumberFormat(
+                        (data["20-34"] / data["Total"]) * 100,
+                        false,
+                        0
+                    );
                 });
         };
 
+        /**
+         * Function that updates the statistics for the right country
+         * It is called when the right selector changes
+         */
         $scope.updateStatisticsRight = () => {
             // getting the ranking statistics
             dataService
-                .getGlobalRankStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getGlobalRankStatistics(
+                    $scope.selectedCountry.right.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.globalRankCountryRightStatisticsValues.totalImmigrationsGlobalRank = setNotAvailable(
                         data.average_tot_migrants_global_rank,
@@ -265,7 +314,12 @@
 
             // getting total migration by origin and destination statistics
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getTotMigrantsByOriginAndDestination(
+                    $scope.selectedCountry.right.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.countryRightStatisticsValues.totalImmigrations = setNotAvailable(data, false);
                     $scope.$apply();
@@ -322,11 +376,13 @@
                 });
 
             // getting the mutual migration statistics
-            dataService.getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
-                $scope.leftSendToRight = transformNumberFormat(data.countryOneSend);
-                $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend);
-                $scope.$apply();
-            });
+            dataService
+                .getMutualMigration($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .then((data) => {
+                    $scope.leftSendToRight = transformNumberFormat(data.countryOneSend, false, 0);
+                    $scope.rightSendToLeft = transformNumberFormat(data.countryTwoSend, false, 0);
+                    $scope.$apply();
+                });
 
             // getting the statistics for the common regions migration
             dataService
@@ -337,46 +393,72 @@
                 )
                 .then((data) => {
                     if (firsCommonStructureCall) {
-                        commonStructure = createCommonMigrationStructure(data);
+                        commonStructure = initializeCommonMigrationStructure(data);
                         firsCommonStructureCall = false;
                     }
-                    drawBarChart(data, commonStructure, [$scope.selectedCountry.left.visName, $scope.selectedCountry.right.visName]);
-                });
-
-            // getting the migration rate of change for the left country
-            dataService.getRateOfChange($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue).then((data) => {
-                data = preprocessRateOfChange(data).map((d) => ({ label: parseDate(d.label.split("-")[1]), value: d.value }));
-                dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
-                    if (firstRateOfChangeLineChartStructureCall) {
-                        lineRateOfChangeChartStructure = initializeRateOfChangeLineChart(data, minMax, "change-rate-container");
-                        firstRateOfChangeLineChartStructureCall = false;
-                    }
-                    drawRateOfChangeLineChart(data, "right-line-chart", "right-line-chart-class", [
+                    drawBarChart(data, commonStructure, [
                         $scope.selectedCountry.left.visName,
                         $scope.selectedCountry.right.visName,
                     ]);
                 });
-            });
 
-            dataService.getEstimatedRefugeesByYear($scope.selectedCountry.left.name, $scope.selectedCountry.right.name).then((data) => {
-                console.log($scope.selectedCountry.right.name);
-                if (firstRefugeesLineChartStructureCall) {
-                    lineRefugeesStructure = initializeRefugeesLineChart(data, "refugees-container");
-                    firstRefugeesLineChartStructureCall = false;
-                }
-                drawRefugeesLineChart(data, "right-refugees", "right-line-chart-class", "right", [
-                    $scope.selectedCountry.left.visName,
-                    $scope.selectedCountry.right.visName,
-                ]);
-            });
-
+            // getting the migration rate of change for the left country
             dataService
-                .getChildBrainDrainStatistics($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getRateOfChange($scope.selectedCountry.right.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .then((data) => {
+                    data = Object.keys(data).map((k) => ({ label: parseDate(k), value: data[k] }));
+
+                    dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
+                        if (firstRateOfChangeLineChartStructureCall) {
+                            lineRateOfChangeChartStructure = initializeRateOfChangeLineChart(
+                                data,
+                                minMax,
+                                "change-rate-container"
+                            );
+                            firstRateOfChangeLineChartStructureCall = false;
+                        }
+                        drawRateOfChangeLineChart(data, "right-line-chart", "right-line-chart-class", [
+                            $scope.selectedCountry.left.visName,
+                            $scope.selectedCountry.right.visName,
+                        ]);
+                    });
+                });
+
+            // getting the estimated refugees for each year for both countries
+            dataService
+                .getEstimatedRefugeesByYear($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
+                .then((data) => {
+                    if (firstRefugeesLineChartStructureCall) {
+                        lineRefugeesStructure = initializeRefugeesLineChart(data, "refugees-container");
+                        firstRefugeesLineChartStructureCall = false;
+                    }
+                    drawRefugeesLineChart(data, "right-refugees", "right-line-chart-class", "right", [
+                        $scope.selectedCountry.left.visName,
+                        $scope.selectedCountry.right.visName,
+                    ]);
+                });
+
+            // getting the brain drain and child statistics for the right country
+            dataService
+                .getChildBrainDrainStatistics(
+                    $scope.selectedCountry.right.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.childRightStatistics = transformNumberFormat(data["0-14"], false, 0);
-                    $scope.childrenRightPercentage = transformNumberFormat((data["0-14"] / data["Total"]) * 100, false, 0);
+                    $scope.childrenRightPercentage = transformNumberFormat(
+                        (data["0-14"] / data["Total"]) * 100,
+                        false,
+                        0
+                    );
                     $scope.brainDrainRightStatistics = transformNumberFormat(data["20-34"], false, 0);
-                    $scope.drainBrainRightPercentage = transformNumberFormat((data["20-34"] / data["Total"]) * 100, false, 0);
+                    $scope.drainBrainRightPercentage = transformNumberFormat(
+                        (data["20-34"] / data["Total"]) * 100,
+                        false,
+                        0
+                    );
                     $scope.totalRightMigrants = transformNumberFormat(data["Total"], false, 0);
                 });
         };
@@ -386,14 +468,15 @@
          * @param {array} data
          * @returns
          */
-        let createCommonMigrationStructure = (data) => {
+        let initializeCommonMigrationStructure = (data) => {
             let container = d3.select("#common-migration");
 
+            // creating the svg container
             let svg = container
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height)
-                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+                .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px");
 
             svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
 
@@ -401,23 +484,17 @@
             let groups = data.map((d) => d.label);
 
             // creating the x axis
-            let x = d3
-                .scaleBand()
-                .range([margins.left, width - margins.right])
-                .domain(groups);
+            let x = createScale(groups, [margins.left, width - margins.right], "band");
 
             // creating the y axis
-            let y = d3
-                .scaleLinear()
-                .domain([0, d3.max(data, (d) => Math.max(d.value.left[0], d.value.right[0]))])
-                .range([height - margins.top - margins.bottom, 0]);
+            let y = createScale(
+                [0, d3.max(data, (d) => Math.max(d.value.left[0], d.value.right[0]))],
+                [height - margins.top - margins.bottom, 0],
+                "linear"
+            );
 
             // creating the subgroups
-            let xSubGroup = d3
-                .scaleBand()
-                .domain(subgroups)
-                .range([margins.left, x.bandwidth() + margins.right])
-                .padding(0.2);
+            let xSubGroup = createScale(subgroups, [margins.left, x.bandwidth() + margins.right], "band", 0.2);
 
             // creating the bars labels container
             svg.append("g")
@@ -461,7 +538,7 @@
         let handleCommonMigrationEnter = (enter, svgElement) => {
             enter
                 .append("rect")
-                .style("fill", (_, i) => color(i))
+                .style("fill", (_, i) => getCountryColor(i))
                 .attr("x", (d) => svgElement.xSubgroup(d.key))
                 .attr("y", svgElement.y(0))
                 .attr("width", svgElement.xSubgroup.bandwidth())
@@ -475,13 +552,15 @@
          * @param {object} svgElement
          */
         let handleCommonMigrationUpdate = (update, yMax, svgElement) => {
-            let y = svgElement.y.domain([0, yMax]);
+            svgElement.y.domain([0, yMax]);
+            // updating the y axis
             svgElement.svgElement
                 .select("g.grid-lines.y-axis")
                 .transition()
                 .duration(TRANSITION_DURATION)
-                .call(d3.axisLeft(y).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(d3.axisLeft(svgElement.y).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
+            // updating the bars
             update
                 .transition()
                 .duration(TRANSITION_DURATION)
@@ -530,14 +609,15 @@
          */
         let drawBarChart = (data, svgElement, legendData) => {
             let yMax = d3.max(data, (d) => Math.max(d.value.left[0], d.value.right[0]));
-            console.log(data);
 
             // drawing the bars
             svgElement.svgElement
                 .selectAll(".groups")
                 .data(data)
                 .selectAll("rect")
-                .data((d) => svgElement.subgroups.map((k) => ({ key: k, val: d.value[k][0], percentage: d.value[k][1] })))
+                .data((d) =>
+                    svgElement.subgroups.map((k) => ({ key: k, val: d.value[k][0], percentage: d.value[k][1] }))
+                )
                 .join(
                     (enter) => handleCommonMigrationEnter(enter, svgElement),
                     (update) => handleCommonMigrationUpdate(update, yMax, svgElement),
@@ -549,13 +629,16 @@
                 .selectAll(".groups")
                 .data(data)
                 .selectAll("text")
-                .data((d) => svgElement.subgroups.map((k) => ({ key: k, val: d.value[k][0], percentage: d.value[k][1] })))
+                .data((d) =>
+                    svgElement.subgroups.map((k) => ({ key: k, val: d.value[k][0], percentage: d.value[k][1] }))
+                )
                 .join(
                     (enter) => handleCommonMigrationLabelsEnter(enter, svgElement),
                     (update) => handleCommonMigrationLabelsUpdate(update, svgElement),
                     (exit) => exit.remove()
                 );
 
+            // inserting the legend
             svgElement.svgElement
                 .selectAll(".legend")
                 .data(legendData)
@@ -564,13 +647,17 @@
                         let group = enter
                             .append("g")
                             .attr("class", "legend")
-                            .attr("transform", (_, i) => `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`);
+                            .attr(
+                                "transform",
+                                (_, i) =>
+                                    `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`
+                            );
                         group
                             .append("rect")
                             .attr("x", width + 10)
                             .attr("width", LEGEND_SQUARE_DIM)
                             .attr("height", LEGEND_SQUARE_DIM)
-                            .style("fill", (_, i) => color(i));
+                            .style("fill", (_, i) => getCountryColor(i));
 
                         group
                             .append("text")
@@ -599,25 +686,38 @@
         let initializeRateOfChangeLineChart = (data, minMax, container) => {
             let lineChartContainer = d3.select("#" + container);
 
+            // creating the svg container
             let svg = lineChartContainer
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height)
-                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+                .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px");
 
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "left-line-chart");
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "right-line-chart");
+            //creating the group for the left line chart
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "left-line-chart");
 
-            let xScale = d3
-                .scaleTime()
-                .domain([d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[5].label, +1)])
-                .range([margins.left, width - margins.right - 15]);
+            //creating the group for the right line chart
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "right-line-chart");
 
-            let yScale = d3
-                .scaleLinear()
-                .domain([minMax.MinRateOfChange, minMax.MaxRateOfChange])
-                .range([height - margins.bottom - margins.top, 0]);
+            // creating the x-scale
+            let xScale = createScale(
+                [d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[5].label, +1)],
+                [margins.left, width - margins.right - 15],
+                "time"
+            );
 
+            // creating the y-scale
+            let yScale = createScale(
+                [minMax.MinRateOfChange, minMax.MaxRateOfChange],
+                [height - margins.bottom - margins.top, 0],
+                "linear"
+            );
+
+            // inserting the x axis
             svg.append("g")
                 .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
                 .style("font-size", "10px")
@@ -627,6 +727,7 @@
                 .attr("transform", "rotate(25)")
                 .attr("text-anchor", "start");
 
+            // inserting the y axis
             svg.append("g")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
                 .style("font-size", "10px")
@@ -634,7 +735,9 @@
                 .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0).ticks(8));
 
             // inserting the circles
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "year-circles");
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "year-circles");
 
             return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
         };
@@ -651,31 +754,30 @@
                 .x((d) => lineRateOfChangeChartStructure.xScale(d.label))
                 .y((d) => lineRateOfChangeChartStructure.yScale(d.value));
 
+            // inserting the paths
             lineRateOfChangeChartStructure.lineChartStructure
                 .select("." + structure)
                 .selectAll("path")
                 .data([data])
                 .join(
-                    (enter) =>
+                    (enter) => {
                         enter
                             .append("path")
                             .attr("class", lineClass)
-                            .call((enter) =>
-                                enter
-                                    .transition()
-                                    .duration(TRANSITION_DURATION)
-                                    .attr("d", (d) => lineGenerator(d))
-                            ),
-                    (update) =>
-                        update.call((update) =>
-                            update
-                                .transition()
-                                .duration(TRANSITION_DURATION)
-                                .attr("d", (d) => lineGenerator(d))
-                        ),
+                            .transition()
+                            .duration(TRANSITION_DURATION)
+                            .attr("d", (d) => lineGenerator(d));
+                    },
+                    (update) => {
+                        update
+                            .transition()
+                            .duration(TRANSITION_DURATION)
+                            .attr("d", (d) => lineGenerator(d));
+                    },
                     (exit) => exit.remove()
                 );
 
+            // inserting the path circles
             lineRateOfChangeChartStructure.lineChartStructure
                 .select(".year-circles")
                 .selectAll("." + lineClass + "year-circle")
@@ -686,7 +788,7 @@
                             .append("circle")
                             .attr("class", lineClass + "year-circle " + lineClass)
                             .attr("fill", "none")
-                            .attr("stroke", countryColors[0])
+                            .attr("stroke", getCountryColor(structure.split("-")[0]))
                             .attr("cx", (d) => lineRateOfChangeChartStructure.xScale(d.label))
                             .attr("cy", (d) => lineRateOfChangeChartStructure.yScale(d.value))
                             .attr("r", 3);
@@ -700,6 +802,7 @@
                     (exit) => exit.remove()
                 );
 
+            // inserting the legend
             lineRateOfChangeChartStructure.lineChartStructure
                 .selectAll(".legend")
                 .data(legendData)
@@ -708,13 +811,17 @@
                         let group = enter
                             .append("g")
                             .attr("class", "legend")
-                            .attr("transform", (_, i) => `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`);
+                            .attr(
+                                "transform",
+                                (_, i) =>
+                                    `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`
+                            );
                         group
                             .append("rect")
                             .attr("x", width + 10)
                             .attr("width", LEGEND_SQUARE_DIM)
                             .attr("height", LEGEND_SQUARE_DIM)
-                            .style("fill", (_, i) => color(i));
+                            .style("fill", (_, i) => getCountryColor(i));
 
                         group
                             .append("text")
@@ -743,22 +850,33 @@
         let initializeRefugeesLineChart = (data, container) => {
             let refugeesContainer = d3.select("#" + container);
 
+            // crating the svg container
             let svg = refugeesContainer
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height)
-                .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
+                .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px");
 
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "left-refugees");
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "right-refugees");
+            // creating the group for the left refugees
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "left-refugees");
 
+            // creating the group for the right refugees
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "right-refugees");
+
+            // crating the x scale
             let xScale = d3
                 .scaleTime()
                 .domain([d3.timeYear.offset(data.left[0].year, -1), d3.timeYear.offset(data.left[6].year, +1)])
                 .range([margins.left, width - margins.right - 15]);
 
+            // crating the y scale
             let yScale = d3.scaleLinear().range([height - margins.bottom - margins.top, 0]);
 
+            // inserting the y axis
             svg.append("g")
                 .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
                 .style("font-size", "10px")
@@ -768,14 +886,21 @@
                 .attr("transform", "rotate(25)")
                 .attr("text-anchor", "start");
 
+            // inserting the group for the y axis
             svg.append("g")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
                 .style("font-size", "10px")
                 .attr("class", "grid-lines y-axis");
 
-            // inserting the circles
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "year-circles-left");
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "year-circles-right");
+            // inserting the circles for the left country
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "year-circles-left");
+
+            // for the right country
+            svg.append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "year-circles-right");
 
             return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
         };
@@ -790,19 +915,28 @@
             let bothData = data.left.map((d) => d.value).concat(data.right.map((d) => d.value));
             let dataMinMax = [d3.min(bothData), d3.max(bothData)];
 
+            // updating the y scale
             lineRefugeesStructure.yScale.domain([dataMinMax[0], dataMinMax[1]]);
 
+            // inserting the y axiss
             lineRefugeesStructure.lineChartStructure
                 .select("g.grid-lines.y-axis")
                 .transition()
                 .duration(TRANSITION_DURATION)
-                .call(d3.axisLeft(lineRefugeesStructure.yScale).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(
+                    d3
+                        .axisLeft(lineRefugeesStructure.yScale)
+                        .tickSize(-width)
+                        .tickSizeOuter(0)
+                        .tickFormat(d3.format(".2s"))
+                );
 
             let lineGenerator = d3
                 .line()
                 .x((d) => lineRefugeesStructure.xScale(d.year))
                 .y((d) => lineRefugeesStructure.yScale(d.value));
 
+            // inserting the path
             lineRefugeesStructure.lineChartStructure
                 .select("." + structure)
                 .selectAll("path")
@@ -831,6 +965,7 @@
                     (exit) => exit.remove()
                 );
 
+            // inserting the circles
             lineRefugeesStructure.lineChartStructure
                 .select(".year-circles-" + country)
                 .selectAll("." + lineClass + "-year-circle")
@@ -841,7 +976,7 @@
                             .append("circle")
                             .attr("class", lineClass + "-year-circle " + lineClass)
                             .attr("fill", "none")
-                            .attr("stroke", countryColors[0])
+                            .attr("stroke", getCountryColor(country))
                             .attr("cx", (d) => lineRefugeesStructure.xScale(d.year))
                             .attr("cy", (d) => lineRefugeesStructure.yScale(d.value))
                             .attr("r", 3);
@@ -866,6 +1001,7 @@
                     (exit) => exit.remove()
                 );
 
+            // inserting the legend
             lineRefugeesStructure.lineChartStructure
                 .selectAll(".legend")
                 .data(legendData)
@@ -874,13 +1010,17 @@
                         let group = enter
                             .append("g")
                             .attr("class", "legend")
-                            .attr("transform", (_, i) => `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`);
+                            .attr(
+                                "transform",
+                                (_, i) =>
+                                    `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`
+                            );
                         group
                             .append("rect")
                             .attr("x", width + 10)
                             .attr("width", LEGEND_SQUARE_DIM)
                             .attr("height", LEGEND_SQUARE_DIM)
-                            .style("fill", (_, i) => color(i));
+                            .style("fill", (_, i) => getCountryColor(i));
 
                         group
                             .append("text")
@@ -915,7 +1055,8 @@
                     );
                 } else {
                     return (
-                        parseInt($scope.countryLeftStatisticsValues[field], 10) < parseInt($scope.countryRightStatisticsValues[field], 10)
+                        parseInt($scope.countryLeftStatisticsValues[field], 10) <
+                        parseInt($scope.countryRightStatisticsValues[field], 10)
                     );
                 }
             } else {
@@ -926,7 +1067,8 @@
                     );
                 } else
                     return (
-                        parseInt($scope.countryRightStatisticsValues[field], 10) < parseInt($scope.countryLeftStatisticsValues[field], 10)
+                        parseInt($scope.countryRightStatisticsValues[field], 10) <
+                        parseInt($scope.countryLeftStatisticsValues[field], 10)
                     );
             }
         };
@@ -967,6 +1109,11 @@
             $scope.searchDestination = "";
         };
 
+        /**
+         * Function that show the tooltip for the brain drain and children statistic
+         * @param {string} source
+         * @param {event} event
+         */
         $scope.showLabelDescription = (source, event) => {
             let tooltip = document.querySelector("#compare-tooltip");
             tooltip.classList.remove("display-none");
@@ -977,12 +1124,15 @@
             tooltip.style.zIndex = 100;
 
             if (source === "children") {
-                tooltip.innerHTML = "Share of migrant stock with an age between 0 and 14";
+                tooltip.innerHTML = "Share of migrant stock with an age between 0 and 14 years.";
             } else {
-                tooltip.innerHTML = "Share of migrant stock with an age between 20 and 35";
+                tooltip.innerHTML = "Share of migrant stock with an age between 20 and 35 years.";
             }
         };
 
+        /**
+         * Function that hide the tooltip for the brain drain and children statistic
+         */
         $scope.hideLabelDescription = () => {
             let tooltip = document.querySelector("#compare-tooltip");
             tooltip.classList.remove("display-block");
@@ -995,6 +1145,16 @@
          */
         $scope.updateSearch = (event) => {
             event.stopPropagation();
+        };
+
+        /**
+         * Function that returns o color according to the passed parameter
+         * @param {string/int} country
+         * @returns
+         */
+        let getCountryColor = (country) => {
+            if (country === "left" || country == 0) return countryColors.left;
+            else return countryColors.right;
         };
     }
 })();

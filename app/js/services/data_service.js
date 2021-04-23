@@ -57,7 +57,7 @@
          * as those countries are not better specified.
          */
         let removeOtherSouth_OtherNorth = (data_origDest) => {
-            data_origDest.forEach(row => {
+            data_origDest.forEach((row) => {
                 let otherCountries = +row["Other South"] + +row["Other North"];
                 row["Total"] = +row["Total"] - otherCountries;
             });
@@ -68,27 +68,32 @@
         data_service.estimatedRefugees = data_service.loadCsv(estimated_refugees);
         data_service.totMigrByAgeSex = data_service.loadCsv(total_migrants_by_age_and_sex);
         data_service.totPopulationByAgeSex = data_service.loadCsv(total_population_by_age_and_sex);
-        data_service.migrAsPercOfPopulationAgeSex = data_service.loadCsv(migrants_as_percentage_of_total_population_by_age_and_sex);
+        data_service.migrAsPercOfPopulationAgeSex = data_service.loadCsv(
+            migrants_as_percentage_of_total_population_by_age_and_sex
+        );
         data_service.migrPercDistributionAgeSex = data_service.loadCsv(migrants_percentage_distribution_by_age_and_sex);
         data_service.totMigrRateOfChange = data_service.loadCsv(migrants_annual_rate_of_change);
         data_service.worldCountriesHierarchy = data_service.loadJson(world_countries_hierarchy);
 
-        data_service.totMigrByOriginDest = data_service.loadCsv(total_migrants_by_origin_and_destination)
-            .then(data_origDest => {                
+        data_service.totMigrByOriginDest = data_service
+            .loadCsv(total_migrants_by_origin_and_destination)
+            .then((data_origDest) => {
                 removeOtherSouth_OtherNorth(data_origDest);
 
                 return data_origDest;
             });
 
-        data_service.maleMigrByOriginDest = data_service.loadCsv(male_migrants_by_origin_and_destination)
-            .then(data_origDest => {                
+        data_service.maleMigrByOriginDest = data_service
+            .loadCsv(male_migrants_by_origin_and_destination)
+            .then((data_origDest) => {
                 removeOtherSouth_OtherNorth(data_origDest);
 
                 return data_origDest;
             });
 
-        data_service.femaleMigrByOriginDest = data_service.loadCsv(female_migrants_by_origin_and_destination)
-            .then(data_origDest => {                
+        data_service.femaleMigrByOriginDest = data_service
+            .loadCsv(female_migrants_by_origin_and_destination)
+            .then((data_origDest) => {
                 removeOtherSouth_OtherNorth(data_origDest);
 
                 return data_origDest;
@@ -224,14 +229,18 @@
 
                                         for (const region in data[key][i]) {
                                             data[key][i][region].forEach((country) =>
-                                                countries.push(new Country(country, continent, continent, getVisName(country)))
+                                                countries.push(
+                                                    new Country(country, continent, continent, getVisName(country))
+                                                )
                                             );
                                         }
                                     } else {
                                         const continent = "Northern America";
 
                                         data[key][i].forEach((country) =>
-                                            countries.push(new Country(country, continent, continent, getVisName(country)))
+                                            countries.push(
+                                                new Country(country, continent, continent, getVisName(country))
+                                            )
                                         );
                                     }
                                 }
@@ -272,7 +281,14 @@
             return getCountries(data);
         });
 
-        data_service.continents = ["Africa", "Asia", "Europe", "Latin America and the Caribbean", "Northern America", "Oceania"];
+        data_service.continents = [
+            "Africa",
+            "Asia",
+            "Europe",
+            "Latin America and the Caribbean",
+            "Northern America",
+            "Oceania",
+        ];
 
         // variable that defines the country info types buttons
         data_service.countryInfoTypeButtons = [
@@ -340,14 +356,18 @@
         data_service.filterData = (data, selectedCountry, yearMin, yearMax) => {
             return data.filter(
                 (countryData) =>
-                    countryData["Destination"] == selectedCountry && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                    countryData["Destination"] == selectedCountry &&
+                    countryData["Year"] >= yearMin &&
+                    countryData["Year"] <= yearMax
             );
         };
 
         data_service.filterDataMulti = (data, countries, yearMin, yearMax) => {
             return data.filter(
                 (countryData) =>
-                    countries.includes(countryData["Destination"]) && countryData["Year"] >= yearMin && countryData["Year"] <= yearMax
+                    countries.includes(countryData["Destination"]) &&
+                    countryData["Year"] >= yearMin &&
+                    countryData["Year"] <= yearMax
             );
         };
 
@@ -409,7 +429,9 @@
         data_service.getTotPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.totPopulationByAgeSex.then((data) => {
                 let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
-                return (filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length) * 1000;
+                return (
+                    (filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length) * 1000
+                );
             });
         };
 
@@ -421,7 +443,12 @@
          * @param {string} selectedGender
          * @returns {promise}
          */
-        data_service.getMigrantsAsPercentageOfPopulationByAgeAndSex = (selectedCountry, yearMin, yearMax, selectedGender) => {
+        data_service.getMigrantsAsPercentageOfPopulationByAgeAndSex = (
+            selectedCountry,
+            yearMin,
+            yearMax,
+            selectedGender
+        ) => {
             return data_service.migrAsPercOfPopulationAgeSex.then((data) => {
                 let filteredData = data_service.filterData(data, selectedCountry, yearMin, yearMax);
                 return filteredData.reduce((sum, curr) => sum + +curr[selectedGender], 0) / filteredData.length;
@@ -436,7 +463,9 @@
                 const ageGroupsAggregation = {
                     "0-14": ["0-4", "5-9", "10-14"].map((d) => d + genderSuffix),
                     "20-34": ["20-24", "25-29", "30-34"].map((d) => d + genderSuffix),
-                    "35+": ["35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75+"].map((d) => d + genderSuffix),
+                    "35+": ["35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75+"].map(
+                        (d) => d + genderSuffix
+                    ),
                     Total: ["Total" + genderSuffix],
                 };
                 const ageGroups = Object.keys(ageGroupsAggregation);
@@ -583,7 +612,8 @@
             return data_service.estimatedRefugees.then((data) => {
                 let selectedCountryData = getSelectedCountryData(data, selectedCountry);
                 return (
-                    yearsColumns.reduce((sum, elem) => +sum + +selectedCountryData[0]["" + elem + selectedGender], 0) / yearsColumns.length
+                    yearsColumns.reduce((sum, elem) => +sum + +selectedCountryData[0]["" + elem + selectedGender], 0) /
+                    yearsColumns.length
                 );
             });
         };
@@ -599,15 +629,18 @@
             return data_service.estimatedRefugees.then((data) => {
                 let selectedCountryDataLeft = getSelectedCountryData(data, selectedCountryLeft)[0];
                 let selectedCountryDataRight = getSelectedCountryData(data, selectedCountryRight)[0];
+
                 let countryLeftKeys = Object.keys(selectedCountryDataLeft).slice(1, 8);
                 let countryRightKeys = Object.keys(selectedCountryDataRight).slice(1, 8);
+
                 let result = { left: [], right: [] };
-                result.left = countryLeftKeys.map((c, i) => ({
+
+                result.left = countryLeftKeys.map((c) => ({
                     year: parseDate(c.split("_")[0]),
                     value: isNaN(+selectedCountryDataLeft[c]) ? 0 : +selectedCountryDataLeft[c],
                 }));
 
-                result.right = countryRightKeys.map((c, i) => ({
+                result.right = countryRightKeys.map((c) => ({
                     year: parseDate(c.split("_")[0]),
                     value: isNaN(+selectedCountryDataRight[c]) ? 0 : +selectedCountryDataRight[c],
                 }));
@@ -740,7 +773,10 @@
                 Object.values(data).forEach((elem) => {
                     if (elem["Destination"] === "More developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1) {
                         development[0].value.push(elem[selectedCountry]);
-                    } else if (elem["Destination"] === "Less developed regions" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                    } else if (
+                        elem["Destination"] === "Less developed regions" &&
+                        yearsColumns.indexOf(+elem["Year"]) > -1
+                    )
                         development[1].value.push(elem[selectedCountry]);
                 });
 
@@ -765,13 +801,22 @@
                 Object.values(data).forEach((elem) => {
                     if (elem["Destination"] === "High-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
                         income[0].value.push(elem[selectedCountry]);
-                    else if (elem["Destination"] === "Upper-middle-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                    else if (
+                        elem["Destination"] === "Upper-middle-income countries" &&
+                        yearsColumns.indexOf(+elem["Year"]) > -1
+                    )
                         income[1].value.push(elem[selectedCountry]);
-                    else if (elem["Destination"] === "Lower-middle-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                    else if (
+                        elem["Destination"] === "Lower-middle-income countries" &&
+                        yearsColumns.indexOf(+elem["Year"]) > -1
+                    )
                         income[2].value.push(elem[selectedCountry]);
                     else if (elem["Destination"] === "Low-income countries" && yearsColumns.indexOf(+elem["Year"]) > -1)
                         income[3].value.push(elem[selectedCountry]);
-                    else if (elem["Destination"] === "No income group available" && yearsColumns.indexOf(+elem["Year"]) > -1)
+                    else if (
+                        elem["Destination"] === "No income group available" &&
+                        yearsColumns.indexOf(+elem["Year"]) > -1
+                    )
                         income[4].value.push(elem[selectedCountry]);
                 });
 
@@ -865,38 +910,40 @@
             });
         };
 
+        /**
+         * Function that computes the annual rate of change given a country, a gender and a year interval
+         * @param {string} selectedCountry
+         * @param {number} yearMin
+         * @param {number} yearMax
+         * @param {string} selectedGender
+         * @returns
+         */
         data_service.getRateOfChange = (selectedCountry, yearMin, yearMax, selectedGender) => {
             return data_service.totMigrRateOfChange.then((data) => {
-                let filteredData = data.filter((countryData) => countryData["Destination"] == selectedCountry);
-                let filteredDataColumns = Object.keys(filteredData[0]);
-                filteredDataColumns = filteredDataColumns.filter((columnName) => {
-                    let pattern = /([0-9]+)-([0-9]+)_(\(mf\)|\(m\)|\(f\))/g;
-                    let match = pattern.exec(columnName);
-                    if (match != null) {
-                        let leftLimit = +match[1];
-                        let rightLimit = +match[2];
-                        if (leftLimit >= +yearMin && rightLimit <= +yearMax) {
-                            return true;
-                        }
+                let filteredData = data.find((countryData) => countryData["Destination"] == selectedCountry);
+                let filteredDataColumns = Object.keys(filteredData);
+                let countryRateOfChange = {};
+
+                filteredDataColumns = filteredDataColumns.slice(1).filter((columnName) => {
+                    let limits = columnName.split("-");
+                    let leftLimit = +limits[0];
+                    let rightLimit = +limits[1].slice(0, 4);
+
+                    if (
+                        leftLimit >= +yearMin &&
+                        rightLimit <= +yearMax &&
+                        data_service.getSelectedGenderColumn(selectedGender, columnName.slice(0, 9)) === columnName
+                    ) {
+                        return true;
                     } else return false;
                 });
+
                 if (filteredDataColumns.length == 0) {
                     return filteredDataColumns;
                 }
-                filteredDataColumns = filteredDataColumns.filter((columnName) => {
-                    let pattern = /([0-9]+-[0-9]+)_(\(mf\)|\(m\)|\(f\))/g;
-                    let match = pattern.exec(columnName);
-                    if (match != null) {
-                        let matchedYearRange = match[1];
-                        return data_service.getSelectedGenderColumn(selectedGender, matchedYearRange) === columnName;
-                    } else return false;
-                });
-                if (filteredDataColumns.length == 0) {
-                    return "Data not available for the specified time span!";
-                }
-                let countryRateOfChange = {};
-                for (let key in filteredData[0]) {
-                    if (filteredDataColumns.includes(key)) countryRateOfChange[key] = filteredData[0][key];
+
+                for (let key in filteredData) {
+                    if (filteredDataColumns.includes(key)) countryRateOfChange[key.slice(5, 9)] = +filteredData[key];
                 }
 
                 return countryRateOfChange;
@@ -1092,25 +1139,24 @@
 
         data_service.getFeedData = (selectedYear) => {
             return data_service.countries.then((countries) => {
-
-                return data_service.totMigrByOriginDest.then(data => {
-                    
-                    let countryNames = countries.map(country => country.name);
-                    data = data.filter(countryData => countryNames.includes(countryData["Destination"]) && 
-                        +countryData["Year"]===selectedYear)
-                        .map(countryData => 
-                            ({
-                                title:countries[countryNames.indexOf(countryData.Destination)].visName,
-                                value:+countryData["Total"]
-                                }
-                            ));
+                return data_service.totMigrByOriginDest.then((data) => {
+                    let countryNames = countries.map((country) => country.name);
+                    data = data
+                        .filter(
+                            (countryData) =>
+                                countryNames.includes(countryData["Destination"]) &&
+                                +countryData["Year"] === selectedYear
+                        )
+                        .map((countryData) => ({
+                            title: countries[countryNames.indexOf(countryData.Destination)].visName,
+                            value: +countryData["Total"],
+                        }));
 
                     // descending order
                     data.sort((a, b) => +b.value - +a.value);
 
                     return data;
-                }); 
-                
+                });
             });
         };
 
@@ -1121,7 +1167,10 @@
                 let totalMigrantsGroupByYear = data_service.totMigrByOriginDest.then((data) => {
                     data = data.filter((countryData) => countryData.Destination === "WORLD");
 
-                    let groupedByYear = data.map((worldData) => ({ year: +worldData.Year, total_immigration: +worldData.Total }));
+                    let groupedByYear = data.map((worldData) => ({
+                        year: +worldData.Year,
+                        total_immigration: +worldData.Total,
+                    }));
 
                     return groupedByYear;
                 });

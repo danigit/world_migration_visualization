@@ -143,11 +143,8 @@ let preprocessRateOfChange = (data) => {
  * @param {array} a    The first array.
  * @param {array} b    The second array.
  */
-function equals(a, b, sortFunc=null, equalsFunc=null) {
-    if (!Array.isArray(a)
-        || !Array.isArray(b)
-        || a.length !== b.length)
-        return false;
+function equals(a, b, sortFunc = null, equalsFunc = null) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
 
     if (sortFunc === null) {
         a.sort();
@@ -157,9 +154,7 @@ function equals(a, b, sortFunc=null, equalsFunc=null) {
         b.sort(sortFunc);
     }
 
-    return a.every((v, i) => equalsFunc === null
-        ? v === b[i]
-        : equalsFunc(v, b[i]));
+    return a.every((v, i) => (equalsFunc === null ? v === b[i] : equalsFunc(v, b[i])));
 }
 
 /**
@@ -168,3 +163,23 @@ function equals(a, b, sortFunc=null, equalsFunc=null) {
 function unique(a) {
     return [...new Set(a)];
 }
+
+/**
+ * Function that creates a scale according to the passed parameters
+ * @param {array} domain
+ * @param {array} range
+ * @param {string} type
+ * @returns
+ */
+let createScale = (domain, range, type, padding = 0) => {
+    switch (type) {
+        case "time":
+            return d3.scaleTime().domain(domain).range(range);
+        case "linear":
+            return d3.scaleLinear().domain(domain).range(range);
+        case "band":
+            return d3.scaleBand().range(range).domain(domain).padding(padding);
+        default:
+            throw "Scale not valid";
+    }
+};
