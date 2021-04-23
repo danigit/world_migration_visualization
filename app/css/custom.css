@@ -77,6 +77,10 @@ DISPLAY
     min-height: 50px !important;
 }
 
+.max-height-150-px {
+    max-height: 150px;
+}
+
 .max-height-700-px {
     max-height: 700px;
 }
@@ -798,4 +802,22 @@ Navbar
 
 .pointer {
     cursor: pointer;
+}
+
+md-chip {
+    color: gray:important;
+    width: 100%;
+}
+
+.md-chip-content {
+    width: 100%;
+}
+
+md-chip:hover {
+    background-color: #fa606b;
+}
+
+md-chip.md-focused {
+    background: #e0e0e0 !important;
+    color: grey!important;
 }

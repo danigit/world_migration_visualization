@@ -25,7 +25,7 @@
             .domain(migrationThreshs)
             .range(migrationMagnitudeColors);
 
-        let yearsInterval = [ "1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019" ];
+        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
 
         let yearsData = [];
         let yearsData_origDest = [];
@@ -51,11 +51,13 @@
             source: [],
             destination: [],
         };
+        $scope.selectedSources = [];
+        $scope.selectedDestinations = [];
 
         let validCountries = {
             source: [],
-            destination: []
-        }
+            destination: [],
+        };
 
         $scope.searchSource = "";
         $scope.searchDestination = "";
@@ -70,32 +72,30 @@
         };
 
         let checkChanged = () => {
-            let sourceChanged = !equals(
-                $scope.selectedCountries.source,
-                validCountries.source,
-                Country.sort, Country.equals);
+            let sourceChanged = !equals($scope.selectedCountries.source, validCountries.source, Country.sort, Country.equals);
 
             let destinationChanged = !equals(
                 $scope.selectedCountries.destination,
                 validCountries.destination,
-                Country.sort, Country.equals);
+                Country.sort,
+                Country.equals
+            );
 
             return sourceChanged || destinationChanged;
-        }
+        };
 
         let revertSelection = () => {
             revertedSelection = true;
 
-            $scope.selectedCountries.source      = [...validCountries.source];
+            $scope.selectedCountries.source = [...validCountries.source];
             $scope.selectedCountries.destination = [...validCountries.destination];
-        }
+        };
 
         let _handleOnSelectionChanged = () => {
             if (selectionChanged) {
                 if (!checkValidSelection()) {
                     // TODO: Display error in UI
-                    console.log("Invalid selection.\n"
-                            + "Reverting to previous state...");
+                    console.log("Invalid selection.\n" + "Reverting to previous state...");
 
                     revertSelection();
                     return;
@@ -107,22 +107,20 @@
                     return;
                 }
 
-                validCountries.source      = [...$scope.selectedCountries.source];
+                validCountries.source = [...$scope.selectedCountries.source];
                 validCountries.destination = [...$scope.selectedCountries.destination];
 
-                if (!isPaused)
-                    pauseArcs();
+                if (!isPaused) pauseArcs();
 
                 initArcs($scope.geoObject.element, false);
 
-                drawAreaChart(areaChartObject,
-                              yearsData_origDest);
+                drawAreaChart(areaChartObject, yearsData_origDest);
 
                 if (isPaused) {
                     $scope.playPauseBtn = IC_PAUSE;
                 }
             }
-        }
+        };
 
         /**
          * Function that clears the search box in the source select filter
@@ -130,15 +128,13 @@
         $scope.clearSearch = () => {
             $scope.searchSource = "";
             $scope.searchDestination = "";
-            
-            _handleOnSelectionChanged();
         };
 
         $scope.updateSearch = (event) => {
             event.stopPropagation();
         };
 
-        let selectionChanged  = false;
+        let selectionChanged = false;
         let revertedSelection = false;
 
         $scope.$watch("selectedCountries.source", (newVal, oldVal) => {
@@ -154,16 +150,10 @@
                 let selectedDest = $scope.selectedCountries.destination;
 
                 if (newVal.length == 0) {
-                    selectorSources.classed('hide', true);
-
-                    if (selectedDest.length == 0)
-                        textNoFilters.classed('hide', false);
+                    selectorSources.classed("hide", true);
                 } else {
-                    if (selectedDest.length == 0)
-                        textNoFilters.classed('hide', true);
-                        
                     selectedOrig.sort(Country.sort);
-                    selectorSources.classed('hide', false);
+                    selectorSources.classed("hide", false);
                 }
             } else {
                 selectionChanged = false;
@@ -183,17 +173,16 @@
                 let selectedDest = $scope.selectedCountries.destination;
 
                 if (newVal.length == 0) {
-                    selectorDestinations.classed('hide', true);
+                    selectorDestinations.classed("hide", true);
 
                     if (selectedOrig.length == 0) {
-                        textNoFilters.classed('hide', false);
+                        textNoFilters.classed("hide", false);
                     }
                 } else {
-                    if (selectedOrig.length == 0)
-                        textNoFilters.classed('hide', true);
-                        
+                    if (selectedOrig.length == 0) textNoFilters.classed("hide", true);
+
                     selectedDest.sort(Country.sort);
-                    selectorDestinations.classed('hide', false);
+                    selectorDestinations.classed("hide", false);
                 }
             } else {
                 selectionChanged = false;
@@ -202,34 +191,26 @@
 
         let textNoFilters = null;
 
-        let selectorSources      = null;
+        let selectorSources = null;
         let selectorDestinations = null;
 
         let filterOrigDest = (_yearsData) => {
-            let _yearsData_weighted = _yearsData.filter(d =>
-                d.weight >= $scope.weightThresh);
- 
-            let countriesOrig = $scope.selectedCountries
-                .source.map(c => c.name);
+            let _yearsData_weighted = _yearsData.filter((d) => d.weight >= $scope.weightThresh);
 
-            let countriesDest = $scope.selectedCountries
-                .destination.map(c => c.name);
+            let countriesOrig = $scope.selectedCountries.source.map((c) => c.name);
 
-            if (countriesOrig.length == 0
-                    && countriesDest.length == 0) {
+            let countriesDest = $scope.selectedCountries.destination.map((c) => c.name);
+
+            if (countriesOrig.length == 0 && countriesDest.length == 0) {
                 return [..._yearsData_weighted];
             } else if (countriesOrig.length == 0) {
-                return _yearsData_weighted.filter(d => countriesDest
-                        .includes(d.destinationName));
+                return _yearsData_weighted.filter((d) => countriesDest.includes(d.destinationName));
             } else if (countriesDest.length == 0) {
-                return _yearsData_weighted.filter(d => countriesOrig
-                        .includes(d.sourceName));
+                return _yearsData_weighted.filter((d) => countriesOrig.includes(d.sourceName));
             } else {
-                return _yearsData_weighted.filter(d => countriesOrig
-                        .includes(d.sourceName)
-                    && countriesDest.includes(d.destinationName));
+                return _yearsData_weighted.filter((d) => countriesOrig.includes(d.sourceName) && countriesDest.includes(d.destinationName));
             }
-        }
+        };
 
         $scope.genderFilterValue = "menu-all";
 
@@ -390,8 +371,8 @@
         dataService.loadWorldMap().then((_worldJson) => {
             textNoFilters = d3.select('#text-no-filters');
 
-            selectorSources      = d3.select('#select-sources');
-            selectorDestinations = d3.select('#select-destinations');
+            selectorSources = d3.select("#select-sources");
+            selectorDestinations = d3.select("#select-destinations");
 
             worldJson = _worldJson;
 
@@ -422,8 +403,7 @@
                 $scope.$apply();
             });
 
-            document.getElementById("clear-all")
-                    .addEventListener("click", () => {
+            document.getElementById("clear-all").addEventListener("click", () => {
                 $scope.selectedCountries.source = [];
                 $scope.selectedCountries.destination = [];
 
@@ -512,15 +492,11 @@
         };
 
         let drawArcs = (map) => {
-            if (yearIdx == yearsInterval.length - 1)
-                yearIdx = 0;
+            if (yearIdx == yearsInterval.length - 1) yearIdx = 0;
 
-            updateAreaChartTick(
-                areaChartObject,
-                yearIdx);
+            updateAreaChartTick(areaChartObject, yearIdx);
 
-            let yearData = yearsData_origDest.filter((arc) =>
-                arc.year == yearsInterval[yearIdx]);
+            let yearData = yearsData_origDest.filter((arc) => arc.year == yearsInterval[yearIdx]);
 
             let arcElems = map
                 .select(".arch-container")
@@ -552,9 +528,7 @@
                 // createGlows(geoObject.element);
                 const geoCentroids = geoObject.element
                     .selectAll("circle")
-                        .data(geoObject.data.filter((d) =>
-                                destinations.some((dd) =>
-                                        dd === d.properties.name)));
+                    .data(geoObject.data.filter((d) => destinations.some((dd) => dd === d.properties.name)));
                 geoCentroids
                     .join("circle")
                     .attr("fill", "#63b3d4")
@@ -580,8 +554,7 @@
         let updateArcs = (map, arcElems, delayTrans = false) => {
             let destinations = [];
             arcElems.each((d) => {
-                if (!destinations.includes(d.destinationName))
-                    destinations.push(d.destinationName);
+                if (!destinations.includes(d.destinationName)) destinations.push(d.destinationName);
             });
 
             removeCentroids($scope.geoObject);
@@ -676,10 +649,9 @@
                                         radius: 2,
                                         fill: getMigrationColor(weight),
                                         year: prev.Year + "-" + c1.Year,
-                                        sourceCentroid: ioData.find((e) =>
-                                                e.Destination === k).centroid,
+                                        sourceCentroid: ioData.find((e) => e.Destination === k).centroid,
                                         destinationCentroid: c.centroid,
-                                        weight: weight
+                                        weight: weight,
                                     };
 
                                     _yearsData.push(source);
@@ -692,15 +664,14 @@
             }
 
             return _yearsData;
-        }
+        };
 
         /**
          * Function that draws the migration on the map
          * @param {object} map
          */
-        let initArcs = (mapElem, loadData=true) => {
-            dataService.getCountriesInwardOutwardMigrants(
-                $scope.genderFilterValue).then((ioData) => {
+        let initArcs = (mapElem, loadData = true) => {
+            dataService.getCountriesInwardOutwardMigrants($scope.genderFilterValue).then((ioData) => {
                 if (loadData) {
                     yearsData = [];
 
@@ -709,17 +680,14 @@
 
                 yearRep = 0;
 
-                if (!mapElem.selectAll(".arch-container")
-                        ._groups[0].length) {
-                    mapElem.append("g").attr("class",
-                            "arch-container");
+                if (!mapElem.selectAll(".arch-container")._groups[0].length) {
+                    mapElem.append("g").attr("class", "arch-container");
                 }
 
                 yearsData_origDest = [];
                 yearsData_origDest = filterOrigDest(yearsData);
-                
-                drawAreaChart(areaChartObject,
-                              yearsData_origDest);
+
+                drawAreaChart(areaChartObject, yearsData_origDest);
 
                 // createGlows($scope.geoObject.element);
                 drawArcs(mapElem);
@@ -803,7 +771,7 @@
                 .data(geoObject.data)
                 .join(
                     (enter) => _handleMapEnter(enter, geoObject.path),
-                    (exit)  => exit.remove()
+                    (exit) => exit.remove()
                 );
 
             initArcs(geoObject.element);
@@ -816,89 +784,69 @@
 
             let dateParser = d3.timeParse("%Y");
 
-            let svgWidth  = areaChartContainer.node().getBoundingClientRect().width  - svgMargins.left - svgMargins.right;
-            let svgHeight = areaChartContainer.node().getBoundingClientRect().height - svgMargins.top  - svgMargins.bottom;
+            let svgWidth = areaChartContainer.node().getBoundingClientRect().width - svgMargins.left - svgMargins.right;
+            let svgHeight = areaChartContainer.node().getBoundingClientRect().height - svgMargins.top - svgMargins.bottom;
 
             // Create the SVG element
             let svgAreaChart = areaChartContainer
                 .append("svg")
-                    .attr("width",  svgWidth + svgMargins.left)
-                    .attr("height", svgHeight + svgMargins.bottom)
+                .attr("width", svgWidth + svgMargins.left)
+                .attr("height", svgHeight + svgMargins.bottom)
                 .append("g")
-                    .attr("transform", "translate(" + svgMargins.left
-                        + ", " + svgMargins.top + ")");
+                .attr("transform", "translate(" + svgMargins.left + ", " + svgMargins.top + ")");
 
             // Append the Y axis group
-            svgAreaChart
-                .append("g")
-                    .classed("axis-dark-cyan", true)
-                    .classed("group-y-axis", true)
-                    .classed("hide", true);
+            svgAreaChart.append("g").classed("axis-dark-cyan", true).classed("group-y-axis", true).classed("hide", true);
 
             // Append the X axis group
             svgAreaChart
                 .append("g")
-                    .classed("axis-dark-cyan", true)
-                    .classed("group-x-axis", true)
-                    .classed("hide", true)
-                    .attr("transform", "translate(0, " + (svgHeight - svgMargins.top
-                            - svgMargins.bottom) + ")");
+                .classed("axis-dark-cyan", true)
+                .classed("group-x-axis", true)
+                .classed("hide", true)
+                .attr("transform", "translate(0, " + (svgHeight - svgMargins.top - svgMargins.bottom) + ")");
 
             // Append area chart group
-            svgAreaChart
-                .append("g")
-                    .classed("group-area-chart", true)
-                    .classed("hide", true);
+            svgAreaChart.append("g").classed("group-area-chart", true).classed("hide", true);
 
             // Append the circles group
-            svgAreaChart
-                .append("g")
-                    .classed("group-circles", true)
-                    .classed("hide", true);
+            svgAreaChart.append("g").classed("group-circles", true).classed("hide", true);
 
             // Append the years lines group
-            svgAreaChart
-                .append("g")
-                    .classed("group-years-lines", true)
-                    .classed("hide", true);
+            svgAreaChart.append("g").classed("group-years-lines", true).classed("hide", true);
 
             return {
-                dimens:  { height: svgHeight,
-                           width:  svgWidth },
+                dimens: { height: svgHeight, width: svgWidth },
                 element: svgAreaChart,
                 margins: svgMargins,
-                parser:  dateParser
+                parser: dateParser,
             };
         };
 
         /**
          * Extract data for individual years from year ranges between 1990 and 2019.
-         * 
+         *
          * @param {boolean} l
          */
         let extractSingles = (_yearsData) => {
-            let getDataObj = (year, l=false) => {
-                let currYearData = _yearsData.filter(d =>
-                        d.year.split("-")[l ? 1 : 0] === year);
+            let getDataObj = (year, l = false) => {
+                let currYearData = _yearsData.filter((d) => d.year.split("-")[l ? 1 : 0] === year);
 
                 let totVal = currYearData.reduce((acc, it) => {
-                        let b = acc + (l
-                                ? it.nextTot
-                                : it.prevTot);
+                    let b = acc + (l ? it.nextTot : it.prevTot);
 
-                        return isNaN(b) ? acc : b;
-                    }, 0);
+                    return isNaN(b) ? acc : b;
+                }, 0);
 
                 return {
                     totVal: totVal,
-                    year:   year,
-                }
+                    year: year,
+                };
             };
 
             let _singleYearsData = [];
 
-            let allYears = yearsInterval
-                .map(d => d.split("-")).flat();
+            let allYears = yearsInterval.map((d) => d.split("-")).flat();
 
             allYears = unique(allYears);
 
@@ -924,24 +872,18 @@
 
             let dateParser = acObject.parser;
 
-            let allYears = unique(yearsInterval.map(d =>
-                        d.split("-")).flat())
-                .map(d => dateParser(d));
+            let allYears = unique(yearsInterval.map((d) => d.split("-")).flat()).map((d) => dateParser(d));
 
-            const y0Height = acObject.dimens.height
-                    - acObject.margins.top
-                    - acObject.margins.bottom;
+            const y0Height = acObject.dimens.height - acObject.margins.top - acObject.margins.bottom;
 
             // Create the X scale
-            let xScale = d3.scaleTime()
+            let xScale = d3
+                .scaleTime()
                 .domain(d3.extent(allYears))
-                .range([0, acObject.dimens.width
-                               - acObject.margins.right]);
+                .range([0, acObject.dimens.width - acObject.margins.right]);
 
             // Create the X axis generator
-            let xAxis = d3.axisBottom(xScale)
-                .tickValues(allYears)
-                .tickSize(0);
+            let xAxis = d3.axisBottom(xScale).tickValues(allYears).tickSize(0);
 
             // Create the Y scale
             let yScale = d3.scaleLinear()
@@ -972,68 +914,58 @@
                     .classed("hide", false)
                 .call(yAxis);
 
-            // Show the X axis
-            acObject.element
-                .select(".group-x-axis")
-                    .classed("hide", false)
-                .call(xAxis);
-
             // Create the area generator
-            let areaGenerator = d3.area()
-                .x(d  => xScale(dateParser(d.year)))
-                .y1(d => yScale(d.totVal))
+            let areaGenerator = d3
+                .area()
+                .x((d) => xScale(dateParser(d.year)))
+                .y1((d) => yScale(d.totVal))
                 .y0(y0Height);
 
             let acElem = acObject.element
                 .select(".group-area-chart")
-                    .classed("hide", false)
+                .classed("hide", false)
                 .selectAll(".area-chart")
-                    .data([singleYearsData]);
+                .data([singleYearsData]);
 
             acElem.exit().remove();
 
-            let acElemEnter = acElem.enter()
-                .append("path")
-                    .attr("class", "area-chart");
+            let acElemEnter = acElem.enter().append("path").attr("class", "area-chart");
 
-            acElem = acElemEnter
-                .merge(acElem)
-                .transition()
-                    .duration(TRANSITION_DURATION)
-                    .attr("d", areaGenerator(singleYearsData));
+            acElem = acElemEnter.merge(acElem).transition().duration(TRANSITION_DURATION).attr("d", areaGenerator(singleYearsData));
 
             // Create the circles
             let circleElems = acObject.element
                 .select(".group-circles")
-                    .classed("hide", false)
+                .classed("hide", false)
                 .selectAll(".year-circle")
-                    .data(singleYearsData);
+                .data(singleYearsData);
 
-            circleElems.enter()
+            circleElems
+                .enter()
                 .append("circle")
-                    .classed("zindex-1000", true)
-                    .attr("class", "year-circle")
+                .classed("zindex-1000", true)
+                .attr("class", "year-circle")
                 .merge(circleElems)
                 .transition()
-                    .duration(TRANSITION_DURATION)
-                    .attr("cx", d => xScale(dateParser(d.year)))
-                    .attr("cy", d => yScale(d.totVal))
-                    .attr("r", 4);
+                .duration(TRANSITION_DURATION)
+                .attr("cx", (d) => xScale(dateParser(d.year)))
+                .attr("cy", (d) => yScale(d.totVal))
+                .attr("r", 4);
 
             // Create the years lines
             acObject.element
                 .select(".group-years-lines")
-                    .classed("hide", false)
+                .classed("hide", false)
                 .selectAll(".year-line")
                 .data(singleYearsData)
                 .enter()
                 .append("line")
-                    .attr("class", "year-line")
-                    .classed("zindex-1000", true)
-                    .attr("y1", yScale.range()[0])
-                    .attr("y2", yScale.range()[1])
-                    .attr("x1", d => xScale(dateParser(d.year)))
-                    .attr("x2", d => xScale(dateParser(d.year)));
+                .attr("class", "year-line")
+                .classed("zindex-1000", true)
+                .attr("y1", yScale.range()[0])
+                .attr("y2", yScale.range()[1])
+                .attr("x1", (d) => xScale(dateParser(d.year)))
+                .attr("x2", (d) => xScale(dateParser(d.year)));
 
             updateAreaChartTick(acObject, yearIdx);
         };
@@ -1042,10 +974,9 @@
             let _actvRange = yearsInterval[_yearIdx].split("-");
             let dateParser = acObject.parser;
 
-            let _parsedRange = _actvRange.map(y =>
-                    dateParser(y).getFullYear());
+            let _parsedRange = _actvRange.map((y) => dateParser(y).getFullYear());
 
-            let isActive = (d, parseDate=false) => {
+            let isActive = (d, parseDate = false) => {
                 if (parseDate) {
                     return _parsedRange.includes(d.getFullYear());
                 } else {
@@ -1054,26 +985,16 @@
             };
 
             // Highlight active circles
-            acObject.element
-                .selectAll(".year-circle")
-                    .classed("highlight-fill", d =>
-                        isActive(d));
+            acObject.element.selectAll(".year-circle").classed("highlight-fill", (d) => isActive(d));
 
-            acObject.element
-                .selectAll(".year-line")
-                    .classed("highlight-stroke", d =>
-                        isActive(d));
+            acObject.element.selectAll(".year-line").classed("highlight-stroke", (d) => isActive(d));
 
-            let xTicks = acObject.element
-                .select(".group-x-axis")
-                .selectAll(".tick");
+            let xTicks = acObject.element.select(".group-x-axis").selectAll(".tick");
 
             xTicks
                 .select("text")
-                    .classed("highlight-fill", d =>
-                        isActive(d, true))
-                    .classed("highlight-stroke", d =>
-                        isActive(d, true));
+                .classed("highlight-fill", (d) => isActive(d, true))
+                .classed("highlight-stroke", (d) => isActive(d, true));
         };
 
         let initCirclesWeight = () => {
@@ -1128,8 +1049,7 @@
             if (newVal !== oldVal) {
                 // yearRep = 0;
 
-                if (!isPaused)
-                    pauseArcs();
+                if (!isPaused) pauseArcs();
 
                 initArcs($scope.geoObject.element);
 
@@ -1140,23 +1060,70 @@
         });
 
         // TODO: Get feed data for relevant year
-        dataService.getFeedData(2019).then(data => {
+        dataService.getFeedData(2019).then((data) => {
             let top5feeds = data.slice(0, 5);
 
-            top5feeds.forEach(top5Feed => {
+            top5feeds.forEach((top5Feed) => {
                 top5Feed.image = "app/img/home/up.png";
                 top5Feed.value = transformNumberFormat(top5Feed.value, false, 0);
             });
 
-            let flop5feeds = data.slice(data.length - 5,
-                    data.length).reverse();
+            let flop5feeds = data.slice(data.length - 5, data.length).reverse();
 
-            flop5feeds.forEach(flop5Feed => {
+            flop5feeds.forEach((flop5Feed) => {
                 flop5Feed.image = "app/img/home/down.png";
                 flop5Feed.value = transformNumberFormat(flop5Feed.value, false, 0);
             });
-                    
-            $scope.yearFeeds = [...top5feeds,...flop5feeds];
+
+            $scope.yearFeeds = [...top5feeds, ...flop5feeds];
         });
+
+        $scope.updateSearch = (event) => {
+            event.stopPropagation();
+        };
+
+        $scope.selectionClosed = () => {
+            let sourcesDiv = document.querySelector("#sources-tooltip");
+            let destinationsDiv = document.querySelector("#destinations-tooltip");
+            let textNoFilters = d3.select("#text-no-filters");
+
+            $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
+            $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
+
+            if ($scope.selectedSources.length != 0) {
+                sourcesDiv.classList.remove("display-none");
+                textNoFilters.classed("hide", true);
+            }
+            if ($scope.selectedDestinations.length != 0) {
+                destinationsDiv.classList.remove("display-none");
+                textNoFilters.classed("hide", true);
+            }
+
+            _handleOnSelectionChanged();
+        };
+
+        $scope.remove = function (chip, source) {
+            _handleOnSelectionChanged();
+            let textNoFilters = d3.select("#text-no-filters");
+            if (source) {
+                let sourcesDiv = document.querySelector("#sources-tooltip");
+                $scope.selectedSources = $scope.selectedSources.filter((c) => c !== chip);
+                $scope.selectedCountries.source = $scope.selectedCountries.source.filter((c) => c.name !== chip);
+                if ($scope.selectedSources.length == 0) {
+                    sourcesDiv.classList.add("display-none");
+                }
+            } else {
+                let destinationsDiv = document.querySelector("#destinations-tooltip");
+                $scope.selectedDestinations = $scope.selectedDestinations.filter((c) => c !== chip);
+                $scope.selectedCountries.destination = $scope.selectedCountries.destination.filter((c) => c.name !== chip);
+                if ($scope.selectedDestinations.length == 0) {
+                    destinationsDiv.classList.add("display-none");
+                }
+            }
+
+            if ($scope.selectedSources.length == 0 && $scope.selectedDestinations.length == 0) {
+                textNoFilters.classed("hide", false);
+            }
+        };
     }
 })();
