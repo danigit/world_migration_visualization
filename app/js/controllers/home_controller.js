@@ -19,7 +19,14 @@
         let svgMapHeight;
 
         let migrationMagnitudeColors = ["#F6F990", "#F6F990", "#F8FF42", "#C5B409", "#F1860C", "#FF3333"];
-        let migrationThreshs = [0, 1000, 100000, 1000000, 5000000];
+
+        // Simplest solution: set the thresholds by hand (after having looked at the dataset's min/max values)
+        // Min weight dataset: 1
+        // Max weight dataset: 2763183
+        let migrationThreshs = [0, 1000, 10000, 100000, 1000000];
+
+        // old choice for the threshold domain
+        // let migrationThreshs = [0, 1000, 100000, 1000000, 5000000];
 
         let weightScale = d3.scaleThreshold()
             .domain(migrationThreshs)
@@ -422,9 +429,6 @@
                     // FIXME: Prevent update if empy yearsData_origDest
                     // FIXME: Restore old weight circle
 
-                    console.log("Mix max years data:",
-                            d3.extent(yearsData.map(d => d.weight)));
-
                     if (!isPaused)
                         pauseArcs();
 
@@ -676,6 +680,12 @@
                     yearsData = [];
 
                     yearsData = extractYearsData(ioData);
+                    
+                    migrationThreshs = d3.extent(
+                        extractYearsData(ioData).map(d => d.weight).filter(weight => weight > 0)
+                    );
+
+                    console.log("migration thresholds ", migrationThreshs);
                 }
 
                 yearRep = 0;
