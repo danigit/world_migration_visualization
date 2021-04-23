@@ -180,6 +180,10 @@ DISPLAY
     width: 100px !important;
 }
 
+.width-150-px {
+    width: 150px !important;
+}
+
 .width-80-px {
     width: 80px !important;
 }
