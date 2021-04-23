@@ -307,6 +307,10 @@ FONTS
     font-size: small !important;
 }
 
+.font-size-10px {
+    font-size: 10px !important;
+}
+
 .font-size-x-small {
     font-size: x-small !important;
 }

@@ -18,8 +18,7 @@
                     </md-toolbar>
                     <div layout="column">
                         <civ class="width-100">
-                            <md-button id="clear-all" class="color-white font-size-small float-right">Clear all
-                            </md-button>
+                            <md-button id="clear-all" class="color-white font-size-10px float-right">Clear all</md-button>
                         </civ>
                         <div
                             class="filters-container margin-lr-auto font-size-small color-lightgray clear-float border-radius-10px overflow-auto max-height-150-px">
@@ -47,6 +46,7 @@
                                 buttons="genderButtons" radio-buttons-class="'md-button'" class="background-darkteal">
                             </radio-button-group>
                         </div>
+
                         <!-- <hr class="menu-divider width-100" />
                         <div class="width-90 margin-auto">
                             <radio-button-group selected-button="regionFilterValue"
@@ -91,27 +91,7 @@
                         <hr class="menu-divider" />
                         <div layout="row">
                             <svg width="100%" height="50px">
-                                <g width="100%">
-                                    <ellipse id="5m_label" fill="#FF3333" rx="12" ry="12" cx="10%" cy="15" />
-                                    <text x="6%" y="50" stroke="#ffffff" font-size="14">
-                                        5M
-                                    </text>
-                                    <ellipse id="1m_label" fill="#F1860C" rx="9" ry="9" cx="30%" cy="15" />
-                                    <text x="26%" y="50" stroke="#ffffff" font-size="14">
-                                        1M
-                                    </text>
-                                    <ellipse id="100k_label" fill="#C5B409" rx="6" ry="6" cx="50%" cy="15" />
-                                    <text x="45%" y="50" stroke="#ffffff" font-size="14">
-                                        100k
-                                    </text>
-                                    <ellipse id="1k_label" fill="#F8FF42" rx="4" ry="4" cx="70%" cy="15" />
-                                    <text x="67%" y="50" stroke="#ffffff" font-size="14">
-                                        1k
-                                    </text>
-                                    <ellipse id="all_label" fill="#F6F990" rx="2" ry="2" cx="90%" cy="15" />
-                                    <text x="88%" y="50" stroke="#ffffff" font-size="14">
-                                        All
-                                    </text>
+                                <g width="100%" id="container-weights">
                                 </g>
                             </svg>
                         </div>
