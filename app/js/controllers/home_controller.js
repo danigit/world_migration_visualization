@@ -18,7 +18,12 @@
         let svgMapWidth;
         let svgMapHeight;
 
-        let migrationMagnitudeColors = ["#FF3333", "#F1860C", "#C5B409", "#F8FF42", "F6F990"];
+        let migrationMagnitudeColors = ["#F6F990", "#F6F990", "#F8FF42", "#C5B409", "#F1860C", "#FF3333"];
+        let migrationThreshs = [0, 1000, 100000, 1000000, 5000000];
+
+        let weightScale = d3.scaleThreshold()
+            .domain(migrationThreshs)
+            .range(migrationMagnitudeColors);
 
         let yearsInterval = [ "1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019" ];
 
@@ -28,11 +33,11 @@
         let yearIdx = 0;
         let yearRep = 0;
 
-        $scope.weightThresh = 10000;
+        $scope.weightThresh = migrationThreshs[1];
 
         let localDashArray = d3.local();
         
-        let countries;
+        let worldJson;
         let homeInfoBox;
         let zoomMap;
         let isPaused = false;
@@ -54,6 +59,11 @@
 
         $scope.searchSource = "";
         $scope.searchDestination = "";
+
+        let strokeColor = (d) => {
+            return d === $scope.weightThresh
+                    ? "#0093c4" : "#ffffff";
+        }
 
         let checkValidSelection = () => {
             return filterOrigDest(yearsData) != 0;
@@ -294,10 +304,10 @@
             homeInfoBox.innerHTML = `
                         <div class="width-100 color-white font-size-medium">
                         <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Source:</div><div class="text-right width-100">${
-                            d.sourceName
+                            source.properties.visName
                         }</div></div>
                         <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Destination:</div><div class="text-right width-100"> ${
-                            d.destinationName
+                            destination.properties.visName
                         }</div></div>
                         <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Migration:</div><div class="text-right width-100"> ${transformNumberFormat(
                             d.weight
@@ -353,8 +363,9 @@
                     return tweenDash(this, startP);
                 })
                 .on("interrupt", function (d) {
-                    let source = countries.find((c) => c.properties.name === d.sourceName);
-                    let destination = countries.find((c) => c.properties.name === d.destinationName);
+                    let source = worldJson.find((c) => c.properties.name === d.sourceName);
+                    let destination = worldJson.find((c) => c.properties.name === d.destinationName);
+
                     localDashArray.set(this, d3.select(this).attr("stroke-dasharray"));
 
                     d3.select(this).on("mouseover", function () {
@@ -376,13 +387,15 @@
             );
         };
 
-        dataService.loadWorldMap().then((worldJson) => {
+        dataService.loadWorldMap().then((_worldJson) => {
             textNoFilters = d3.select('#text-no-filters');
 
             selectorSources      = d3.select('#select-sources');
             selectorDestinations = d3.select('#select-destinations');
 
-            countries = worldJson;
+            worldJson = _worldJson;
+
+            let weightElems = initCirclesWeight();
 
             $scope.geoObject = initMap(worldJson);
             drawMap($scope.geoObject);
@@ -405,7 +418,7 @@
                 } else {
                     resumeArcs();
                 }
-                // $scope.isRunning = !isPaused;
+
                 $scope.$apply();
             });
 
@@ -418,6 +431,32 @@
 
                 $scope.$apply();
             });
+
+            weightElems
+                .on("click", function(_, d) {
+                    $scope.weightThresh = d;
+
+                    weightElems.select("text")
+                            .attr("stroke", d => strokeColor(d));
+
+                    // FIXME: Prevent update if empy yearsData_origDest
+                    // FIXME: Restore old weight circle
+
+                    console.log("Mix max years data:",
+                            d3.extent(yearsData.map(d => d.weight)));
+
+                    if (!isPaused)
+                        pauseArcs();
+
+                    initArcs($scope.geoObject.element, false);
+
+                    drawAreaChart(areaChartObject,
+                                yearsData_origDest);
+
+                    if (isPaused) {
+                        $scope.playPauseBtn = IC_PAUSE;
+                    }
+                });
 
             homeInfoBox = document.querySelector("#home-info-div");
         });
@@ -564,8 +603,8 @@
                     return tweenDash(this, 0);
                 })
                 .on("interrupt", function (d) {
-                    let source = countries.find((c) => c.properties.name === d.sourceName);
-                    let destination = countries.find((c) => c.properties.name === d.destinationName);
+                    let source = worldJson.find((c) => c.properties.name === d.sourceName);
+                    let destination = worldJson.find((c) => c.properties.name === d.destinationName);
                     localDashArray.set(this, d3.select(this).attr("stroke-dasharray"));
 
                     d3.select(this).on("mouseover", function () {
@@ -600,17 +639,7 @@
         };
 
         let getMigrationColor = (weight) => {
-            if (weight > 5000000) {
-                return migrationMagnitudeColors[0];
-            } else if (weight > 1000000) {
-                return migrationMagnitudeColors[1];
-            } else if (weight > 100000) {
-                return migrationMagnitudeColors[2];
-            } else if (weight > 1000) {
-                return migrationMagnitudeColors[3];
-            } else {
-                return migrationMagnitudeColors[4];
-            }
+            return weightScale(weight);
         };
 
         let extractYearsData = (ioData) => {
@@ -753,7 +782,7 @@
                     <div>
                         <div class="display-flex">
                             <img width="40" height="30" class="margin-left-20px" src="${d.properties.flagPath}">
-                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${d.properties.name}</div>
+                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${d.properties.visName}</div>
                         </div>
                     </div>
                     `;
@@ -887,10 +916,11 @@
 
         let drawAreaChart = (acObject, _yearsData) => {
             let singleYearsData = extractSingles(_yearsData);
-            // console.log('Area chart single years', singleYearsData);
 
             const maxTicks = 6;
-            const tickSize = 8;
+
+            const _tickSize = 8;
+            const _tickPadding = Math.round(_tickSize / 2);
 
             let dateParser = acObject.parser;
 
@@ -917,20 +947,28 @@
             let yScale = d3.scaleLinear()
                 .domain([0, d3.max(singleYearsData,
                         d => d.totVal)])
-                .range([y0Height, 0]);
+                .range([y0Height, 0]).nice();
+
+            let tickScale = d3.scaleLinear()
+                .domain([0, maxTicks])
+                .range([0, d3.max(singleYearsData,
+                    d => d.totVal)]).nice();
+          
+            let _tickValues = [...Array(maxTicks + 1).keys()]
+                .map(t => tickScale(t));
 
             // Create the Y axis generator
             let yAxis = d3.axisLeft(yScale)
-                .ticks(maxTicks)
+                .tickValues(_tickValues)
                 .tickFormat(d3.format(".2s"))
-                .tickPadding(1.0)
-                .tickSize(tickSize);
+                .tickPadding(_tickPadding)
+                .tickSize(_tickSize);
                 
             // Show the Y axis
             acObject.element
                 .select(".group-y-axis")
                     .attr("transform", "translate(-"
-                            + tickSize + ",0)") 
+                            + _tickSize + ",0)") 
                     .classed("hide", false)
                 .call(yAxis);
 
@@ -1036,6 +1074,54 @@
                         isActive(d, true))
                     .classed("highlight-stroke", d =>
                         isActive(d, true));
+        };
+
+        let initCirclesWeight = () => {
+            let weightElems = d3.select("#container-weights")
+                .selectAll(".group-weight")
+                    .data(migrationThreshs)
+                .enter()
+                .append("g")
+                    .classed(".group-weight", true)
+                    .classed("pointer", true)
+                    .attr("id", d => `label-${d}`);
+
+            let pctFormat = d3.format("%");
+
+            let radiusScale = d3.scaleOrdinal()
+                .domain(migrationThreshs)
+                .range(["2", "4", "6", "9", "12"]);
+
+            let cxScale = d3.scaleOrdinal()
+                .domain(migrationThreshs)
+                .range([0.9, 0.7, 0.5, 0.3, 0.1]);
+
+            let _xScale = d3.scaleOrdinal()
+                .domain(migrationThreshs)
+                .range([0.885, 0.67, 0.45, 0.26, 0.06]);
+
+            let nospaceFormat = (d) => {
+                return transformNumberFormat(d, false, 0)
+                    .replace(" ", "");
+            }
+
+            weightElems
+                .append("ellipse")
+                    .attr("cy", 15)
+                    .attr("cx", d => pctFormat(cxScale(d)))
+                    .attr("rx", d => radiusScale(d))
+                    .attr("ry", d => radiusScale(d))
+                    .attr("fill", d => weightScale(d));
+
+            weightElems
+                .append("text")
+                    .attr("stroke", d => strokeColor(d))
+                    .attr("font-size", 14)
+                    .attr("y", "50")
+                    .attr("x", d => pctFormat(_xScale(d)))
+                .text(d => nospaceFormat(d));
+
+            return weightElems;
         };
 
         $scope.$watch("genderFilterValue", (newVal, oldVal) => {
