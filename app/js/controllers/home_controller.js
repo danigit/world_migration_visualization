@@ -12,74 +12,68 @@
 
     function homeController($scope, $state, dataService, feedService) {
         $scope.yearFeeds = [];
+        $scope.playPauseBtn = null;
+        $scope.isRunning = true;
+        $scope.selectedSources = [];
+        $scope.selectedDestinations = [];
+        $scope.searchSource = "";
+        $scope.searchDestination = "";
+        $scope.genderFilterValue = "menu-all";
+        $scope.selectedCountries = {
+            source: [],
+            destination: [],
+        };
 
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
-
+        let localDashArray = d3.local();
         let svgMapWidth;
         let svgMapHeight;
+        let worldJson;
+        let homeInfoBox;
+        let zoomMap;
+        let yearIdx = 0;
+        let yearRep = 0;
+        let isPaused = false;
+        let selectionChanged = false;
+        let revertedSelection = false;
+        let textNoFilters = null;
+        let selectorSources = null;
+        let selectorDestinations = null;
+        let yearsData = [];
+        let yearsData_origDest = [];
 
+        let areaChartObject = null;
+        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
         let migrationMagnitudeColors = ["#F6F990", "#F6F990", "#F8FF42", "#C5B409", "#F1860C", "#FF3333"];
 
         // Simplest solution: set the thresholds by hand (after having looked at the dataset's min/max values)
         // Min weight dataset: 1
         // Max weight dataset: 2763183
         let migrationThreshs = [0, 1000, 10000, 100000, 1000000];
-
-        // old choice for the threshold domain
-        // let migrationThreshs = [0, 1000, 100000, 1000000, 5000000];
-
-        let weightScale = d3.scaleThreshold()
-            .domain(migrationThreshs)
-            .range(migrationMagnitudeColors);
-
-        let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
-
-        let yearsData = [];
-        let yearsData_origDest = [];
-
-        let yearIdx = 0;
-        let yearRep = 0;
-
         $scope.weightThresh = migrationThreshs[1];
-
-        let localDashArray = d3.local();
-        
-        let worldJson;
-        let homeInfoBox;
-        let zoomMap;
-        let isPaused = false;
-
-        let areaChartObject = null;
-
-        $scope.playPauseBtn = null;
-        $scope.isRunning = true;
-
-        $scope.selectedCountries = {
-            source: [],
-            destination: [],
-        };
-        $scope.selectedSources = [];
-        $scope.selectedDestinations = [];
+        let weightScale = d3.scaleThreshold().domain(migrationThreshs).range(migrationMagnitudeColors);
 
         let validCountries = {
             source: [],
             destination: [],
         };
 
-        $scope.searchSource = "";
-        $scope.searchDestination = "";
-
+        // function that returns a color given the parameter
         let strokeColor = (d) => {
-            return d === $scope.weightThresh
-                    ? "#0093c4" : "#ffffff";
-        }
+            return d === $scope.weightThresh ? "#0093c4" : "#ffffff";
+        };
 
         let checkValidSelection = () => {
             return filterOrigDest(yearsData) != 0;
         };
 
         let checkChanged = () => {
-            let sourceChanged = !equals($scope.selectedCountries.source, validCountries.source, Country.sort, Country.equals);
+            let sourceChanged = !equals(
+                $scope.selectedCountries.source,
+                validCountries.source,
+                Country.sort,
+                Country.equals
+            );
 
             let destinationChanged = !equals(
                 $scope.selectedCountries.destination,
@@ -129,21 +123,7 @@
             }
         };
 
-        /**
-         * Function that clears the search box in the source select filter
-         */
-        $scope.clearSearch = () => {
-            $scope.searchSource = "";
-            $scope.searchDestination = "";
-        };
-
-        $scope.updateSearch = (event) => {
-            event.stopPropagation();
-        };
-
-        let selectionChanged = false;
-        let revertedSelection = false;
-
+        // controlling the state of the sources variable
         $scope.$watch("selectedCountries.source", (newVal, oldVal) => {
             if (revertedSelection) {
                 revertedSelection = false;
@@ -167,6 +147,7 @@
             }
         });
 
+        // controlling the state of the destinations variable
         $scope.$watch("selectedCountries.destination", (newVal, oldVal) => {
             if (revertedSelection) {
                 revertedSelection = false;
@@ -196,11 +177,6 @@
             }
         });
 
-        let textNoFilters = null;
-
-        let selectorSources = null;
-        let selectorDestinations = null;
-
         let filterOrigDest = (_yearsData) => {
             let _yearsData_weighted = _yearsData.filter((d) => d.weight >= $scope.weightThresh);
 
@@ -215,29 +191,25 @@
             } else if (countriesDest.length == 0) {
                 return _yearsData_weighted.filter((d) => countriesOrig.includes(d.sourceName));
             } else {
-                return _yearsData_weighted.filter((d) => countriesOrig.includes(d.sourceName) && countriesDest.includes(d.destinationName));
+                return _yearsData_weighted.filter(
+                    (d) => countriesOrig.includes(d.sourceName) && countriesDest.includes(d.destinationName)
+                );
             }
         };
 
-        $scope.genderFilterValue = "menu-all";
-
-        let isBadCountry = (props) => {
-            return !props || !(props instanceof Country);
-        };
-
         /**
-         * Function that handles the click on the gender radio group filter in the menu
-         * @param {string} genderVal
+         * Function that interrupt the arcs transition
          */
-        $scope.handleGenderClick = function (genderVal) {
-            $scope.genderFilterValue = genderVal;
-        };
-
         let pauseArcs = () => {
             $scope.geoObject.element.selectAll(".arch-path").interrupt();
             $scope.geoObject.element.selectAll("circle").interrupt();
         };
 
+        /**
+         * Function that computes the remaining duration of a paused transition
+         * @param {object} currentElem
+         * @returns
+         */
         let resumedDuration = (currentElem) => {
             let dashArray = localDashArray.get(currentElem);
             let trajectoryEndpoints = dashArray.split(",").map(Number);
@@ -247,6 +219,11 @@
             return ARCS_DURATION * (1 - elapsedPct);
         };
 
+        /**
+         * Function that handles the number of repetitions of the transitions for each year
+         * @param {object} map
+         * @param {array} arcElems
+         */
         let _handleArcsRepetition = (map, arcElems) => {
             if (yearRep == HOME_MAP_YEAR_REPS) {
                 yearRep = 0;
@@ -260,24 +237,37 @@
             }
         };
 
+        /**
+         * Function that handles the mouse over for the paused arcs
+         * @param {object} path
+         * @param {object} d
+         * @param {object} source
+         * @param {object} destination
+         * @param {object} homeInfoBox
+         */
         let arcsMouseOver = (path, d, source, destination, homeInfoBox) => {
+            // getting the source country
             d3.select("#" + source.id)
                 .transition()
                 .delay(400)
                 .attr("fill", HOVERED_COLOR)
                 .attr("stroke", "#63b3d4");
+
+            // getting the destination country
             d3.select("#" + destination.id)
                 .transition()
                 .delay(400)
                 .attr("fill", HOVERED_COLOR)
                 .attr("stroke", "#63b3d4");
-            d3.select(path).attr("stroke", "#0093c4").style("stroke-linecap", "round").attr("stroke-width", 4);
 
+            // updating the path characteristics
+            d3.select(path).attr("stroke", "#0093c4").style("stroke-linecap", "round").attr("stroke-width", 4);
             d3.select(path)
                 .transition()
                 .duration(500)
                 .attr("stroke-dasharray", path.getTotalLength() + ", 0");
 
+            // setting the opacity for the non selected paths
             $scope.geoObject.element
                 .selectAll(".arch-path")
                 .filter((c) => {
@@ -289,6 +279,7 @@
 
             d3.select(path).style("opacity", 1);
 
+            // filling the info box
             homeInfoBox.innerHTML = `
                         <div class="width-100 color-white font-size-medium">
                         <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Source:</div><div class="text-right width-100">${
@@ -307,33 +298,55 @@
                         `;
         };
 
+        /**
+         * Function that handles the mouse out for the paused arcs
+         * @param {object} path
+         * @param {object} source
+         * @param {object} destination
+         * @param {object} homeInfoBox
+         */
         let arcsMouseOut = (path, source, destination, homeInfoBox) => {
+            // getting the source country
             d3.select("#" + source.id)
                 .interrupt()
                 .attr("fill", HOME_COUNTRY_COLOR)
                 .attr("stroke", HOME_COUNTRY_MAP_STROKE);
+
+            // getting the destination country
             d3.select("#" + destination.id)
                 .interrupt()
                 .attr("fill", HOME_COUNTRY_COLOR)
                 .attr("stroke", HOME_COUNTRY_MAP_STROKE);
 
+            // changing the path characteristics
             d3.select(path)
                 .attr("stroke", getMigrationColor(d3.select(path).data()[0].weight))
                 .attr("stroke-width", 2)
                 .attr("stroke-dasharray", localDashArray.get(path));
 
+            // resuming the path length
             d3.select(path).interrupt().attr("stroke-dashoffset", path.getTotalLength());
-
             $scope.geoObject.element.selectAll(".arch-path").interrupt().transition().duration(200).style("opacity", 1);
+
+            // filling the info box
             homeInfoBox.innerHTML = "Information on hover will be shown here";
         };
 
         // FIXME: Handle split on undefined (dashArray)
+        /**
+         * Function that resume the animation for the paused arcs
+         */
         let resumeArcs = () => {
             let map = $scope.geoObject.element;
 
-            let arcElems = map.select(".arch-container").selectAll(".arch-path").on("mouseover", null).on("mouseout", null);
+            // removing event listeners for the arcs
+            let arcElems = map
+                .select(".arch-container")
+                .selectAll(".arch-path")
+                .on("mouseover", null)
+                .on("mouseout", null);
 
+            // resuming the path characteristics
             let arcElemsTrans = arcElems
                 .transition()
                 .duration(function () {
@@ -375,8 +388,11 @@
             );
         };
 
+        /**
+         * Drawing the map
+         */
         dataService.loadWorldMap().then((_worldJson) => {
-            textNoFilters = d3.select('#text-no-filters');
+            textNoFilters = d3.select("#text-no-filters");
 
             selectorSources = d3.select("#select-sources");
             selectorDestinations = d3.select("#select-destinations");
@@ -396,6 +412,7 @@
             $scope.playPauseBtn = IC_PAUSE;
             $scope.$apply();
 
+            // handling the play/pause button for the arcs
             document.getElementById("playpause-btn").addEventListener("click", () => {
                 isPaused = $scope.playPauseBtn === IC_PAUSE;
 
@@ -410,6 +427,7 @@
                 $scope.$apply();
             });
 
+            // handling the removal of all the filters
             document.getElementById("clear-all").addEventListener("click", () => {
                 $scope.selectedCountries.source = [];
                 $scope.selectedCountries.destination = [];
@@ -419,42 +437,34 @@
                 $scope.$apply();
             });
 
-            weightElems
-                .on("click", function(_, d) {
-                    $scope.weightThresh = d;
+            weightElems.on("click", function (_, d) {
+                $scope.weightThresh = d;
 
-                    weightElems.select("text")
-                            .attr("stroke", d => strokeColor(d));
+                weightElems.select("text").attr("stroke", (d) => strokeColor(d));
 
-                    // FIXME: Prevent update if empy yearsData_origDest
-                    // FIXME: Restore old weight circle
+                // FIXME: Prevent update if empy yearsData_origDest
+                // FIXME: Restore old weight circle
 
-                    if (!isPaused)
-                        pauseArcs();
+                if (!isPaused) pauseArcs();
 
-                    initArcs($scope.geoObject.element, false);
+                initArcs($scope.geoObject.element, false);
 
-                    drawAreaChart(areaChartObject,
-                                yearsData_origDest);
+                drawAreaChart(areaChartObject, yearsData_origDest);
 
-                    if (isPaused) {
-                        $scope.playPauseBtn = IC_PAUSE;
-                    }
-                });
+                if (isPaused) {
+                    $scope.playPauseBtn = IC_PAUSE;
+                }
+            });
 
             homeInfoBox = document.querySelector("#home-info-div");
         });
 
-        /* $scope.$watch("isRunning", (newVal, oldVal) => {
-            if (newVal != oldVal) {
-                if (!newVal) {
-                    pauseArcs();
-                } else {
-                    resumeArcs();
-                }
-            }
-        }); */
-
+        /**
+         * Function that define the path for the arcs
+         * @param {object} source
+         * @param {object} target
+         * @returns
+         */
         const defineArc = (source, target) => {
             if (source && target) {
                 const sourceX = source[0],
@@ -495,6 +505,10 @@
             }
         };
 
+        /**
+         * Function that inserts the arcs in the map
+         * @param {object} map
+         */
         let drawArcs = (map) => {
             if (yearIdx == yearsInterval.length - 1) yearIdx = 0;
 
@@ -518,6 +532,12 @@
             updateArcs(map, arcElems);
         };
 
+        /**
+         * Function that handle the arc transition element
+         * @param {object} node
+         * @param {object} startP
+         * @returns
+         */
         function tweenDash(node, startP) {
             var l = node.getTotalLength();
             var i = d3.interpolateString(`${startP},` + l, l + "," + l);
@@ -527,6 +547,12 @@
             };
         }
 
+        /**
+         * Function that draw the centroid circles for the destination countries
+         * @param {object} geoObject
+         * @param {object} destinations
+         * @param {boolean} show
+         */
         let drawCentroids = (geoObject, destinations, show) => {
             if (show) {
                 // createGlows(geoObject.element);
@@ -551,10 +577,20 @@
             }
         };
 
+        /**
+         *  Function that removes all the centroids
+         * @param {object} geoObject
+         */
         let removeCentroids = (geoObject) => {
             geoObject.element.selectAll("circle").remove();
         };
 
+        /**
+         * Function that updates the arcs transition
+         * @param {object} map
+         * @param {array} arcElems
+         * @param {boolean} delayTrans
+         */
         let updateArcs = (map, arcElems, delayTrans = false) => {
             let destinations = [];
             arcElems.each((d) => {
@@ -603,11 +639,19 @@
             // arcElems.style("filter", "url(#glow)");
         };
 
+        /**
+         * Function that creates a glow effect
+         * @param {object} map
+         */
         const createGlows = (map) => {
             const defs = map.append("defs");
             const filter = defs.append("filter").attr("id", "glow");
 
-            filter.append("feGaussianBlur").attr("class", "blur").attr("stdDeviation", "7").attr("result", "coloredBlur");
+            filter
+                .append("feGaussianBlur")
+                .attr("class", "blur")
+                .attr("stdDeviation", "7")
+                .attr("result", "coloredBlur");
 
             const feMerge = filter.append("feMerge");
 
@@ -615,10 +659,20 @@
             feMerge.append("feMergeNode").attr("in", "SourceGraphic");
         };
 
+        /**
+         * Function that returns the migration color given the number passed as parameter
+         * @param {number} weight
+         * @returns
+         */
         let getMigrationColor = (weight) => {
             return weightScale(weight);
         };
 
+        /**
+         * Function that creates the data structure for the arcs
+         * @param {object} ioData
+         * @returns
+         */
         let extractYearsData = (ioData) => {
             let _yearsData = [];
 
@@ -650,7 +704,6 @@
                                         nextTot: c1[k],
                                         sourceName: k,
                                         destinationName: c.Destination,
-                                        radius: 2,
                                         fill: getMigrationColor(weight),
                                         year: prev.Year + "-" + c1.Year,
                                         sourceCentroid: ioData.find((e) => e.Destination === k).centroid,
@@ -671,7 +724,7 @@
         };
 
         /**
-         * Function that draws the migration on the map
+         * Function that initialize the migration arcs
          * @param {object} map
          */
         let initArcs = (mapElem, loadData = true) => {
@@ -680,9 +733,11 @@
                     yearsData = [];
 
                     yearsData = extractYearsData(ioData);
-                    
+
                     migrationThreshs = d3.extent(
-                        extractYearsData(ioData).map(d => d.weight).filter(weight => weight > 0)
+                        extractYearsData(ioData)
+                            .map((d) => d.weight)
+                            .filter((weight) => weight > 0)
                     );
 
                     console.log("migration thresholds ", migrationThreshs);
@@ -703,6 +758,12 @@
                 drawArcs(mapElem);
             });
         };
+
+        /**
+         * Function that initialize the world map
+         * @param {object} worldData
+         * @returns
+         */
         let initMap = (worldData) => {
             let mapContainer = d3.select("#map");
             mapContainer.html("");
@@ -710,26 +771,23 @@
             svgMapWidth = mapContainer.node().getBoundingClientRect().width;
             svgMapHeight = mapContainer.node().getBoundingClientRect().height;
 
-            let svgPaddings = { top: 128, right: 0, bottom: 0, left: 0 };
-
             let mapProjection = d3
                 .geoMercator()
                 .scale(170)
-                .translate([svgMapWidth / 2, svgMapHeight / 2 + svgPaddings.top]);
+                .translate([svgMapWidth / 2, svgMapHeight / 2 + 128]);
 
             let geoPath = d3.geoPath().projection(mapProjection);
 
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
 
             let svgMap = svgMapContainer.append("g").attr("id", "map-group");
+
             zoomMap = d3
                 .zoom()
                 .scaleExtent([1, 10])
                 .on("zoom", (e) => svgMap.attr("transform", e.transform));
 
-            let geoJson = worldData;
-
-            geoJson.forEach((d) => {
+            worldData.forEach((d) => {
                 if (isBadCountry(d.properties)) return;
 
                 d.properties.props["C"] = mapProjection(d3.geoCentroid(d));
@@ -739,13 +797,18 @@
             svgMapContainer.call(zoomMap.transform, () => d3.zoomIdentity.scale(1));
 
             return {
-                data: geoJson,
+                data: worldData,
                 element: svgMap,
                 path: geoPath,
                 projection: mapProjection,
             };
         };
 
+        /**
+         * Function that handless the enter set of the map
+         * @param {object} _enter
+         * @param {object} _path
+         */
         let _handleMapEnter = (_enter, _path) => {
             _enter
                 .append("path")
@@ -755,7 +818,11 @@
                 .attr("fill", HOME_COUNTRY_COLOR)
                 .attr("stroke", HOME_COUNTRY_MAP_STROKE)
                 .on("mouseover", (e, d) => {
-                    d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR).attr("stroke", "#63b3d4");
+                    d3.select(e.target)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", HOVERED_COLOR)
+                        .attr("stroke", "#63b3d4");
                     homeInfoBox.innerHTML = `
                     <div>
                         <div class="display-flex">
@@ -766,11 +833,19 @@
                     `;
                 })
                 .on("mouseout", (e, d) => {
-                    d3.select(e.target).transition().duration(100).attr("fill", HOME_COUNTRY_COLOR).attr("stroke", HOME_COUNTRY_MAP_STROKE);
+                    d3.select(e.target)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", HOME_COUNTRY_COLOR)
+                        .attr("stroke", HOME_COUNTRY_MAP_STROKE);
                     homeInfoBox.innerHTML = "Information on hover will be shown here";
                 });
         };
 
+        /**
+         * Function that draws the map
+         * @param {object} geoObject
+         */
         let drawMap = (geoObject) => {
             if (!geoObject.element.selectAll(".map-container")._groups[0].length) {
                 geoObject.element.append("g").attr("class", "map-container");
@@ -787,6 +862,10 @@
             initArcs(geoObject.element);
         };
 
+        /**
+         * Function that initialize the area chart
+         * @returns
+         */
         let initAreaChart = () => {
             const svgMargins = { left: 50, right: 12, top: 18, bottom: 8 };
 
@@ -795,7 +874,8 @@
             let dateParser = d3.timeParse("%Y");
 
             let svgWidth = areaChartContainer.node().getBoundingClientRect().width - svgMargins.left - svgMargins.right;
-            let svgHeight = areaChartContainer.node().getBoundingClientRect().height - svgMargins.top - svgMargins.bottom;
+            let svgHeight =
+                areaChartContainer.node().getBoundingClientRect().height - svgMargins.top - svgMargins.bottom;
 
             // Create the SVG element
             let svgAreaChart = areaChartContainer
@@ -806,7 +886,11 @@
                 .attr("transform", "translate(" + svgMargins.left + ", " + svgMargins.top + ")");
 
             // Append the Y axis group
-            svgAreaChart.append("g").classed("axis-dark-cyan", true).classed("group-y-axis", true).classed("hide", true);
+            svgAreaChart
+                .append("g")
+                .classed("axis-dark-cyan", true)
+                .classed("group-y-axis", true)
+                .classed("hide", true);
 
             // Append the X axis group
             svgAreaChart
@@ -835,7 +919,6 @@
 
         /**
          * Extract data for individual years from year ranges between 1990 and 2019.
-         *
          * @param {boolean} l
          */
         let extractSingles = (_yearsData) => {
@@ -872,6 +955,11 @@
             return _singleYearsData;
         };
 
+        /**
+         * Function that draws the area chart
+         * @param {object} acObject
+         * @param {array} _yearsData
+         */
         let drawAreaChart = (acObject, _yearsData) => {
             let singleYearsData = extractSingles(_yearsData);
 
@@ -887,42 +975,35 @@
             const y0Height = acObject.dimens.height - acObject.margins.top - acObject.margins.bottom;
 
             // Create the X scale
-            let xScale = d3
-                .scaleTime()
-                .domain(d3.extent(allYears))
-                .range([0, acObject.dimens.width - acObject.margins.right]);
+            let xScale = createScale(d3.extent(allYears), [0, acObject.dimens.width - acObject.margins.right], "time");
 
             // Create the X axis generator
             let xAxis = d3.axisBottom(xScale).tickValues(allYears).tickSize(0);
 
             // Create the Y scale
-            let yScale = d3.scaleLinear()
-                .domain([0, d3.max(singleYearsData,
-                        d => d.totVal)])
-                .range([y0Height, 0]).nice();
+            let yScale = createScale([0, d3.max(singleYearsData, (d) => d.totVal)], [y0Height, 0], "linear").nice();
 
-            let tickScale = d3.scaleLinear()
-                .domain([0, maxTicks])
-                .range([0, d3.max(singleYearsData,
-                    d => d.totVal)]).nice();
-          
-            let _tickValues = [...Array(maxTicks + 1).keys()]
-                .map(t => tickScale(t));
+            let tickScale = createScale([0, maxTicks], [0, d3.max(singleYearsData, (d) => d.totVal)], "linear").nice();
+
+            let _tickValues = [...Array(maxTicks + 1).keys()].map((t) => tickScale(t));
 
             // Create the Y axis generator
-            let yAxis = d3.axisLeft(yScale)
+            let yAxis = d3
+                .axisLeft(yScale)
                 .tickValues(_tickValues)
                 .tickFormat(d3.format(".2s"))
                 .tickPadding(_tickPadding)
                 .tickSize(_tickSize);
-                
+
             // Show the Y axis
             acObject.element
                 .select(".group-y-axis")
-                    .attr("transform", "translate(-"
-                            + _tickSize + ",0)") 
-                    .classed("hide", false)
+                .attr("transform", "translate(-" + _tickSize + ",0)")
+                .classed("hide", false)
                 .call(yAxis);
+
+            // Show the X axis
+            acObject.element.select(".group-x-axis").classed("hide", false).call(xAxis);
 
             // Create the area generator
             let areaGenerator = d3
@@ -941,7 +1022,11 @@
 
             let acElemEnter = acElem.enter().append("path").attr("class", "area-chart");
 
-            acElem = acElemEnter.merge(acElem).transition().duration(TRANSITION_DURATION).attr("d", areaGenerator(singleYearsData));
+            acElem = acElemEnter
+                .merge(acElem)
+                .transition()
+                .duration(TRANSITION_DURATION)
+                .attr("d", areaGenerator(singleYearsData));
 
             // Create the circles
             let circleElems = acObject.element
@@ -980,6 +1065,11 @@
             updateAreaChartTick(acObject, yearIdx);
         };
 
+        /**
+         * Function that updates the interval year on the line chart
+         * @param {object} acObject
+         * @param {number} _yearIdx
+         */
         let updateAreaChartTick = (acObject, _yearIdx) => {
             let _actvRange = yearsInterval[_yearIdx].split("-");
             let dateParser = acObject.parser;
@@ -1007,58 +1097,55 @@
                 .classed("highlight-stroke", (d) => isActive(d, true));
         };
 
+        /**
+         * Function that initialize the migration magnitude filter
+         * @returns
+         */
         let initCirclesWeight = () => {
-            let weightElems = d3.select("#container-weights")
+            let weightElems = d3
+                .select("#container-weights")
                 .selectAll(".group-weight")
-                    .data(migrationThreshs)
+                .data(migrationThreshs)
                 .enter()
                 .append("g")
-                    .classed(".group-weight", true)
-                    .classed("pointer", true)
-                    .attr("id", d => `label-${d}`);
+                .classed(".group-weight", true)
+                .classed("pointer", true)
+                .attr("id", (d) => `label-${d}`);
 
             let pctFormat = d3.format("%");
 
-            let radiusScale = d3.scaleOrdinal()
-                .domain(migrationThreshs)
-                .range(["2", "4", "6", "9", "12"]);
+            let radiusScale = d3.scaleOrdinal().domain(migrationThreshs).range(["2", "4", "6", "9", "12"]);
 
-            let cxScale = d3.scaleOrdinal()
-                .domain(migrationThreshs)
-                .range([0.9, 0.7, 0.5, 0.3, 0.1]);
+            let cxScale = d3.scaleOrdinal().domain(migrationThreshs).range([0.9, 0.7, 0.5, 0.3, 0.1]);
 
-            let _xScale = d3.scaleOrdinal()
-                .domain(migrationThreshs)
-                .range([0.885, 0.67, 0.45, 0.26, 0.06]);
+            let _xScale = d3.scaleOrdinal().domain(migrationThreshs).range([0.885, 0.67, 0.45, 0.26, 0.06]);
 
             let nospaceFormat = (d) => {
-                return transformNumberFormat(d, false, 0)
-                    .replace(" ", "");
-            }
+                return transformNumberFormat(d, false, 0).replace(" ", "");
+            };
 
             weightElems
                 .append("ellipse")
-                    .attr("cy", 15)
-                    .attr("cx", d => pctFormat(cxScale(d)))
-                    .attr("rx", d => radiusScale(d))
-                    .attr("ry", d => radiusScale(d))
-                    .attr("fill", d => weightScale(d));
+                .attr("cy", 15)
+                .attr("cx", (d) => pctFormat(cxScale(d)))
+                .attr("rx", (d) => radiusScale(d))
+                .attr("ry", (d) => radiusScale(d))
+                .attr("fill", (d) => weightScale(d));
 
             weightElems
                 .append("text")
-                    .attr("stroke", d => strokeColor(d))
-                    .attr("font-size", 14)
-                    .attr("y", "50")
-                    .attr("x", d => pctFormat(_xScale(d)))
-                .text(d => nospaceFormat(d));
+                .attr("stroke", (d) => strokeColor(d))
+                .attr("font-size", 14)
+                .attr("y", "50")
+                .attr("x", (d) => pctFormat(_xScale(d)))
+                .text((d) => nospaceFormat(d));
 
             return weightElems;
         };
 
+        // handling the gender filter changes
         $scope.$watch("genderFilterValue", (newVal, oldVal) => {
             if (newVal !== oldVal) {
-                // yearRep = 0;
-
                 if (!isPaused) pauseArcs();
 
                 initArcs($scope.geoObject.element);
@@ -1070,6 +1157,9 @@
         });
 
         // TODO: Get feed data for relevant year
+        /**
+         * Function that gets the feeds data
+         */
         dataService.getFeedData(2019).then((data) => {
             let top5feeds = data.slice(0, 5);
 
@@ -1088,10 +1178,9 @@
             $scope.yearFeeds = [...top5feeds, ...flop5feeds];
         });
 
-        $scope.updateSearch = (event) => {
-            event.stopPropagation();
-        };
-
+        /**
+         * Function that apply the filters when the selection popup is closed
+         */
         $scope.selectionClosed = () => {
             let sourcesDiv = document.querySelector("#sources-tooltip");
             let destinationsDiv = document.querySelector("#destinations-tooltip");
@@ -1112,6 +1201,11 @@
             _handleOnSelectionChanged();
         };
 
+        /**
+         * Function that removes the filter chips when they are clicked
+         * @param {object} chip
+         * @param {object} source
+         */
         $scope.remove = function (chip, source) {
             _handleOnSelectionChanged();
             let textNoFilters = d3.select("#text-no-filters");
@@ -1125,7 +1219,9 @@
             } else {
                 let destinationsDiv = document.querySelector("#destinations-tooltip");
                 $scope.selectedDestinations = $scope.selectedDestinations.filter((c) => c !== chip);
-                $scope.selectedCountries.destination = $scope.selectedCountries.destination.filter((c) => c.name !== chip);
+                $scope.selectedCountries.destination = $scope.selectedCountries.destination.filter(
+                    (c) => c.name !== chip
+                );
                 if ($scope.selectedDestinations.length == 0) {
                     destinationsDiv.classList.add("display-none");
                 }
@@ -1134,6 +1230,39 @@
             if ($scope.selectedSources.length == 0 && $scope.selectedDestinations.length == 0) {
                 textNoFilters.classed("hide", false);
             }
+        };
+
+        /**
+         * Function that controls if the passed country is valid
+         * @param {object} props
+         * @returns
+         */
+        let isBadCountry = (props) => {
+            return !props || !(props instanceof Country);
+        };
+
+        /**
+         * Function that clears the search box in the source select filter
+         */
+        $scope.clearSearch = () => {
+            $scope.searchSource = "";
+            $scope.searchDestination = "";
+        };
+
+        /**
+         * Function that prevent the event propagation for the event passed as parameter
+         * @param {event} event
+         */
+        $scope.updateSearch = (event) => {
+            event.stopPropagation();
+        };
+
+        /**
+         * Function that handles the click on the gender radio group filter in the menu
+         * @param {string} genderVal
+         */
+        $scope.handleGenderClick = function (genderVal) {
+            $scope.genderFilterValue = genderVal;
         };
     }
 })();

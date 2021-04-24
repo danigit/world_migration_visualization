@@ -1,6 +1,6 @@
+<!-- File that defines the home page html -->
 <div layout="column" class="parent-size">
     <div ng-include="'app/commons/navbar.html'" onload="active='home'"></div>
-
     <div layout="row" class="parent-size">
         <!--menu container-->
         <div id="menu-container" ng-controller="menuController as menuCtrl"
@@ -18,7 +18,8 @@
                     </md-toolbar>
                     <div layout="column">
                         <civ class="width-100">
-                            <md-button id="clear-all" class="color-white font-size-10px float-right">Clear all</md-button>
+                            <md-button id="clear-all" class="color-white font-size-10px float-right">Clear all
+                            </md-button>
                         </civ>
                         <div
                             class="filters-container margin-lr-auto font-size-small color-lightgray clear-float border-radius-10px overflow-auto max-height-150-px">
@@ -47,6 +48,7 @@
                             </radio-button-group>
                         </div>
 
+                        <!-- Future work - insert filter by region -->
                         <!-- <hr class="menu-divider width-100" />
                         <div class="width-90 margin-auto">
                             <radio-button-group selected-button="regionFilterValue"
@@ -56,7 +58,6 @@
                         </div> -->
 
                         <hr class="menu-divider" />
-
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
                             <label>Select sources...</label>
                             <md-select ng-model="selectedCountries.source" md-on-close="selectionClosed()" multiple>
@@ -96,6 +97,7 @@
                             </svg>
                         </div>
                         <hr class="menu-divider width-100" />
+                        <!-- Future work - insert filter by year range -->
                         <!-- <div class="width-80 margin-auto color-white"><label>Restrict time span</label></div>
                         <div id="home-slider" class="width-80 margin-auto">
                             <rzslider rz-slider-model="sliderYears.minValue" rz-slider-high="sliderYears.maxValue"
@@ -130,7 +132,6 @@
                     <img id="playpause-btn" ng-src="{{playPauseBtn}}"
                         class="float-right pointer zindex-100 parent-size">
                 </div>
-
                 <div id="home-area-chart" class="height-80 display-block"></div>
             </div>
 

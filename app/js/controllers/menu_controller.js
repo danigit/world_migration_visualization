@@ -23,12 +23,9 @@
         });
         $scope.genderButtons = dataService.genderButtons;
         $scope.regionButtons = dataService.regionButtons;
-        // $scope.selectedCountries = {
-        //     source: [],
-        //     destination: [],
-        // };
 
         // variable that holds the values for the slider
+        // This is a future work
         $scope.sliderYears = {
             minValue: 1990,
             maxValue: 2019,
@@ -52,14 +49,10 @@
         });
 
         /**
-         * Function that updates the statistics
-         */
-        let updateMap = () => {};
-
-        /**
          * Function that handles the click on the region radio group filter in the menu
          * @param {string} value
          */
+        // this is a future work
         $scope.handleRegionClick = function (value) {
             $scope.regionFilterValue = value;
             updateStatistics();
@@ -72,9 +65,5 @@
             $scope.isSideMenuOpened = $scope.isSideMenuOpened ? false : true;
             resizeMenuPanel($scope.isSideMenuOpened);
         };
-
-        // $scope.updateSearch = (event) => {
-        //     event.stopPropagation();
-        // };
     }
 })();

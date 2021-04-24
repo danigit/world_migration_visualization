@@ -28,9 +28,6 @@
         let firstRateOfChangeLineChartStructureCall = true;
         let firstRefugeesLineChartStructureCall = true;
         let countryColors = { left: "#1f78b4", right: "#a6cee3" };
-        let margins = { top: 20, bottom: 60, left: 20, right: 20 };
-        let width = 500 - margins.left - margins.right;
-        let height = 300 - margins.top - margins.bottom;
 
         let sliderMin = 1990;
         let sliderMax = 2019;
@@ -474,32 +471,34 @@
             // creating the svg container
             let svg = container
                 .append("svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", SVG_WIDTH)
+                .attr("height", SVG_HEIGHT)
                 .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px");
 
-            svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
+            svg.append("g")
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
+                .attr("class", "main-group");
 
             let subgroups = ["left", "right"];
             let groups = data.map((d) => d.label);
 
             // creating the x axis
-            let x = createScale(groups, [margins.left, width - margins.right], "band");
+            let x = createScale(groups, [SVG_MARGINS.left, SVG_WIDTH - SVG_MARGINS.right], "band");
 
             // creating the y axis
             let y = createScale(
                 [0, d3.max(data, (d) => Math.max(d.value.left[0], d.value.right[0]))],
-                [height - margins.top - margins.bottom, 0],
+                [SVG_HEIGHT - SVG_MARGINS.top - SVG_MARGINS.bottom, 0],
                 "linear"
             );
 
             // creating the subgroups
-            let xSubGroup = createScale(subgroups, [margins.left, x.bandwidth() + margins.right], "band", 0.2);
+            let xSubGroup = createScale(subgroups, [SVG_MARGINS.left, x.bandwidth() + SVG_MARGINS.right], "band", 0.2);
 
             // creating the bars labels container
             svg.append("g")
                 .attr("class", "axis-dark-cyan")
-                .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_HEIGHT - SVG_MARGINS.bottom})`)
                 .call(d3.axisBottom(x))
                 .selectAll("text")
                 .attr("transform", "rotate(25)")
@@ -508,8 +507,8 @@
             // inserting the x axis
             svg.append("g")
                 .attr("class", "grid-lines y-axis")
-                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
-                .call(d3.axisLeft(y).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, ${SVG_MARGINS.top})`)
+                .call(d3.axisLeft(y).tickSize(-SVG_WIDTH).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             let svgGroups = svg
                 .select(".main-group")
@@ -517,7 +516,7 @@
                 .data(data)
                 .enter()
                 .append("g")
-                .attr("transform", (d) => `translate(${x(d.label) - margins.left}, 0)`)
+                .attr("transform", (d) => `translate(${x(d.label) - SVG_MARGINS.left}, 0)`)
                 .attr("class", "groups");
 
             return {
@@ -558,14 +557,14 @@
                 .select("g.grid-lines.y-axis")
                 .transition()
                 .duration(TRANSITION_DURATION)
-                .call(d3.axisLeft(svgElement.y).tickSize(-width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(d3.axisLeft(svgElement.y).tickSize(-SVG_WIDTH).tickSizeOuter(0).tickFormat(d3.format(".2s")));
 
             // updating the bars
             update
                 .transition()
                 .duration(TRANSITION_DURATION)
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("height", (d) => height - margins.bottom - margins.top - svgElement.y(d.val));
+                .attr("height", (d) => SVG_HEIGHT - SVG_MARGINS.bottom - SVG_MARGINS.top - svgElement.y(d.val));
         };
 
         /**
@@ -650,18 +649,20 @@
                             .attr(
                                 "transform",
                                 (_, i) =>
-                                    `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`
+                                    `translate(${-SVG_WIDTH + SVG_MARGINS.left + SVG_MARGINS.right + i * 200}, ${
+                                        SVG_HEIGHT - 13
+                                    } )`
                             );
                         group
                             .append("rect")
-                            .attr("x", width + 10)
+                            .attr("x", SVG_WIDTH + 10)
                             .attr("width", LEGEND_SQUARE_DIM)
                             .attr("height", LEGEND_SQUARE_DIM)
                             .style("fill", (_, i) => getCountryColor(i));
 
                         group
                             .append("text")
-                            .attr("x", width + 40)
+                            .attr("x", SVG_WIDTH + 40)
                             .attr("y", LEGEND_SQUARE_DIM)
                             .attr("font-size", "small")
                             .style("text-anchor", "start")
@@ -689,37 +690,37 @@
             // creating the svg container
             let svg = lineChartContainer
                 .append("svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", SVG_WIDTH)
+                .attr("height", SVG_HEIGHT)
                 .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px");
 
             //creating the group for the left line chart
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "left-line-chart");
 
             //creating the group for the right line chart
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "right-line-chart");
 
             // creating the x-scale
             let xScale = createScale(
                 [d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[5].label, +1)],
-                [margins.left, width - margins.right - 15],
+                [SVG_MARGINS.left, SVG_WIDTH - SVG_MARGINS.right - 15],
                 "time"
             );
 
             // creating the y-scale
             let yScale = createScale(
                 [minMax.MinRateOfChange, minMax.MaxRateOfChange],
-                [height - margins.bottom - margins.top, 0],
+                [SVG_HEIGHT - SVG_MARGINS.bottom - SVG_MARGINS.top, 0],
                 "linear"
             );
 
             // inserting the x axis
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_HEIGHT - SVG_MARGINS.bottom})`)
                 .style("font-size", "10px")
                 .attr("class", "axis-dark-cyan")
                 .call(d3.axisBottom(xScale).ticks(data.length))
@@ -729,14 +730,14 @@
 
             // inserting the y axis
             svg.append("g")
-                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, ${SVG_MARGINS.top})`)
                 .style("font-size", "10px")
                 .attr("class", "grid-lines y-axis")
-                .call(d3.axisLeft(yScale).tickSize(-width).tickSizeOuter(0).ticks(8));
+                .call(d3.axisLeft(yScale).tickSize(-SVG_WIDTH).tickSizeOuter(0).ticks(8));
 
             // inserting the circles
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "year-circles");
 
             return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
@@ -814,18 +815,20 @@
                             .attr(
                                 "transform",
                                 (_, i) =>
-                                    `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`
+                                    `translate(${-SVG_WIDTH + SVG_MARGINS.left + SVG_MARGINS.right + i * 200}, ${
+                                        SVG_HEIGHT - 13
+                                    } )`
                             );
                         group
                             .append("rect")
-                            .attr("x", width + 10)
+                            .attr("x", SVG_WIDTH + 10)
                             .attr("width", LEGEND_SQUARE_DIM)
                             .attr("height", LEGEND_SQUARE_DIM)
                             .style("fill", (_, i) => getCountryColor(i));
 
                         group
                             .append("text")
-                            .attr("x", width + 40)
+                            .attr("x", SVG_WIDTH + 40)
                             .attr("y", LEGEND_SQUARE_DIM)
                             .attr("font-size", "small")
                             .style("text-anchor", "start")
@@ -853,32 +856,32 @@
             // crating the svg container
             let svg = refugeesContainer
                 .append("svg")
-                .attr("width", width)
-                .attr("height", height)
+                .attr("width", SVG_WIDTH)
+                .attr("height", SVG_HEIGHT)
                 .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px");
 
             // creating the group for the left refugees
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "left-refugees");
 
             // creating the group for the right refugees
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "right-refugees");
 
             // crating the x scale
             let xScale = d3
                 .scaleTime()
                 .domain([d3.timeYear.offset(data.left[0].year, -1), d3.timeYear.offset(data.left[6].year, +1)])
-                .range([margins.left, width - margins.right - 15]);
+                .range([SVG_MARGINS.left, SVG_WIDTH - SVG_MARGINS.right - 15]);
 
             // crating the y scale
-            let yScale = d3.scaleLinear().range([height - margins.bottom - margins.top, 0]);
+            let yScale = d3.scaleLinear().range([SVG_HEIGHT - SVG_MARGINS.bottom - SVG_MARGINS.top, 0]);
 
             // inserting the y axis
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${height - margins.bottom})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_HEIGHT - SVG_MARGINS.bottom})`)
                 .style("font-size", "10px")
                 .attr("class", "axis-dark-cyan")
                 .call(d3.axisBottom(xScale).ticks(data.length))
@@ -888,18 +891,18 @@
 
             // inserting the group for the y axis
             svg.append("g")
-                .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, ${SVG_MARGINS.top})`)
                 .style("font-size", "10px")
                 .attr("class", "grid-lines y-axis");
 
             // inserting the circles for the left country
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "year-circles-left");
 
             // for the right country
             svg.append("g")
-                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_MARGINS.top})`)
                 .attr("class", "year-circles-right");
 
             return { lineChartStructure: svg, xScale: xScale, yScale: yScale };
@@ -926,7 +929,7 @@
                 .call(
                     d3
                         .axisLeft(lineRefugeesStructure.yScale)
-                        .tickSize(-width)
+                        .tickSize(-SVG_WIDTH)
                         .tickSizeOuter(0)
                         .tickFormat(d3.format(".2s"))
                 );
@@ -1013,18 +1016,20 @@
                             .attr(
                                 "transform",
                                 (_, i) =>
-                                    `translate(${-width + margins.left + margins.right + i * 200}, ${height - 13} )`
+                                    `translate(${-SVG_WIDTH + SVG_MARGINS.left + SVG_MARGINS.right + i * 200}, ${
+                                        SVG_HEIGHT - 13
+                                    } )`
                             );
                         group
                             .append("rect")
-                            .attr("x", width + 10)
+                            .attr("x", SVG_WIDTH + 10)
                             .attr("width", LEGEND_SQUARE_DIM)
                             .attr("height", LEGEND_SQUARE_DIM)
                             .style("fill", (_, i) => getCountryColor(i));
 
                         group
                             .append("text")
-                            .attr("x", width + 40)
+                            .attr("x", SVG_WIDTH + 40)
                             .attr("y", LEGEND_SQUARE_DIM)
                             .attr("font-size", "small")
                             .style("text-anchor", "start")
