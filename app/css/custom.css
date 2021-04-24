@@ -833,3 +833,7 @@ md-chip.md-focused {
 .text-glow{
     text-shadow: 0 0 10px #0093c4;
 }
+
+.text-glow-white{
+    text-shadow: 0 0 10px #FFFFFF;
+}

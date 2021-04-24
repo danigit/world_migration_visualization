@@ -1,6 +1,8 @@
+<!-- File that defines the country page html -->
 <div layout="column" class="parent-size max-width-1920-px margin-auto min-width-1520-px">
     <div ng-include="'app/commons/navbar.html'" onload="active='statistics'"></div>
 
+    <!-- World, Country, Compare menu container -->
     <div layout="row" class="background-dark height-5">
         <div class="width-30 margin-auto margin-top-20-px">
             <radio-button-group selected-button="secondaryMenuSelectedValue"
@@ -8,16 +10,18 @@
                 buttons="statisticsButtons" radio-buttons-class="'md-button border-1'">
         </div>
     </div>
+
     <div layout="row" class="background-dark height-95">
+        <!-- Left column container -->
         <div class="width-20">
             <div layout="column">
                 <div class="color-white margin-top-15-px margin-left-20px">
-                    <div id="title-year" class="font-size-xx-large text-bold"></div>
+                    <div id="title-year" class="font-size-xx-large text-bold text-glow-white"></div>
                     <div id="title-label" class="font-large margin-top-10-px color-darkcyan"></div>
                 </div>
             </div>
-
             <hr class="menu-divider">
+            <!-- metric explanation container -->
             <div layout="column" class="color-white margin-top-none">
                 <div ng-if="selectedMetric === 'total_immigration'"
                     class="font-size-small color-white padding-10-px text-justify">
@@ -50,15 +54,17 @@
                     </div>
                 </div>
                 <div id="global-statistics"></div>
-                <div class="color-white font-size-small padding-10-px">Click on a bar in the above plot to filter
+                <div class="color-lightgray font-size-small padding-10-px">Click on a bar in the above plot to filter
                     the visualized statistics.</div>
             </div>
         </div>
+        <!-- Map visualization container -->
         <div layout="column" class="width-80">
             <div class="height-80 position-relative">
                 <div id="map-container"
                     class="height-100 min-height-400-px max-height-700-px margin-top-10-px overflow-hidden">
                 </div>
+                <!-- Metric selection container -->
                 <div class="position-absolute bottom-0 margin-left-20px">
                     <md-input-container id="visualization-type-container">
                         <label>Visualization type</label>
@@ -71,6 +77,7 @@
                 </div>
             </div>
             <hr class="menu-divider">
+            <!-- Bottom row container -->
             <div layout="row" class="height-20">
                 <div class="width-90 height-100">
                     <div layout="row" class="color-white font-size-small">
@@ -109,6 +116,7 @@
                                 5</span> countries in the world listed according to the selected metric.</div>
                     </div>
                 </div>
+                <!-- Top countries container -->
                 <div class="width-300-px height-100">
                     <div layout="column" class="margin-right-10-px">
                         <top-countries handle-button="handleTopCountryClick(flagValue, 'in')" countries="top5Countries"
@@ -123,6 +131,7 @@
                             top-countries-icon-path="'app/img/home/down.png'"></top-countries>
                     </div>
                 </div>
+                <!-- Top countries tooltip container -->
                 <div layout="column" id="top-flags-tooltip" class="display-none">
                     <div>{{selectedTopFlag}}</div>
                 </div>
@@ -130,6 +139,4 @@
         </div>
     </div>
 
-</div>
-<!-- end map container-->
 </div>

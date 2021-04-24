@@ -1,3 +1,6 @@
+/**
+ * Directive that creates the top countries elements
+ */
 angular.module("top-countries", []).directive("topCountries", function () {
     return {
         require: "ngModel",

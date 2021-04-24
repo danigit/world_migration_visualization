@@ -8,9 +8,9 @@
      * Function that handlle the user login
      */
 
-    homeController.$inject = ["$scope", "$state", "dataService", "feedService"];
+    homeController.$inject = ["$scope", "dataService"];
 
-    function homeController($scope, $state, dataService, feedService) {
+    function homeController($scope, dataService) {
         $scope.yearFeeds = [];
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
@@ -1230,15 +1230,6 @@
             if ($scope.selectedSources.length == 0 && $scope.selectedDestinations.length == 0) {
                 textNoFilters.classed("hide", false);
             }
-        };
-
-        /**
-         * Function that controls if the passed country is valid
-         * @param {object} props
-         * @returns
-         */
-        let isBadCountry = (props) => {
-            return !props || !(props instanceof Country);
         };
 
         /**

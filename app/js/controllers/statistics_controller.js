@@ -18,7 +18,26 @@
         $scope.flop5Countries = [];
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
+        $scope.globalStatisticsVisName = "Global statistics";
+        $scope.selectedMetric = "total_immigration";
+        $scope.barChartInitialized = false;
+        $scope.geoObject = null;
+        $scope.activeYears = dataService.getActiveYears();
+        $scope.globalStatistics = {};
 
+        const titleYear = document.getElementById("title-year");
+        const titleLabel = document.getElementById("title-label");
+        const BAD_COUNTRY_COLOR = "#ff5952";
+        const HIGHLIGHTED_COLOR = "#ff9316";
+        let colorScheme = d3.schemeBlues[9];
+        let colorScale, colorTicks;
+        let barChartSvgElement;
+        let svgMapWidth;
+        let svgMapHeight;
+
+        /**
+         * Function that updates the year visualization
+         */
         let _updateTitle = () => {
             titleLabel.innerHTML = $scope.visualizationTypes.find((t) => t.value === $scope.selectedMetric).text;
 
@@ -34,6 +53,7 @@
             titleYear.innerHTML = yearText;
         };
 
+        // controlling the changes for the countries data
         $scope.$watch("countriesData", function (_new, _old) {
             if (_new !== _old) {
                 _updateTitle();
@@ -42,6 +62,7 @@
             }
         });
 
+        // controlling the changes for the years slider
         $scope.$watch("activeYears", function (_new, _old) {
             if (_new !== _old) {
                 _updateTitle();
@@ -50,34 +71,11 @@
             }
         });
 
-        const titleYear = document.getElementById("title-year");
-        const titleLabel = document.getElementById("title-label");
-
-        const BAD_COUNTRY_COLOR = "#ff5952";
-        const HIGHLIGHTED_COLOR = "#ff9316";
-
-        const colorScheme = d3.schemeBlues[9];
-        let colorScale, colorTicks;
-
-        $scope.globalStatisticsVisName = "Global statistics";
-        $scope.selectedMetric = "total_immigration";
-        $scope.barChartInitialized = false;
-
-        $scope.geoObject = null;
-        $scope.activeYears = dataService.getActiveYears();
-
-        $scope.globalStatistics = {};
-
-        // let selectedYear = -1;
-        let barChartSvgElement;
-
-        let isBadCountry = (props) => {
-            return !props || !(props instanceof Country);
-        };
-
-        let svgMapWidth;
-        let svgMapHeight;
-
+        /**
+         * Function that initialize the map
+         * @param {object} worldData
+         * @returns
+         */
         let initMap = (worldData) => {
             let mapContainer = d3.select("#map-container");
             mapContainer.html("");
@@ -87,6 +85,7 @@
 
             let svgPaddings = { top: 128, right: 0, bottom: 0, left: 0 };
 
+            // creating the projection
             let mapProjection = d3
                 .geoMercator()
                 .scale(170)
@@ -94,21 +93,21 @@
 
             let geoPath = d3.geoPath().projection(mapProjection);
 
+            // creating the svg container
             let svgMapContainer = mapContainer.append("svg").attr("width", svgMapWidth).attr("height", svgMapHeight);
-
+            // creating the map group
             let svgMap = svgMapContainer.append("g").attr("id", "map");
+            // creating the legend group
             svgMapContainer.append("g").classed("legends", true);
-            // let svgGraticule = svgMapContainer.append("g")
-            //         .attr('id', 'graticule');
 
+            // creating the zoom function
             let zoomMap = d3
                 .zoom()
                 .scaleExtent([1, 10])
                 .on("zoom", (e) => svgMap.attr("transform", e.transform));
 
-            let geoJson = worldData;
-
-            geoJson.forEach((d) => {
+            // cleaning the data
+            worldData.forEach((d) => {
                 if (isBadCountry(d.properties)) return;
 
                 d.properties.props["C"] = mapProjection(d3.geoCentroid(d));
@@ -118,7 +117,7 @@
             svgMapContainer.call(zoomMap.transform, () => d3.zoomIdentity.scale(1));
 
             return {
-                data: geoJson,
+                data: worldData,
                 element: svgMap,
                 mapContainer: svgMapContainer,
                 path: geoPath,
@@ -126,6 +125,11 @@
             };
         };
 
+        /**
+         * Function that draws the map
+         * @param {object} geoObject
+         * @param {object} _statChanged
+         */
         let drawMap = (geoObject, _statChanged = true) => {
             let getStatistics_avgByCountry = (activeYears, _reduceFunc) => {
                 let statistics_groupByCountry = d3.group(
@@ -133,7 +137,10 @@
                     (r) => r.Destination
                 );
 
-                let statistics_avgByCountry = map(statistics_groupByCountry, (v) => v.reduce(_reduceFunc, 0) / v.length);
+                let statistics_avgByCountry = map(
+                    statistics_groupByCountry,
+                    (v) => v.reduce(_reduceFunc, 0) / v.length
+                );
 
                 return statistics_avgByCountry;
             };
@@ -143,7 +150,9 @@
             const statistics_avgByCountry = getStatistics_avgByCountry($scope.activeYears, _reduceFunc);
 
             // Extract Top 5 and Flop 5 countries
-            const sorted_avgByCountry = Object.entries(statistics_avgByCountry).sort((a, b) => d3.descending(a[1], b[1]));
+            const sorted_avgByCountry = Object.entries(statistics_avgByCountry).sort((a, b) =>
+                d3.descending(a[1], b[1])
+            );
 
             let top5Countries = sorted_avgByCountry.slice(0, 5);
             let flop5Countries = sorted_avgByCountry.slice(-5);
@@ -160,13 +169,17 @@
                 $scope.$apply();
             });
 
+            // controlling if the statistics has changed
             if (_statChanged) {
                 let statistics_avgValues = null;
 
                 if (equals($scope.activeYears, dataService.getActiveYears())) {
                     statistics_avgValues = Object.values(statistics_avgByCountry);
                 } else {
-                    let statistics_all_avgByCountry = getStatistics_avgByCountry(dataService.getActiveYears(), _reduceFunc);
+                    let statistics_all_avgByCountry = getStatistics_avgByCountry(
+                        dataService.getActiveYears(),
+                        _reduceFunc
+                    );
 
                     statistics_avgValues = Object.values(statistics_all_avgByCountry);
                 }
@@ -174,6 +187,12 @@
                 colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
             }
 
+            /**
+             * Function that handles the country mouse over
+             * @param {event} e
+             * @param {object} d
+             * @param {array} _statistics
+             */
             let _handleMapOnMouseOver = (e, d, _statistics) => {
                 d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR);
 
@@ -192,14 +211,18 @@
                     } else {
                         $scope.hoveredCountry.value = transformNumberFormat(v, false, 1, $scope.selectedMetric);
                     }
-
-                    console.log("Hovering over:", d.properties.visName, "-", v);
                 }
 
                 // Check if a dispatch is under way
                 if (!$scope.$$phase) $scope.$apply();
             };
 
+            /**
+             * Function that handles the country mouse out
+             * @param {event} e
+             * @param {object} d
+             * @param {array} _statistics
+             */
             let _handleMapOnMouseOut = (e, d, _statistics) => {
                 let fillColor = null;
 
@@ -223,6 +246,12 @@
                 d3.select(e.target).transition().duration(100).attr("fill", fillColor);
             };
 
+            /**
+             * Function that handles the enter set of the map
+             * @param {object} _enter
+             * @param {object} _path
+             * @param {array} _statistics
+             */
             let _handleMapEnter = (_enter, _path, _statistics) => {
                 _enter
                     .append("path")
@@ -254,6 +283,11 @@
                     .on("mouseout", (e, d) => _handleMapOnMouseOut(e, d, _statistics));
             };
 
+            /**
+             * Function that handles the update set of the map
+             * @param {object} _update
+             * @param {array} _statistics
+             */
             let _handleMapUpdate = (_update, _statistics) => {
                 _update
                     .on("mouseover", (e, d) => _handleMapOnMouseOver(e, d, _statistics))
@@ -288,11 +322,11 @@
 
             // Create color legend
             colorTicks = colorScale.ticks(9);
-            // console.log(colorTicks.map(d => colorScale(d)));
 
             const rectWidth = 35;
             const rectMargin = 25;
 
+            // updating the legends
             geoObject.mapContainer
                 .select(".legends")
                 .selectAll(".legend-group")
@@ -304,7 +338,7 @@
                             .attr("class", "legend-group")
                             .attr(
                                 "transform",
-                                (d, i) =>
+                                (_, i) =>
                                     "translate(" +
                                     (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
                                     ", " +
@@ -331,7 +365,7 @@
                     (update) => {
                         update.attr(
                             "transform",
-                            (d, i) =>
+                            (_, i) =>
                                 "translate(" +
                                 (svgMapWidth - rectWidth * colorTicks.length + i * rectWidth - rectMargin) +
                                 ", " +
@@ -348,6 +382,7 @@
                     (exit) => exit.remove()
                 );
 
+            // updating the unknown country in the legends
             geoObject.mapContainer
                 .select(".legends")
                 .selectAll(".legend-group-unk")
@@ -359,7 +394,12 @@
                             .attr("class", "legend-group-unk")
                             .attr(
                                 "transform",
-                                (d) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
+                                (d) =>
+                                    "translate(" +
+                                    (svgMapWidth - rectWidth * d - 4 * rectMargin) +
+                                    ", " +
+                                    (svgMapHeight - 45) +
+                                    ")"
                             );
 
                         unknownGroup
@@ -379,15 +419,26 @@
                     (update) => {
                         update.attr(
                             "transform",
-                            (d, i) => "translate(" + (svgMapWidth - rectWidth * d - 4 * rectMargin) + ", " + (svgMapHeight - 45) + ")"
+                            (d, i) =>
+                                "translate(" +
+                                (svgMapWidth - rectWidth * d - 4 * rectMargin) +
+                                ", " +
+                                (svgMapHeight - 45) +
+                                ")"
                         );
                     }
                 );
         };
 
+        /**
+         * Function that draws the centroids for all the countries
+         * @param {object} geoObject
+         */
         let drawCentroids = (geoObject) => {
             // Centroids
-            const geoCentroids = geoObject.element.selectAll("circle").data(geoObject.data.filter((d) => !isBadCountry(d.properties)));
+            const geoCentroids = geoObject.element
+                .selectAll("circle")
+                .data(geoObject.data.filter((d) => !isBadCountry(d.properties)));
 
             geoCentroids
                 .enter()
@@ -403,41 +454,37 @@
                 });
         };
 
+        /**
+         * Function that initialize the statistics
+         * @param {array} data
+         * @returns
+         */
         let createGlobalStatisticsStructure = (data) => {
             let container = d3.select("#global-statistics");
             let margins = { top: 20, right: 20, bottom: 60, left: 20 };
             let commonWidth = 360 - margins.left - margins.right;
             let commonHeight = 300 - margins.top - margins.bottom;
 
+            // creating the svg container
             let svg = container
                 .append("svg")
                 .attr("width", commonWidth)
                 .attr("height", commonHeight)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px");
 
-            let mainGroup = svg.append("g").attr("transform", `translate(${margins.left}, ${margins.top})`).attr("class", "main-group");
+            let mainGroup = svg
+                .append("g")
+                .attr("transform", `translate(${margins.left}, ${margins.top})`)
+                .attr("class", "main-group");
 
             let xLabels = data.map((d) => d.label);
             let maxY = d3.max(data, (d) => d.val);
 
-            let x = d3
-                .scaleBand()
-                .range([margins.left, commonWidth - margins.right])
-                .padding(0.3)
-                .domain(xLabels);
+            // creating the scales
+            let x = createScale(xLabels, [margins.left, commonWidth - margins.right], "band", 0.3);
+            let y = createScale([0, maxY], [commonHeight - margins.top - margins.bottom, 0], "linear");
 
-            let y = d3
-                .scaleLinear()
-                .domain([0, maxY])
-                .range([commonHeight - margins.top - margins.bottom, 0]);
-
-            /* let tickInterval = ;
-            let tickValues = data.map(function(d) { return d.val; }).filter(function(d, i) { return i % tickInterval === 0 });
-            let xAxisLower = d3.axisBottom(x)
-                .tickFormat(d3.timeFormat("%m-%d"))
-                .tickValues(tickValues)
-                .tickPadding(15);  */
-
+            // inserting the x-axis
             svg.append("g")
                 .attr("class", "axis-dark-cyan")
                 .attr("transform", `translate(${margins.left}, ${commonHeight - margins.bottom})`)
@@ -447,6 +494,7 @@
                 .attr("font-weight", 100)
                 .attr("transform", "rotate(45)");
 
+            // inserting the y-axis
             svg.append("g")
                 .attr("class", "grid-lines y-axis")
                 .attr("transform", `translate(${margins.left + margins.right}, ${margins.top})`)
@@ -463,6 +511,11 @@
             };
         };
 
+        /**
+         * Function that handles the enter set of the bar chart
+         * @param {object} enter
+         * @param {object} svgElement
+         */
         let handleEnter = (enter, svgElement) => {
             enter
                 .append("rect")
@@ -470,7 +523,10 @@
                 .attr("x", (d) => svgElement.x(d.label))
                 .attr("width", svgElement.x.bandwidth())
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
+                .attr(
+                    "height",
+                    (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val)
+                )
                 .attr("fill", colorScheme[4]);
 
             enter.selectAll("rect").on("click", function (e, d) {
@@ -495,7 +551,11 @@
                             return colorScheme[4];
                         });
 
-                    d3.select(this).classed("selected", true).transition().duration(100).attr("fill", HIGHLIGHTED_COLOR);
+                    d3.select(this)
+                        .classed("selected", true)
+                        .transition()
+                        .duration(100)
+                        .attr("fill", HIGHLIGHTED_COLOR);
 
                     $scope.activeYears = [+d.label];
                     $scope.$apply();
@@ -503,6 +563,12 @@
             });
         };
 
+        /**
+         * Function that handles the update set of the bar chart
+         * @param {object} update
+         * @param {array} data
+         * @param {object} svgElement
+         */
         let handleUpdate = (update, data, svgElement) => {
             let maxY = d3.max(data, (d) => d.val);
             let y = svgElement.y.domain([0, maxY]);
@@ -511,13 +577,18 @@
                 .select("g.grid-lines.y-axis")
                 .transition()
                 .duration(TRANSITION_DURATION)
-                .call(d3.axisLeft(y).ticks(8).tickSize(-svgElement.width).tickSizeOuter(0).tickFormat(d3.format(".2s")));
+                .call(
+                    d3.axisLeft(y).ticks(8).tickSize(-svgElement.width).tickSizeOuter(0).tickFormat(d3.format(".2s"))
+                );
 
             update
                 .transition()
                 .duration(TRANSITION_DURATION)
                 .attr("y", (d) => svgElement.y(d.val))
-                .attr("height", (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val))
+                .attr(
+                    "height",
+                    (d) => svgElement.height - svgElement.margins.bottom - svgElement.margins.top - svgElement.y(d.val)
+                )
                 .attr("fill", function (datum, i) {
                     if (!d3.select(this).classed("selected")) return colorScheme[4];
 
@@ -525,6 +596,11 @@
                 });
         };
 
+        /**
+         * Function that handles the enter set for the bar chart labels
+         * @param {object} enter
+         * @param {object} svgElement
+         */
         let handleLabelsEnter = (enter, svgElement) => {
             enter
                 .append("text")
@@ -539,6 +615,11 @@
                 });
         };
 
+        /**
+         * Function that handles the update set for the bar chart labels
+         * @param {object} update
+         * @param {object} svgElement
+         */
         let handleLabelsUpdate = (update, svgElement) => {
             update
                 .transition()
@@ -549,6 +630,11 @@
                 });
         };
 
+        /**
+         * Function that draws the bar chart
+         * @param {object} data
+         * @param {object} svgElement
+         */
         let drawBarChart = (data, svgElement) => {
             svgElement.mainGroup
                 .selectAll("rect")
@@ -597,8 +683,7 @@
 
             $scope.selectedTopFlag = capitalize(country.visName);
 
-            // FIXME: Holy See is not present
-            // in the TopoJSON file
+            // the Vatican is not present in the TopoJSON
             if (!(isoAlpha3 === "VAT")) {
                 $scope.geoObject.element.select(`path#${isoAlpha3}`).dispatch("mouseover");
             } else {
@@ -627,6 +712,7 @@
             const country = value[0];
             const isoAlpha3 = country.props.isoAlpha3;
 
+            // the Vatican is not present in the TopoJSON
             if (!(isoAlpha3 === "VAT")) {
                 $scope.geoObject.element.select(`path#${isoAlpha3}`).dispatch("mouseout");
             } else {
@@ -643,6 +729,9 @@
             tooltip.style.zIndex = -100;
         };
 
+        /**
+         * Function that handles the metric selection and updates the bar chart
+         */
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
                 // Update map
@@ -657,9 +746,8 @@
                 drawBarChart(dataToBePlotted, barChartSvgElement);
             }
         };
-        /*
-         * Initialization functions
-         */
+
+        // initializing the map
         dataService.loadWorldMap().then((worldData) => {
             $scope.geoObject = initMap(worldData);
 
@@ -669,10 +757,14 @@
             });
         });
 
+        // getting the statistics data
         dataService.getWorldStatistics().then((data) => {
             $scope.globalStatistics = data;
 
-            let dataToBePlotted = $scope.globalStatistics.map((d) => ({ label: d.year, val: d.statistics[$scope.selectedMetric] }));
+            let dataToBePlotted = $scope.globalStatistics.map((d) => ({
+                label: d.year,
+                val: d.statistics[$scope.selectedMetric],
+            }));
 
             if (!$scope.barChartInitialized) {
                 barChartSvgElement = createGlobalStatisticsStructure(dataToBePlotted);
@@ -682,6 +774,7 @@
             drawBarChart(dataToBePlotted, barChartSvgElement);
         });
 
+        // updating the year when the page is loaded
         _updateTitle();
     }
 })();

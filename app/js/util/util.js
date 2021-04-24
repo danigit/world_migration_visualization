@@ -74,10 +74,20 @@ function transformNumberFormat(number, order = false, decimals = 2, selectedMetr
     }
 }
 
+/**
+ * Function that changes the spaces with "-"
+ * @param {string} text
+ * @returns
+ */
 const slugify = (text) => {
     return text.trim().split(" ").join("-").toLowerCase();
 };
 
+/**
+ * Function that capitalize the string passed as parameter
+ * @param {string} text
+ * @returns
+ */
 const capitalize = (text) => {
     return text.charAt(0).toUpperCase() + text.slice(1);
 };
@@ -85,23 +95,6 @@ const capitalize = (text) => {
 const map = (obj, callable) => {
     return Object.fromEntries(d3.map(obj, (r) => [r[0], callable(r[1])]));
 };
-
-/**
-* Check whether two arrays are equal sets.
-
-* @param {array} a    The first array.
-* @param {array} b    The second array.
-*/
-// const equals = (a, b) => {
-//     if (Array.isArray(a) && Array.isArray(b) && a.length == b.length) {
-//         a = a.concat().sort();
-//         b = b.concat().sort();
-
-//         return a.reduce((acc, e, i) => acc && e === b[i], true);
-//     } else {
-//         return false;
-//     }
-// };
 
 /**
  * Wrapper of `d3.scaleLog` to produce a logarithmic scale from a (min, max) domain.
@@ -169,4 +162,13 @@ let createScale = (domain, range, type, padding = 0) => {
         default:
             throw "Scale not valid";
     }
+};
+
+/**
+ * Function that controls if the passed country is valid
+ * @param {object} props
+ * @returns
+ */
+let isBadCountry = (props) => {
+    return !props || !(props instanceof Country);
 };

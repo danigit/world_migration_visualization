@@ -1,3 +1,6 @@
+/**
+ * Directive that creates the feed elements
+ */
 angular.module("feed-chip", []).directive("feedChip", function () {
     return {
         require: "ngModel",

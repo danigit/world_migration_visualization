@@ -48,7 +48,7 @@
                 resolve: {},
                 params: {
                     countryName: { squash: true, value: null, dynamic: true },
-                }
+                },
             });
     }
 })();

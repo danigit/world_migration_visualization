@@ -1,3 +1,6 @@
+/**
+ * Directive that creates the a menu
+ */
 angular.module("radio-button", []).directive("radioButtonGroup", function () {
     return {
         restrict: "E",
@@ -32,13 +35,6 @@ angular.module("radio-button", []).directive("radioButtonGroup", function () {
                     ngModel.$setViewValue(scope.value);
                 });
             });
-
-            // scope.$watch("model", (newVal) => {
-            //     element.removeClass("button-clicked");
-            //     if (newVal === scope.value) {
-            //         element.addClass("button-clicked");
-            //     }
-            // });
         },
     };
 });
