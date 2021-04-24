@@ -125,19 +125,6 @@ let setNotAvailable = (data, rank) => {
 };
 
 /**
- * Function that removes the sex postfixes from the data passed as parameter
- * @param {array} data
- * @returns
- */
-let preprocessRateOfChange = (data) => {
-    let xLabels = Object.keys(data);
-    const reg = /(_\(mf\)|_\(m\)|_\(f\))/;
-    xLabels = xLabels.map((label) => label.replace(reg, ""));
-    let yValues = Object.values(data).map((value) => +value);
-    return xLabels.map((elem, idx) => ({ label: elem, value: yValues[idx] }));
-};
-
-/**
  * Check whether two arrays are equal sets.
  *
  * @param {array} a    The first array.

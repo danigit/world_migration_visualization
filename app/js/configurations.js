@@ -25,7 +25,7 @@ const image_folder = "app/img/";
 const image_countries_folder = image_folder + "countries";
 const image_home_folder = image_folder + "home";
 
-const IC_PLAY  = image_home_folder + "/play.svg";
+const IC_PLAY = image_home_folder + "/play.svg";
 const IC_PAUSE = image_home_folder + "/pause.svg";
 
 const IMAGE_COUNTRIES_OUTLINES_FOLDER = image_countries_folder + "/outlines";
@@ -40,7 +40,8 @@ const female_migrants_by_origin_and_destination = "app/data/csv/migrants_by_orig
 const total_population_by_age_and_sex = "app/data/csv/total_population_by_age_and_sex.csv";
 const total_migrants_by_age_and_sex = "app/data/csv/migrants_by_age_and_sex_total.csv";
 const migrants_percentage_distribution_by_age_and_sex = "app/data/csv/migrants_pct_distribution_by_age_and_sex.csv";
-const migrants_as_percentage_of_total_population_by_age_and_sex = "app/data/csv/migrants_pct_total_population_by_age_and_sex.csv";
+const migrants_as_percentage_of_total_population_by_age_and_sex =
+    "app/data/csv/migrants_pct_total_population_by_age_and_sex.csv";
 
 // path for countries classes table
 const countries_classes_by_region = "app/data/csv/countries_class_by_region.csv";
@@ -64,3 +65,7 @@ const HOVERED_COLOR = "#3b4248";
 
 const HOME_COUNTRY_MAP_STROKE = "#272f35";
 const HOME_COUNTRY_COLOR = "#191f24";
+
+const SVG_MARGINS = { top: 20, bottom: 60, left: 20, right: 20 };
+const SVG_WIDTH = 500 - SVG_MARGINS.left - SVG_MARGINS.right;
+const SVG_HEIGHT = 350 - SVG_MARGINS.top - SVG_MARGINS.bottom;

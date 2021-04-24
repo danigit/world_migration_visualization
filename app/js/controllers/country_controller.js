@@ -13,12 +13,29 @@
     function countryController($scope, $state, dataService, countryService, $stateParams) {
         $scope.countryInfoValue = "global_rank";
         $scope.searchSource = "";
-        $scope.continents = dataService.continents;
         $scope.sendReceiveTopCountries = "";
         $scope.secondaryMenuSelectedValue = "country";
         $scope.secondaryMenuButtons = dataService.menuButtons;
         $scope.genderButtons = dataService.genderButtons;
         $scope.countryInfoTypeButtons = dataService.countryInfoTypeButtons;
+
+        let titleYear = document.getElementById("title-year");
+        let radius;
+        let arc;
+        let sliderMin = 1900;
+        let sliderMax = 2019;
+
+        let lineChartStructure;
+        let developmentStructure;
+        let stackedStructure;
+        let stackedStructureCall = true;
+        let incomeStructure;
+
+        let colors = d3.scaleOrdinal(d3.schemePaired);
+
+        // getting the years selected in the slider
+        let consideredYears = dataService.getActiveYears(sliderMin, sliderMax);
+
         $scope.countryStatisticsValues = {
             totalImmigrations: "",
             totalPopulation: "",
@@ -47,22 +64,6 @@
             },
         };
 
-        const titleYear = document.getElementById("title-year");
-        const svgMargins = { top: 40, bottom: 40, left: 30, right: 30 };
-
-        let svgWidth = 500 - svgMargins.left - svgMargins.right;
-        let svgHeight = 350 - svgMargins.top - svgMargins.bottom;
-        let radius;
-        let arc;
-        let sliderMin = 1900;
-        let sliderMax = 2019;
-        let lineChartStructure;
-        let developmentStructure;
-        let stackedStructure;
-        let stackedStructureCall = true;
-        let incomeStructure;
-        let colors = d3.scaleOrdinal(d3.schemePaired);
-
         // inserting the name of the country in the url
         this.uiOnParamsChanged = (newParams) => fetchData(newParams.countryName);
 
@@ -87,7 +88,9 @@
 
             // Update the statistics
             $scope.selectedCountryController =
-                dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
+                dataService.selectedCountryController == ""
+                    ? $scope.countries[0]
+                    : dataService.selectedCountryController;
 
             updateStatistics();
         };
@@ -103,9 +106,6 @@
         // getting the countries data
         dataService.countries.then((data) => {
             $scope.countries = data;
-
-            // $scope.selectedCountryController =
-            //     dataService.selectedCountryController == "" ? $scope.countries[0] : dataService.selectedCountryController;
             $scope.genderFilterValue = "menu-all";
 
             lineChartStructure = initializeLineChart("roc-linechart-container", "roc-linechart-country");
@@ -114,9 +114,6 @@
 
             fetchData($stateParams.countryName);
         });
-
-        // getting the years selected in the slider
-        let consideredYears = dataService.getActiveYears(sliderMin, sliderMax);
 
         // watcher that listens for the slider updates
         $scope.$on("slideEnded", () => {
@@ -135,14 +132,25 @@
 
             // getting the total migrants by origin and destination
             dataService
-                .getTotMigrantsByOriginAndDestination($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getTotMigrantsByOriginAndDestination(
+                    $scope.selectedCountryController.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.countryStatisticsValues.totalImmigrations = setNotAvailable(data, false);
                     $scope.$apply();
                 });
 
+            // getting the global rank statistics
             dataService
-                .getGlobalRankStatistics($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getGlobalRankStatistics(
+                    $scope.selectedCountryController.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     $scope.globalRankCountryStatisticsValues.totalImmigrationsGlobalRank = setNotAvailable(
                         data.average_tot_migrants_global_rank,
@@ -218,14 +226,24 @@
                     $scope.$apply();
                 });
 
+            // getting the country development statistics
             dataService
-                .getCountryDevelopmentStatistic($scope.selectedCountryController.name, consideredYears, $scope.genderFilterValue)
+                .getCountryDevelopmentStatistic(
+                    $scope.selectedCountryController.name,
+                    consideredYears,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     drawPieChart(data, developmentStructure, "development");
                 });
 
+            // getting the country income statistics
             dataService
-                .getCountryIncomeStatistic($scope.selectedCountryController.name, consideredYears, $scope.genderFilterValue)
+                .getCountryIncomeStatistic(
+                    $scope.selectedCountryController.name,
+                    consideredYears,
+                    $scope.genderFilterValue
+                )
                 .then((data) => {
                     drawPieChart(data, incomeStructure, "income");
                 });
@@ -233,7 +251,12 @@
             // Extract the immigration by age groups:
             // 0-4, 5-18, 19-34, 35-54, 55-74, 75+
             dataService
-                .getImmigrationByAgeGroups($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
+                .getImmigrationByAgeGroups(
+                    $scope.selectedCountryController.name,
+                    sliderMin,
+                    sliderMax,
+                    $scope.genderFilterValue
+                )
                 .then((ageGroupsData) => {
                     if (stackedStructureCall) {
                         stackedStructure = initializeStackedBarChart(ageGroupsData, "age-stacked-barchart");
@@ -248,14 +271,15 @@
                 .then((data) => {
                     $scope.top5InwardCountries = data["topInward"];
                     $scope.top5OutwardCountries = data["topOutward"];
-
                     $scope.$apply();
                 });
 
+            // getting the rate of change data
             dataService
                 .getRateOfChange($scope.selectedCountryController.name, sliderMin, sliderMax, $scope.genderFilterValue)
                 .then((data) => {
-                    data = preprocessRateOfChange(data);
+                    data = Object.keys(data).map((k) => ({ label: parseDate(k), value: data[k] }));
+
                     dataService.getGlobalMinMaxRateOfChange().then((minMax) => {
                         drawLineChart(data, "roc-linechart-country", minMax.MinRateOfChange, minMax.MaxRateOfChange);
                     });
@@ -285,24 +309,25 @@
          */
         let createPieStructure = (container, type) => {
             let svgContainer = d3.select("#" + container);
-            radius = Math.min(svgWidth, svgHeight) / 2;
+            radius = Math.min(SVG_WIDTH, SVG_HEIGHT) / 2;
 
-            let svg = svgContainer.append("svg").attr("width", svgWidth).attr("height", svgHeight);
+            // creating the svg container
+            let svg = svgContainer.append("svg").attr("width", SVG_WIDTH).attr("height", SVG_HEIGHT);
 
+            // creating the pie chart group
             svg.append("g")
                 .attr("class", type + "-slices")
-                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
+                .attr("transform", `translate(${SVG_WIDTH / 2}, ${SVG_HEIGHT / 2 - 20})`);
 
+            // creating the labels group
             svg.append("g")
                 .attr("class", type + "-labels")
-                .attr("transform", `translate(${svgWidth / 2}, ${svgHeight / 2 - 20})`);
+                .attr("transform", `translate(${SVG_WIDTH / 2}, ${SVG_HEIGHT / 2 - 20})`);
 
-            arc = d3.arc()
+            arc = d3
+                .arc()
                 .outerRadius(radius - 50)
                 .innerRadius(0);
-                // .padAngle(.03)
-                // .cornerRadius(4);
-
             return svg;
         };
 
@@ -380,12 +405,13 @@
                 .attr("fill", (d, i) => colors(i))
                 .attr("class", type + "-legend-rect")
                 .attr("transform", (_, i) => {
-                    if (i < dataLength / 2) return `translate(${-(svgWidth / 2 - 50)}, ${svgHeight / 2 - i * 20})`;
+                    if (i < dataLength / 2) return `translate(${-(SVG_WIDTH / 2 - 50)}, ${SVG_HEIGHT / 2 - i * 20})`;
                     else {
-                        return `translate(0, ${svgHeight / 2 - legendIndex++ * 20})`;
+                        return `translate(0, ${SVG_HEIGHT / 2 - legendIndex++ * 20})`;
                     }
                 });
 
+            // resetting the labels index
             legendIndex = 0;
 
             // creating the text of the labels
@@ -403,9 +429,9 @@
                 .attr("class", "label-text")
                 .attr("transform", (_, i) => {
                     if (i < dataLength / 2) {
-                        return `translate(${-(svgWidth / 2 - 70)}, ${svgHeight / 2 - i * 20})`;
+                        return `translate(${-(SVG_WIDTH / 2 - 70)}, ${SVG_HEIGHT / 2 - i * 20})`;
                     } else {
-                        return `translate(15, ${svgHeight / 2 - legendIndex++ * 20})`;
+                        return `translate(15, ${SVG_HEIGHT / 2 - legendIndex++ * 20})`;
                     }
                 })
                 .text((d) => d.data.type);
@@ -494,18 +520,19 @@
          * @param {string} coord
          * @returns
          */
-        let computePieChartEndOfLabelLineXY = (d, arc, coord) => {
+        let computePieChartEndOfLabelLineXY = (d, arc, pos) => {
             if (d.value == 0) {
-                if (coord === "x") return arc.centroid[0];
-                if (coord === "y") return arc.centroid[1];
+                if (pos === "x") return arc.centroid[0];
+                if (pos === "y") return arc.centroid[1];
             }
+
             let centroid = arc.centroid(d);
             let midAngle = Math.atan2(centroid[1], centroid[0]);
             let x = Math.cos(midAngle) * (radius - 35);
             let y = Math.sin(midAngle) * (radius - 35);
 
-            if (coord === "x") return x;
-            if (coord === "y") return y;
+            if (pos === "x") return x;
+            if (pos === "y") return y;
         };
 
         /**
@@ -541,58 +568,51 @@
         let initializeStackedBarChart = (data, containerId) => {
             let containerElem = d3.select("#" + containerId);
 
+            // creating the svg container
             let svgElem = containerElem
                 .append("svg")
-                .attr("width", svgWidth)
-                .attr("height", svgHeight)
+                .attr("width", SVG_WIDTH)
+                .attr("height", SVG_HEIGHT)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
                 .append("g")
-                .attr("transform", `translate(${svgMargins.left + svgMargins.right}, 10)`);
+                .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, 10)`);
 
             // Y axis container
-            svgElem
-                .append("g")
-                    .attr("font-size", "10px")
-                    .attr("class", "grid-lines y-axis");
+            svgElem.append("g").attr("font-size", "10px").attr("class", "grid-lines y-axis");
 
             // X axis container
             svgElem
                 .append("g")
-                    .attr("transform", `translate(0, ${svgHeight - svgMargins.bottom - svgMargins.top})`)
-                    .attr("class", "axis-dark-cyan x-axis");
+                .attr("transform", `translate(0, ${SVG_HEIGHT - SVG_MARGINS.bottom - SVG_MARGINS.top})`)
+                .attr("class", "axis-dark-cyan x-axis");
 
             // Groups container
-            svgElem
-                .append("g")
-                    .classed("groups", true)
+            svgElem.append("g").classed("groups", true);
 
             // Tooltip element
-            let tooltipElem = svgElem
-                .append("g")
-                    .classed("age-stacked-barchart-tooltip", true)
-                    .classed("hide", true);
+            let tooltipElem = svgElem.append("g").classed("age-stacked-barchart-tooltip", true).classed("hide", true);
 
             tooltipElem
                 .append("rect")
-                    .attr("width", 40)
-                    .attr("height", 20)
-                    .attr("fill", "white")
-                    .style("padding", "1em")
-                    .style("opacity", 0.5);
-    
+                .attr("width", 40)
+                .attr("height", 20)
+                .attr("fill", "white")
+                .style("padding", "1em")
+                .style("opacity", 0.5);
+
             tooltipElem
                 .append("text")
-                    .attr("x", 20)
-                    .attr("dy", "1.2em")
-                    .style("font-size", "12px")
-                    .style("font-weight", "bold")
-                    .style("text-anchor", "middle");
+                .attr("x", 20)
+                .attr("dy", "1.2em")
+                .style("font-size", "12px")
+                .style("font-weight", "bold")
+                .style("text-anchor", "middle");
 
             // Color legend container
             svgElem
                 .append("g")
-                    .classed("age-stacked-barchart-legend-container", true)
-                    .attr("transform", `translate(0, ${-svgMargins.bottom - svgMargins.top})`)
+                .classed("age-stacked-barchart-legend-container", true)
+                .attr("transform", `translate(0, ${-SVG_MARGINS.bottom - SVG_MARGINS.top})`);
 
             return { svgElement: svgElem };
         };
@@ -601,16 +621,15 @@
             const timeFormat = d3.timeFormat("%Y").parse;
             const barGroups = d3.map(data, (d) => +d.Year);
             const subgroups = Object.keys(data[0]).filter((i) => !["Total", "Year"].includes(i));
-            let stackedData = d3.stack().keys(subgroups)(data);
             const colorScale = d3.scaleOrdinal(d3.schemePaired.slice(0, subgroups.length));
+            let stackedData = d3.stack().keys(subgroups)(data);
 
             let dataNaN = false;
 
-            dataIsNaN:
-            for (const yearSubgroup of stackedData) {
+            dataIsNaN: for (const yearSubgroup of stackedData) {
                 for (const yearDatum of yearSubgroup) {
                     if (Object.values(yearDatum.data).includes(NaN)) {
-                        console.log('Age groups not available');
+                        console.log("Age groups not available");
                         dataNaN = true;
                         break dataIsNaN;
                     }
@@ -620,48 +639,44 @@
             if (dataNaN) {
                 stackedData = [];
 
-                const xPos = Math.round(svgWidth/2) - 1.6*(svgMargins.right + svgMargins.left);
-                const yPos = Math.round(svgHeight/2) - svgMargins.top;
+                const xPos = Math.round(SVG_WIDTH / 2) - 1.6 * (SVG_MARGINS.right + SVG_MARGINS.left);
+                const yPos = Math.round(SVG_HEIGHT / 2) - SVG_MARGINS.top;
 
                 stackedStructure.svgElement
                     .append("text")
-                        .classed("data-not-available", true)
-                        .classed("label-text", true)
-                        .attr("x", xPos)
-                        .attr("y", yPos)
-                        .style("text-anchor", "start")
-                        .style("opacity", "0")
-                        .text("Age groups data not available!")
+                    .classed("data-not-available", true)
+                    .classed("label-text", true)
+                    .attr("x", xPos)
+                    .attr("y", yPos)
+                    .style("text-anchor", "start")
+                    .style("opacity", "0")
+                    .text("Age groups data not available!")
                     .transition()
-                        .duration(TRANSITION_DURATION)
-                        .style("opacity", "1");
-                        
+                    .duration(TRANSITION_DURATION)
+                    .style("opacity", "1");
             } else {
                 stackedStructure.svgElement
                     .selectAll(".data-not-available")
                     .transition()
-                        .duration(TRANSITION_DURATION)
-                        .style("opacity", "0")
+                    .duration(TRANSITION_DURATION)
+                    .style("opacity", "0")
                     .remove();
             }
 
             // Set all the scales
-            let xScale = d3
-                .scaleBand()
-                .domain(barGroups)
-                .rangeRound([0, svgWidth - svgMargins.left - svgMargins.right])
-                .padding(0.16);
+            let xScale = createScale(barGroups, [0, SVG_WIDTH - SVG_MARGINS.left - SVG_MARGINS.right], "band", 0.16);
 
-            let yScale = d3
-                .scaleLinear()
-                .domain([0, d3.max(stackedData, (layerData) => d3.max(layerData, (d) => d[1]))])
-                .range([svgHeight - svgMargins.bottom - svgMargins.top, 0]);
+            let yScale = createScale(
+                [0, d3.max(stackedData, (layerData) => d3.max(layerData, (d) => d[1]))],
+                [SVG_HEIGHT - SVG_MARGINS.bottom - SVG_MARGINS.top, 0],
+                "linear"
+            );
 
             stackedStructure.svgElement.select(".y-axis").call(
                 d3
                     .axisLeft()
                     .scale(yScale)
-                    .tickSize(-svgWidth)
+                    .tickSize(-SVG_WIDTH)
                     .tickSizeOuter(0)
                     .ticks(6)
                     .tickFormat((d) => d + "%")
@@ -669,82 +684,76 @@
 
             stackedStructure.svgElement.select(".x-axis").call(d3.axisBottom().scale(xScale).tickFormat(timeFormat));
 
-            let groupsContaienr = stackedStructure.svgElement.select('.groups');
+            let groupsContainer = stackedStructure.svgElement.select(".groups");
 
-            let groupsElems = groupsContaienr
-                .selectAll(".group")
-                    .data(stackedData, d => d.key);
+            let groupsElems = groupsContainer.selectAll(".group").data(stackedData, (d) => d.key);
 
-            groupsElems.exit()
+            groupsElems
+                .exit()
                 .selectAll("rect")
                 .transition()
-                    .duration(TRANSITION_DURATION)
-                    .style("opacity", "0")
+                .duration(TRANSITION_DURATION)
+                .style("opacity", "0")
                 .remove();
 
             let groupsEnter = groupsElems
                 .enter()
                 .append("g")
-                    .classed('group', true)
-                    .attr("fill", (_, i) => colorScale(i))
+                .classed("group", true)
+                .attr("fill", (_, i) => colorScale(i));
 
             groupsElems = groupsEnter.merge(groupsElems);
 
-            let groupRects = groupsElems
-                .selectAll("rect")
-                    .data(d => d);
+            let groupRects = groupsElems.selectAll("rect").data((d) => d);
 
-            groupRects.exit()
+            groupRects
+                .exit()
                 .transition()
-                    .duration(TRANSITION_DURATION)
-                    .attr("width",  0)
-                    .style("opacity", "0")
-                .remove()
+                .duration(TRANSITION_DURATION)
+                .attr("width", 0)
+                .style("opacity", "0")
+                .remove();
 
-            let groupRectsEnter = groupRects.enter()
+            let groupRectsEnter = groupRects
+                .enter()
                 .append("rect")
-                    .attr("x", (d) => xScale(d.data.Year))
-                    .attr("y", (d) => yScale(d[1]))
-                    .attr("width",  0)
-                    .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
-                    .style("opacity", "0")
-            
+                .attr("x", (d) => xScale(d.data.Year))
+                .attr("y", (d) => yScale(d[1]))
+                .attr("width", 0)
+                .attr("height", (d) => yScale(d[0]) - yScale(d[1]))
+                .style("opacity", "0");
+
             groupRectsEnter
                 .on("mouseover", () => tooltipElem.classed("hide", false))
-                .on("mouseout",  () => tooltipElem.classed("hide", true))
+                .on("mouseout", () => tooltipElem.classed("hide", true))
                 .on("mousemove", (e, d) => {
                     let xPos = d3.pointer(e)[0] - 15;
                     let yPos = d3.pointer(e)[1] - 25;
 
-                    tooltipElem
-                        .attr("transform", "translate(" + xPos + "," + yPos + ")");
+                    tooltipElem.attr("transform", "translate(" + xPos + "," + yPos + ")");
 
-                    tooltipElem
-                        .select("text")
-                            .text((d[1] - d[0]).toFixed(1) + "%");
+                    tooltipElem.select("text").text((d[1] - d[0]).toFixed(1) + "%");
                 });
 
-            groupRectsEnter.
-                transition()
-                    .duration(TRANSITION_DURATION)
-                    .delay(300)
-                    .attr("width", xScale.bandwidth())
-                    .style("opacity", "1");
+            groupRectsEnter
+                .transition()
+                .duration(TRANSITION_DURATION)
+                .delay(300)
+                .attr("width", xScale.bandwidth())
+                .style("opacity", "1");
 
             groupRects
                 .transition()
-                    .duration(TRANSITION_DURATION)
-                    .delay(150)
-                    .attr("x", (d) => xScale(d.data.Year))
-                    .attr("y", (d) => yScale(d[1]))
-                    .attr("width", xScale.bandwidth())
-                    .attr("height", (d) => yScale(d[0]) - yScale(d[1]));
+                .duration(TRANSITION_DURATION)
+                .delay(150)
+                .attr("x", (d) => xScale(d.data.Year))
+                .attr("y", (d) => yScale(d[1]))
+                .attr("width", xScale.bandwidth())
+                .attr("height", (d) => yScale(d[0]) - yScale(d[1]));
 
-            const tooltipElem = stackedStructure.svgElement
-                .select(".age-stacked-barchart-tooltip");
+            const tooltipElem = stackedStructure.svgElement.select(".age-stacked-barchart-tooltip");
 
             const getLegendTranslation = (datumId) => {
-                const horizDelta = 16;
                 const vertDelta = 16;
 
                 // Get legend row/col Id
@@ -753,48 +762,47 @@
 
                 switch (c) {
                     case 0:
-                        return `translate(${-svgWidth},
-                            ${svgHeight + vertDelta + 15 * (r + 1)})`;
+                        return `translate(${-SVG_WIDTH},
+                            ${SVG_HEIGHT + vertDelta + 15 * (r + 1)})`;
                     case 1:
-                        return `translate(${-svgWidth + 150},
-                                ${svgHeight + vertDelta + 15 * (r + 1)})`;
+                        return `translate(${-SVG_WIDTH + 150},
+                                ${SVG_HEIGHT + vertDelta + 15 * (r + 1)})`;
                     case 2:
-                        return `translate(${-svgWidth + 300},
-                        ${svgHeight + vertDelta + 15 * (r + 1)})`;
+                        return `translate(${-SVG_WIDTH + 300},
+                        ${SVG_HEIGHT + vertDelta + 15 * (r + 1)})`;
                 }
             };
 
             // Draw layers legend
-            const legendContainer = stackedStructure.svgElement
-                .select(".age-stacked-barchart-legend-container");
+            const legendContainer = stackedStructure.svgElement.select(".age-stacked-barchart-legend-container");
 
             const legendElem = legendContainer
                 .selectAll(".age-stacked-barchart-legend")
                 .data(colorScale.range())
                 .enter()
                 .append("g")
-                    .classed("age-stacked-barchart-legend", true)
-                    .attr("width", 50)
-                    .attr("height", 12)
-                    .attr("transform", (_, i) => "translate(" + i * 15 + ",30)")
-                    .attr("transform", (_, i) => getLegendTranslation(i));
+                .classed("age-stacked-barchart-legend", true)
+                .attr("width", 50)
+                .attr("height", 12)
+                .attr("transform", (_, i) => "translate(" + i * 15 + ",30)")
+                .attr("transform", (_, i) => getLegendTranslation(i));
 
             legendElem
                 .append("rect")
-                    .attr("x", svgWidth - 12)
-                    .attr("width", 12)
-                    .attr("height", 12)
-                    .attr("stroke", "white")
-                    .style("fill", (_, i) => colorScale(i));
+                .attr("x", SVG_WIDTH - 12)
+                .attr("width", 12)
+                .attr("height", 12)
+                .attr("stroke", "white")
+                .style("fill", (_, i) => colorScale(i));
 
             legendElem
                 .append("text")
-                    .classed("label-text", true)
-                    .attr("x", svgWidth + 5)
-                    .attr("y", 7)
-                    .attr("dy", "-0em")
-                    .style("text-anchor", "start")
-                    .text((_, i) => subgroups[i] + " years");
+                .classed("label-text", true)
+                .attr("x", SVG_WIDTH + 5)
+                .attr("y", 7)
+                .attr("dy", "-0em")
+                .style("text-anchor", "start")
+                .text((_, i) => subgroups[i] + " years");
         };
 
         /**
@@ -807,49 +815,53 @@
         let initializeLineChart = (container, lineChartId) => {
             let rateOfChangeLineChartContainer = d3.select("#" + container);
 
-            //svgMargins.top=10;
+            // creating the svg container
             let svg = rateOfChangeLineChartContainer
                 .append("svg")
-                .attr("width", svgWidth)
-                .attr("height", svgHeight)
+                .attr("width", SVG_WIDTH)
+                .attr("height", SVG_HEIGHT)
                 .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
                 .attr("id", lineChartId + "-svg");
-                //.attr("transform", `translate(${svgMargins.left + svgMargins.right}, 10)`);
 
-
+            // creating the path group
             svg.append("g")
-                .attr("transform", `translate(${svgMargins.left}, 10)`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, 10)`)
                 .attr("id", lineChartId)
                 .attr("class", "country-linechart");
 
-            svg.append("g").attr("transform", `translate(${svgMargins.left}, 10)`).attr("class", "year-circles");
+            // creating the path circles group
+            svg.append("g").attr("transform", `translate(${SVG_MARGINS.left}, 10)`).attr("class", "year-circles");
 
+            // creating the x-axis group
             svg.append("g")
-                .attr("transform", `translate(${svgMargins.left}, ${svgHeight - svgMargins.bottom})`)
+                .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_HEIGHT - SVG_MARGINS.bottom})`)
                 .attr("color", "white")
                 .style("font-size", "10px")
                 .attr("id", lineChartId + "-xaxis")
                 .attr("class", "axis-dark-cyan");
 
+            // creating the text label group
             svg.append("g")
                 .append("text")
                 .classed("legend", true)
-                .attr("transform", `translate(${svgWidth - svgMargins.right}, ${svgHeight - 5})`)
+                .attr("transform", `translate(${SVG_WIDTH - SVG_MARGINS.right}, ${SVG_HEIGHT - 5})`)
                 .style("text-anchor", "end")
                 .text("Time Span");
 
+            // creating the y-axis group
             svg.append("g")
                 .attr("color", "white")
-                .attr("transform", `translate(${svgMargins.left + svgMargins.right}, 10)`)
+                .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, 10)`)
                 .style("font-size", "10px")
                 .attr("id", lineChartId + "-yaxis")
                 .attr("class", "grid-lines y-axis");
 
+            // creating the text label group
             svg.append("g")
                 .append("text")
                 .attr("font-size", "10px")
                 .classed("legend", true)
-                .attr("transform", `rotate(-90) translate(-10, ${svgMargins.left})`)
+                .attr("transform", `rotate(-90) translate(-10, ${SVG_MARGINS.left})`)
                 .style("text-anchor", "end")
                 .attr("stroke", "#FFFFFF!important")
                 .text("Rate Of Change");
@@ -858,44 +870,43 @@
         };
 
         let drawLineChart = (data, lineChartId, globalMinY, globalMaxY) => {
-            
-            if (data.length==0) {
-                d3.select("#" + lineChartId).selectAll("*").remove();
-                lineChartStructure.lineChartStructure
-                    .select(".year-circles")
-                    .selectAll(".year-circle")
+            // inserting a info label if no data is available
+            if (data.length == 0) {
+                d3.select("#" + lineChartId)
+                    .selectAll("*")
                     .remove();
-                d3.select("#" + lineChartId).append("text")
+                lineChartStructure.lineChartStructure.select(".year-circles").selectAll(".year-circle").remove();
+                d3.select("#" + lineChartId)
+                    .append("text")
                     .attr("id", "data-not-available-label")
-                    .attr("color", "white")
+                    .attr("stroke", "gray")
+                    .attr("stroke-width", 0.5)
                     .attr("font-size", "13px")
-                    .attr("transform", `translate(${svgMargins.left + svgMargins.right}, 10)`)
-                    .text("Data not available!Please select a valid time span.");
+                    .attr("y", 85)
+                    .attr("x", 30)
+                    .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, 10)`)
+                    .text("Data not available! Please select a valid time span.");
                 return;
-            }
-            else {
+            } else {
                 d3.select("#data-not-available-label").remove();
             }
 
-            let xScale = d3
-                .scalePoint()
-                .domain(data.map((rateOfChange) => rateOfChange.label))
-                .range([svgMargins.left, svgWidth - svgMargins.right - svgMargins.left]);
-
-            let yScale = d3
-                .scaleLinear()
-                .domain([globalMinY, globalMaxY])
-                .range([svgHeight - svgMargins.bottom - 10, 0]);
+            let xScale = createScale(
+                [d3.timeYear.offset(data[0].label, -1), d3.timeYear.offset(data[data.length - 1].label, +1)],
+                [SVG_MARGINS.left, SVG_WIDTH - SVG_MARGINS.right - SVG_MARGINS.left],
+                "time"
+            );
+            let yScale = createScale([globalMinY, globalMaxY], [SVG_HEIGHT - SVG_MARGINS.bottom - 10, 0], "linear");
 
             d3.select("#" + lineChartId + "-xaxis")
                 .transition()
                 .duration(TRANSITION_DURATION)
-                .call(d3.axisBottom(xScale));
+                .call(d3.axisBottom(xScale).ticks(data.length));
 
             d3.select("#" + lineChartId + "-yaxis")
                 .transition()
                 .duration(TRANSITION_DURATION)
-                .call(d3.axisLeft(yScale).tickSize(-svgWidth).tickSizeOuter(0).ticks(8));
+                .call(d3.axisLeft(yScale).tickSize(-SVG_WIDTH).tickSizeOuter(0).ticks(8));
 
             lineChartStructure.lineChartStructure
                 .select(".year-circles")
@@ -929,22 +940,20 @@
                     return yScale(d.value);
                 });
 
-            if (data.length==1) {
+            if (data.length == 1) {
                 let pointValue = data[0].value;
                 d3.select("#" + lineChartId)
                     .append("line")
                     .attr("class", "country-linechart-path")
                     .attr("id", "single-point-line")
-                    .attr("x1", svgMargins.left)
+                    .attr("x1", SVG_MARGINS.left)
                     .attr("y1", yScale(pointValue))
-                    .attr("x2", svgWidth - svgMargins.right - svgMargins.left)
+                    .attr("x2", SVG_WIDTH - SVG_MARGINS.right - SVG_MARGINS.left)
                     .attr("y2", yScale(pointValue));
+            } else {
+                d3.select("#single-point-line").remove();
             }
-            else {
-                d3.select("#single-point-line")
-                    .remove();
-            }
-                        
+
             d3.select("#" + lineChartId)
                 .selectAll("path")
                 .data([data])
@@ -1013,8 +1022,10 @@
         $scope.showTopCountryHint = function (value, event, type) {
             $scope.selectedTopFlag = value;
             $scope.sendReceiveTopCountries = type;
+
             let tooltip = document.getElementById("top-flags-tooltip");
             let tooltip_text = document.getElementById("tooltip-text");
+
             if (type == "Send") {
                 tooltip_text.classList.remove("color-red");
                 tooltip_text.classList.add("color-green");
@@ -1022,6 +1033,7 @@
                 tooltip_text.classList.remove("color-green");
                 tooltip_text.classList.add("color-red");
             }
+
             tooltip.classList.remove("display-none");
             tooltip.classList.add("display-block");
             tooltip.style.top = event.clientY - 50 + "px";
