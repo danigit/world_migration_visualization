@@ -573,7 +573,7 @@
                 .append("svg")
                 .attr("width", SVG_WIDTH)
                 .attr("height", SVG_HEIGHT)
-                .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
+                .attr("class", "background-gray-transparent border-1-gray border-radius-10px padding-10-px")
                 .append("g")
                 .attr("transform", `translate(${SVG_MARGINS.left + SVG_MARGINS.right}, 10)`);
 
@@ -820,7 +820,7 @@
                 .append("svg")
                 .attr("width", SVG_WIDTH)
                 .attr("height", SVG_HEIGHT)
-                .attr("class", "background-gray-transparent border-radius-10px padding-10-px")
+                .attr("class", "background-gray-transparent border-radius-10px border-1-gray padding-10-px")
                 .attr("id", lineChartId + "-svg");
 
             // creating the path group

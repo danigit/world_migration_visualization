@@ -19,7 +19,7 @@
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
         $scope.globalStatisticsVisName = "Global statistics";
-        $scope.selectedMetric = "total_immigration";
+        $scope.selectedMetric = "immigrants_avg_age";
         $scope.barChartInitialized = false;
         $scope.geoObject = null;
         $scope.activeYears = dataService.getActiveYears();
@@ -194,7 +194,7 @@
              * @param {array} _statistics
              */
             let _handleMapOnMouseOver = (e, d, _statistics) => {
-                d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR);
+                d3.select(e.target).transition().duration(100).attr("fill", HOVERED_COLOR_STATISTICS);
 
                 if (isBadCountry(d.properties)) {
                     $scope.hoveredCountry = {
@@ -734,6 +734,7 @@
          */
         $scope.handleBarChartMetricChange = function () {
             if ($scope.barChartInitialized) {
+                console.log($scope.selectedMetric);
                 // Update map
                 dataService.getCountriesStatistics($scope.selectedMetric).then((data) => ($scope.countriesData = data));
 

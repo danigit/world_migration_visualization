@@ -62,7 +62,6 @@
                             <label>Select sources...</label>
                             <md-select ng-model="selectedCountries.source" md-on-close="selectionClosed()" multiple>
                                 <md-select-header class="select-header-search-box background-white zindex-100">
-                                    <div>Close this panel to view UI changes</div>
                                     <input ng-model="searchSource" aria-label="Source filter" type="search"
                                         placeholder="Search a country..."
                                         class="header-search-box md-text padding-left-10px"
@@ -71,6 +70,10 @@
                                 <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
                                     ng-class="{'margin-top-50-px' : $first}">
                                     {{country.visName}}</md-option>
+
+                                <div class="position-fixed padding-10-px bottom-0 background-white color-gray">
+                                    Close this panel
+                                    to view UI changes</div>
                             </md-select>
                         </md-input-container>
                         <hr class="menu-divider" />
@@ -79,7 +82,6 @@
                             <md-select ng-model="selectedCountries.destination" md-on-close="selectionClosed()"
                                 multiple>
                                 <md-select-header class="select-header-search-box background-white zindex-100">
-                                    <div>Close this panel to view UI changes</div>
                                     <input ng-model="searchDestination" aria-label="Destination filter" type="search"
                                         placeholder="Search a country..."
                                         class="header-search-box md-text padding-left-10px"
@@ -89,6 +91,9 @@
                                     ng-repeat="country in countries | filter: searchDestination"
                                     ng-class="{'margin-top-50-px' : $first}">
                                     {{country.visName}}</md-option>
+                                <div class="position-fixed padding-10-px bottom-0 background-white color-gray">
+                                    Close this panel
+                                    to view UI changes</div>
                             </md-select>
                         </md-input-container>
                         <hr class="menu-divider" />
@@ -109,8 +114,6 @@
                         <div id="home-info-div" class="font-size-small margin-top-5-px color-lightgray">
                             Information on hover will be shown here
                         </div>
-                        <div id="err-msg-div" class="font-size-small margin-top-5-px color-lightgray">
-                            </div>
                     </md-content>
                 </md-sidenav>
             </section>

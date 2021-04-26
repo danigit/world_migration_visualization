@@ -46,20 +46,23 @@
 
         // TODO: Change last two magnitude colors
         let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
-        let migrationMagnitudeColors = ["#26828e", "#26828e", "#6ece58", "#c5b409", "#f1860c", "#ff3333"];
+
+        // let migrationMagnitudeColors = ["#26828e", "#26828e", "#6ece58", "#c5b409", "#f1860c", "#ff3333"];
+        let migrationMagnitudeColors = ["#ffffb2", "#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"];
+        // let migrationMagnitudeColors = ["#ffffcc", "#ffffcc", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"];
 
         // Simplest solution: set the thresholds by hand (after having looked at the dataset's min/max values)
         // Min weight dataset: 1
         // Max weight dataset: 2763183
-        let errorString = "";
         let migrationThreshs = [100, 1000, 10000, 100000, 1000000];
         $scope.weightThresh = migrationThreshs[2];
+
         let weightScale = d3.scaleThreshold().domain(migrationThreshs).range(migrationMagnitudeColors);
 
         let validCountries = {
             source: [],
             destination: [],
-        };  
+        };
 
         // function that returns a color given the parameter
         let strokeColor = (d) => {
@@ -73,12 +76,14 @@
         let checkValidSelection = () => {
             let _yearData_oD = filterOrigDest(yearsData);
 
-            let numArcs = d3.rollup(_yearData_oD,
-                    v => v.length, d => d.year);
+            let numArcs = d3.rollup(
+                _yearData_oD,
+                (v) => v.length,
+                (d) => d.year
+            );
             let leastNumArcs = d3.least(numArcs);
 
-            return !(leastNumArcs === undefined
-                    || leastNumArcs[1] == 0);
+            return !(leastNumArcs === undefined || leastNumArcs[1] == 0);
         };
 
         let checkChanged = () => {
@@ -110,16 +115,14 @@
             if (selectionChanged) {
                 if (!checkValidSelection()) {
                     // TODO: Display error in UI
-                    errorString = "Invalid selection.\n" + "Reverting to previous state...";
-                    console.log("Invalid selection.\n" + "Reverting to previous state...");
-
-                    document.querySelector("#err-msg-div").innerHTML =  
-                    `<div class="display-flex"><div class="text-left width-100">${
-                        errorString
-                    }</div></div>`;
+                    homeInfoBox.classList.add("color-orange");
+                    homeInfoBox.classList.remove("color-lightgray");
+                    homeInfoBox.innerHTML = "Invalid selection.\n" + "Reverting to previous state...";
 
                     setTimeout(function () {
-                        document.querySelector("#err-msg-div").innerHTML = "";
+                        homeInfoBox.innerHTML = "Information on hover will be shown here";
+                        homeInfoBox.classList.remove("color-orange");
+                        homeInfoBox.classList.add("color-lightgray");
                     }, 5000);
 
                     revertSelection();
@@ -128,21 +131,14 @@
 
                 if (!checkChanged()) {
                     // TODO: Display message in UI
-                    errorString = "Selection did not change.";
-                    console.log("Selection did not change.");
-                    document.querySelector("#err-msg-div").innerHTML =  
-                    `<div class="display-flex"><div class="text-left width-100">${
-                        errorString
-                    }</div></div>`;
+                    homeInfoBox.innerHTML = "Selection did not change.";
 
                     setTimeout(function () {
-                        document.querySelector("#err-msg-div").innerHTML = "";
+                        homeInfoBox.innerHTML = "Information on hover will be shown here";
                     }, 5000);
 
                     return;
                 }
-
-                document.querySelector("#err-msg-div").innerHTML = "";
 
                 validCountries.source = [...$scope.selectedCountries.source];
                 validCountries.destination = [...$scope.selectedCountries.destination];
@@ -331,8 +327,6 @@
                         }</div></div>
                         </div>
                         `;
-
-            
         };
 
         /**
@@ -466,6 +460,8 @@
                 $scope.$apply();
             });
 
+            homeInfoBox = document.querySelector("#home-info-box");
+
             // handling the removal of all the filters
             document.getElementById("clear-all").addEventListener("click", () => {
                 $scope.selectedCountries.source = [];
@@ -477,28 +473,25 @@
             });
 
             weightElems.on("click", function (_, d) {
-
                 let _oldThresh = $scope.weightThresh.valueOf();
 
                 $scope.weightThresh = d;
 
                 if (!checkValidSelection()) {
-                    errorString = "Invalid selection.\n" + "Reverting to previous state...";
-                    console.log("Invalid selection.\n" + "Reverting to previous state...");
-                    document.querySelector("#err-msg-div").innerHTML =  
-                    `<div class="display-flex"><div class="text-left width-100">${
-                        errorString
-                    }</div></div>`;
+                    homeInfoBox.classList.add("color-orange");
+                    homeInfoBox.classList.remove("color-lightgray");
+                    homeInfoBox.innerHTML = "Invalid selection.\n" + "Reverting to previous state...";
+
                     $scope.weightThresh = _oldThresh;
 
                     setTimeout(function () {
-                        document.querySelector("#err-msg-div").innerHTML = "";
+                        homeInfoBox.innerHTML = "Information on hover will be shown here";
+                        homeInfoBox.classList.remove("color-orange");
+                        homeInfoBox.classList.add("color-lightgray");
                     }, 5000);
 
                     return;
                 }
-
-                document.querySelector("#err-msg-div").innerHTML = "";
 
                 weightElems.select("text").attr("stroke", (d) => strokeColor(d));
 
@@ -812,12 +805,10 @@
 
         let updateArcsAmount = (_yearsData, _yearIdx) => {
             let _yearRange = yearsInterval[_yearIdx];
-            let numArcs = _yearsData.filter(d =>
-                    d.year === _yearRange).length;
+            let numArcs = _yearsData.filter((d) => d.year === _yearRange).length;
 
-            d3.select("#arcs-amount")
-                    .text(`Showing ${numArcs} migrations`);
-        }
+            d3.select("#arcs-amount").text(`Showing ${numArcs} migrations`);
+        };
 
         /**
          * Function that initialize the world map
@@ -883,11 +874,31 @@
                         .duration(100)
                         .attr("fill", HOVERED_COLOR)
                         .attr("stroke", "#63b3d4");
+
+                    let countryImmigration = yearsData.filter((c) => c.destinationName === d.properties.name);
+
+                    let distinctSources = [...new Set(countryImmigration.map((item) => item.sourceName))];
+                    let totalCountryImmigrants = countryImmigration.reduce((sum, curr) => sum + +curr.weight, 0);
+
                     homeInfoBox.innerHTML = `
-                    <div>
+                    <div class="margin-left-20px">
                         <div class="display-flex">
-                            <img width="40" height="30" class="margin-left-20px" src="${d.properties.flagPath}">
-                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${d.properties.visName}</div>
+                            <img width="40" height="30" src="${d.properties.flagPath}">
+                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${
+                                d.properties.visName
+                            }</div>
+                        </div>
+                        <div class="margin-top-20-px font-size-medium float-left width-100">
+                            <div class="margin-left-20-px float-left color-darkcyan">Number of total sources</div><div class="margin-right-20-px float-right">${
+                                distinctSources.length
+                            } countries</div>
+                        </div>
+                        <div class="margin-top-10-px font-size-medium float-left width-100">
+                            <div class="margin-left-20-px float-left color-darkcyan">Total country immigrants</div><div class="margin-right-20-px float-right">${transformNumberFormat(
+                                totalCountryImmigrants,
+                                false,
+                                0
+                            )}</div>
                         </div>
                     </div>
                     `;
@@ -972,12 +983,12 @@
             // Append the Y axis legend
             svgAreaChart
                 .append("g")
-                    .classed("group-label-y-axis", true)
+                .classed("group-label-y-axis", true)
                 .append("text")
-                    .attr("id", "label-y-axis")
-                    .classed("text-bold", true)
-                    .classed("legend", true)
-                    .attr("transform", `rotate(-90) translate(10, ${-60})`)
+                .attr("id", "label-y-axis")
+                .classed("text-bold", true)
+                .classed("legend", true)
+                .attr("transform", `rotate(-90) translate(10, ${-60})`)
                 .text("Total immigration");
 
             return {
@@ -1175,9 +1186,8 @@
         let updateYearTitle = (_yearIdx) => {
             let _yearRange = yearsInterval[_yearIdx];
 
-            d3.select("#year-title")
-                .text(_yearRange);
-        }
+            d3.select("#year-title").text(_yearRange);
+        };
 
         /**
          * Function that initialize the migration magnitude filter
@@ -1291,7 +1301,6 @@
          * @param {object} source
          */
         $scope.remove = function (chip, source) {
-
             _handleOnSelectionChanged();
             let textNoFilters = d3.select("#text-no-filters");
             if (source) {

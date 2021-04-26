@@ -577,6 +577,10 @@ COLOR
     color: #b0b0b0 !important;
 }
 
+.color-gray {
+    color: gray !important;
+}
+
 .color-black {
     color: #000000;
 }
@@ -747,7 +751,7 @@ Navbar
 *******************************************************************/
 
 .active {
-    color: #0093c4!important;
+    color: #0093c4 !important;
 }
 
 .inactive {
@@ -813,7 +817,7 @@ Navbar
 }
 
 md-chip {
-    color: gray:important;
+    color: gray !important;
     width: 100%;
 }
 
@@ -827,13 +831,13 @@ md-chip:hover {
 
 md-chip.md-focused {
     background: #e0e0e0 !important;
-    color: grey!important;
+    color: grey !important;
 }
 
-.text-glow{
+.text-glow {
     text-shadow: 0 0 10px #0093c4;
 }
 
-.text-glow-white{
-    text-shadow: 0 0 10px #FFFFFF;
+.text-glow-white {
+    text-shadow: 0 0 10px #ffffff;
 }
