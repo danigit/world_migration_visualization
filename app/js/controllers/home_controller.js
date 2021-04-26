@@ -64,7 +64,7 @@
         };
 
         let checkValidSelection = () => {
-            return filterOrigDest(yearsData) != 0;
+            return filterOrigDest(yearsData).length != 0;
         };
 
         let checkChanged = () => {
@@ -438,12 +438,18 @@
             });
 
             weightElems.on("click", function (_, d) {
+
+                let _oldThresh = $scope.weightThresh.valueOf();
+
                 $scope.weightThresh = d;
 
-                weightElems.select("text").attr("stroke", (d) => strokeColor(d));
+                if (!checkValidSelection()) {
+                    console.log("Invalid selection.\n" + "Reverting to previous state...");
+                    $scope.weightThresh = _oldThresh;
+                    return;
+                }
 
-                // FIXME: Prevent update if empy yearsData_origDest
-                // FIXME: Restore old weight circle
+                weightElems.select("text").attr("stroke", (d) => strokeColor(d));
 
                 if (!isPaused) pauseArcs();
 
@@ -1207,6 +1213,7 @@
          * @param {object} source
          */
         $scope.remove = function (chip, source) {
+
             _handleOnSelectionChanged();
             let textNoFilters = d3.select("#text-no-filters");
             if (source) {
