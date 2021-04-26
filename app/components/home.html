@@ -57,7 +57,7 @@
                             </radio-button-group>
                         </div> -->
 
-                        <hr class="menu-divider" />
+                        <hr class="menu-divider margin-bottom-20-px" />
                         <md-input-container id="source-selector" class="width-90 display-block margin-auto">
                             <label>Select sources...</label>
                             <md-select ng-model="selectedCountries.source" md-on-close="selectionClosed()" multiple>
@@ -97,7 +97,9 @@
                             </md-select>
                         </md-input-container>
                         <hr class="menu-divider" />
-                        <div layout="row">
+                        <div layout="column">
+                            <div class="color-lightgray font-size-small margin-left-20px padding-10-px">Migration flow
+                                lowe bound</div>
                             <svg width="100%" height="50px">
                                 <g width="100%" id="container-weights">
                                 </g>

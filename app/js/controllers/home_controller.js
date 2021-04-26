@@ -46,10 +46,7 @@
 
         // TODO: Change last two magnitude colors
         let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
-
-        // let migrationMagnitudeColors = ["#26828e", "#26828e", "#6ece58", "#c5b409", "#f1860c", "#ff3333"];
         let migrationMagnitudeColors = ["#ffffb2", "#ffffb2", "#fecc5c", "#fd8d3c", "#f03b20", "#bd0026"];
-        // let migrationMagnitudeColors = ["#ffffcc", "#ffffcc", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494"];
 
         // Simplest solution: set the thresholds by hand (after having looked at the dataset's min/max values)
         // Min weight dataset: 1
@@ -1339,6 +1336,7 @@
          * @param {event} event
          */
         $scope.updateSearch = (event) => {
+            console.log("source", $scope.searchSource, "final");
             event.stopPropagation();
         };
 

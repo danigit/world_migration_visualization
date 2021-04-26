@@ -11,9 +11,9 @@
      * Function that handle the menu interaction
      * @type {string[]}
      */
-    menuController.$inject = ["$scope", "$mdSidenav", "dataService"];
+    menuController.$inject = ["$scope", "dataService"];
 
-    function menuController($scope, $mdSidenav, dataService) {
+    function menuController($scope,  dataService) {
         $scope.isSideMenuOpened = true;
 
         $scope.regionFilterValue = "menu-continent";
