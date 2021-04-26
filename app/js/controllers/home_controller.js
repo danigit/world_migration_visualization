@@ -43,28 +43,41 @@
         let yearsData_origDest = [];
 
         let areaChartObject = null;
+
+        // TODO: Change last two magnitude colors
         let yearsInterval = ["1990-1995", "1995-2000", "2000-2005", "2005-2010", "2010-2015", "2015-2019"];
-        let migrationMagnitudeColors = ["#F6F990", "#F6F990", "#F8FF42", "#C5B409", "#F1860C", "#FF3333"];
+        let migrationMagnitudeColors = ["#26828e", "#26828e", "#6ece58", "#c5b409", "#f1860c", "#ff3333"];
 
         // Simplest solution: set the thresholds by hand (after having looked at the dataset's min/max values)
         // Min weight dataset: 1
         // Max weight dataset: 2763183
-        let migrationThreshs = [0, 1000, 10000, 100000, 1000000];
-        $scope.weightThresh = migrationThreshs[1];
+        let migrationThreshs = [100, 1000, 10000, 100000, 1000000];
+        $scope.weightThresh = migrationThreshs[2];
         let weightScale = d3.scaleThreshold().domain(migrationThreshs).range(migrationMagnitudeColors);
 
         let validCountries = {
             source: [],
             destination: [],
-        };
+        };  
 
         // function that returns a color given the parameter
         let strokeColor = (d) => {
             return d === $scope.weightThresh ? "#0093c4" : "#ffffff";
         };
 
+        /**
+         * Check if there is at least 1 arc available to display
+         * for each year of the requested selection.
+         */
         let checkValidSelection = () => {
-            return filterOrigDest(yearsData) != 0;
+            let _yearData_oD = filterOrigDest(yearsData);
+
+            let numArcs = d3.rollup(_yearData_oD,
+                    v => v.length, d => d.year);
+            let leastNumArcs = d3.least(numArcs);
+
+            return !(leastNumArcs === undefined
+                    || leastNumArcs[1] == 0);
         };
 
         let checkChanged = () => {
@@ -115,7 +128,7 @@
 
                 initArcs($scope.geoObject.element, false);
 
-                drawAreaChart(areaChartObject, yearsData_origDest);
+                // drawAreaChart(areaChartObject, yearsData_origDest);
 
                 if (isPaused) {
                     $scope.playPauseBtn = IC_PAUSE;
@@ -181,7 +194,6 @@
             let _yearsData_weighted = _yearsData.filter((d) => d.weight >= $scope.weightThresh);
 
             let countriesOrig = $scope.selectedCountries.source.map((c) => c.name);
-
             let countriesDest = $scope.selectedCountries.destination.map((c) => c.name);
 
             if (countriesOrig.length == 0 && countriesDest.length == 0) {
@@ -401,6 +413,8 @@
 
             let weightElems = initCirclesWeight();
 
+            updateYearTitle(yearIdx);
+
             $scope.geoObject = initMap(worldJson);
             drawMap($scope.geoObject);
 
@@ -449,7 +463,7 @@
 
                 initArcs($scope.geoObject.element, false);
 
-                drawAreaChart(areaChartObject, yearsData_origDest);
+                // drawAreaChart(areaChartObject, yearsData_origDest);
 
                 if (isPaused) {
                     $scope.playPauseBtn = IC_PAUSE;
@@ -733,14 +747,6 @@
                     yearsData = [];
 
                     yearsData = extractYearsData(ioData);
-
-                    migrationThreshs = d3.extent(
-                        extractYearsData(ioData)
-                            .map((d) => d.weight)
-                            .filter((weight) => weight > 0)
-                    );
-
-                    console.log("migration thresholds ", migrationThreshs);
                 }
 
                 yearRep = 0;
@@ -752,12 +758,23 @@
                 yearsData_origDest = [];
                 yearsData_origDest = filterOrigDest(yearsData);
 
+                updateArcsAmount(yearsData_origDest, yearIdx);
+
                 drawAreaChart(areaChartObject, yearsData_origDest);
 
                 // createGlows($scope.geoObject.element);
                 drawArcs(mapElem);
             });
         };
+
+        let updateArcsAmount = (_yearsData, _yearIdx) => {
+            let _yearRange = yearsInterval[_yearIdx];
+            let numArcs = _yearsData.filter(d =>
+                    d.year === _yearRange).length;
+
+            d3.select("#arcs-amount")
+                    .text(`Showing ${numArcs} migrations`);
+        }
 
         /**
          * Function that initialize the world map
@@ -867,7 +884,7 @@
          * @returns
          */
         let initAreaChart = () => {
-            const svgMargins = { left: 50, right: 12, top: 18, bottom: 8 };
+            const svgMargins = { left: 75, right: 12, top: 18, bottom: 6 };
 
             let areaChartContainer = d3.select("#home-area-chart");
 
@@ -908,6 +925,17 @@
 
             // Append the years lines group
             svgAreaChart.append("g").classed("group-years-lines", true).classed("hide", true);
+
+            // Append the Y axis legend
+            svgAreaChart
+                .append("g")
+                    .classed("group-label-y-axis", true)
+                .append("text")
+                    .attr("id", "label-y-axis")
+                    .classed("text-bold", true)
+                    .classed("legend", true)
+                    .attr("transform", `rotate(-90) translate(10, ${-60})`)
+                .text("Total immigration");
 
             return {
                 dimens: { height: svgHeight, width: svgWidth },
@@ -1071,7 +1099,8 @@
          * @param {number} _yearIdx
          */
         let updateAreaChartTick = (acObject, _yearIdx) => {
-            let _actvRange = yearsInterval[_yearIdx].split("-");
+            let _yearRange = yearsInterval[_yearIdx];
+            let _actvRange = _yearRange.split("-");
             let dateParser = acObject.parser;
 
             let _parsedRange = _actvRange.map((y) => dateParser(y).getFullYear());
@@ -1095,7 +1124,17 @@
                 .select("text")
                 .classed("highlight-fill", (d) => isActive(d, true))
                 .classed("highlight-stroke", (d) => isActive(d, true));
+
+            updateYearTitle(_yearIdx);
+            updateArcsAmount(yearsData_origDest, _yearIdx);
         };
+
+        let updateYearTitle = (_yearIdx) => {
+            let _yearRange = yearsInterval[_yearIdx];
+
+            d3.select("#year-title")
+                .text(_yearRange);
+        }
 
         /**
          * Function that initialize the migration magnitude filter
@@ -1118,7 +1157,7 @@
 
             let cxScale = d3.scaleOrdinal().domain(migrationThreshs).range([0.9, 0.7, 0.5, 0.3, 0.1]);
 
-            let _xScale = d3.scaleOrdinal().domain(migrationThreshs).range([0.885, 0.67, 0.45, 0.26, 0.06]);
+            let _xScale = d3.scaleOrdinal().domain(migrationThreshs).range([0.86, 0.675, 0.46, 0.245, 0.06]);
 
             let nospaceFormat = (d) => {
                 return transformNumberFormat(d, false, 0).replace(" ", "");
@@ -1136,7 +1175,7 @@
                 .append("text")
                 .attr("stroke", (d) => strokeColor(d))
                 .attr("font-size", 14)
-                .attr("y", "50")
+                .attr("y", "46")
                 .attr("x", (d) => pctFormat(_xScale(d)))
                 .text((d) => nospaceFormat(d));
 
@@ -1185,6 +1224,8 @@
             let sourcesDiv = document.querySelector("#sources-tooltip");
             let destinationsDiv = document.querySelector("#destinations-tooltip");
             let textNoFilters = d3.select("#text-no-filters");
+
+            $scope.clearSearch();
 
             $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
             $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);

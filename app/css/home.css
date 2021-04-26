@@ -111,3 +111,8 @@ md-sidenav {
     left: 210px;
     z-index: 100;
 }
+
+#label-y-axis {
+    font-size: 12px  !important;
+    text-anchor: end !important;
+}
