@@ -108,11 +108,11 @@ md-sidenav {
     border-top: 18px solid transparent;
     border-left: 15px solid #2d2e2e;
     border-bottom: 18px solid transparent;
-    left: 210px;
+    left: 218px;
     z-index: 100;
 }
 
 #label-y-axis {
-    font-size: 12px  !important;
+    font-size: 12px !important;
     text-anchor: end !important;
 }

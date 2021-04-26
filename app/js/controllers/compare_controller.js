@@ -884,7 +884,7 @@
                 .attr("transform", `translate(${SVG_MARGINS.left}, ${SVG_HEIGHT - SVG_MARGINS.bottom})`)
                 .style("font-size", "10px")
                 .attr("class", "axis-dark-cyan")
-                .call(d3.axisBottom(xScale).ticks(data.length))
+                .call(d3.axisBottom(xScale).ticks(6))
                 .selectAll("text")
                 .attr("transform", "rotate(25)")
                 .attr("text-anchor", "start");
