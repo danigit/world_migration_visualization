@@ -49,6 +49,7 @@
         // Simplest solution: set the thresholds by hand (after having looked at the dataset's min/max values)
         // Min weight dataset: 1
         // Max weight dataset: 2763183
+        let errorString = "";
         let migrationThreshs = [0, 1000, 10000, 100000, 1000000];
         $scope.weightThresh = migrationThreshs[1];
         let weightScale = d3.scaleThreshold().domain(migrationThreshs).range(migrationMagnitudeColors);
@@ -96,7 +97,17 @@
             if (selectionChanged) {
                 if (!checkValidSelection()) {
                     // TODO: Display error in UI
+                    errorString = "Invalid selection.\n" + "Reverting to previous state...";
                     console.log("Invalid selection.\n" + "Reverting to previous state...");
+
+                    document.querySelector("#err-msg-div").innerHTML =  
+                    `<div class="display-flex"><div class="text-left width-100">${
+                        errorString
+                    }</div></div>`;
+
+                    setTimeout(function () {
+                        document.querySelector("#err-msg-div").innerHTML = "";
+                    }, 5000);
 
                     revertSelection();
                     return;
@@ -104,9 +115,21 @@
 
                 if (!checkChanged()) {
                     // TODO: Display message in UI
+                    errorString = "Selection did not change.";
                     console.log("Selection did not change.");
+                    document.querySelector("#err-msg-div").innerHTML =  
+                    `<div class="display-flex"><div class="text-left width-100">${
+                        errorString
+                    }</div></div>`;
+
+                    setTimeout(function () {
+                        document.querySelector("#err-msg-div").innerHTML = "";
+                    }, 5000);
+
                     return;
                 }
+
+                document.querySelector("#err-msg-div").innerHTML = "";
 
                 validCountries.source = [...$scope.selectedCountries.source];
                 validCountries.destination = [...$scope.selectedCountries.destination];
@@ -296,6 +319,8 @@
                         }</div></div>
                         </div>
                         `;
+
+            
         };
 
         /**
@@ -444,10 +469,22 @@
                 $scope.weightThresh = d;
 
                 if (!checkValidSelection()) {
+                    errorString = "Invalid selection.\n" + "Reverting to previous state...";
                     console.log("Invalid selection.\n" + "Reverting to previous state...");
+                    document.querySelector("#err-msg-div").innerHTML =  
+                    `<div class="display-flex"><div class="text-left width-100">${
+                        errorString
+                    }</div></div>`;
                     $scope.weightThresh = _oldThresh;
+
+                    setTimeout(function () {
+                        document.querySelector("#err-msg-div").innerHTML = "";
+                    }, 5000);
+
                     return;
                 }
+
+                document.querySelector("#err-msg-div").innerHTML = "";
 
                 weightElems.select("text").attr("stroke", (d) => strokeColor(d));
 
