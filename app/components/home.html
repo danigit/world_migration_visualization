@@ -3,9 +3,9 @@
     <div ng-include="'app/commons/navbar.html'" onload="active='home'"></div>
     <div layout="row" class="parent-size">
         <!--menu container-->
-        <div id="menu-container" ng-controller="menuController as menuCtrl"
+        <div id="menu-container"
             class="width-20 max-width-500-px background-dark">
-            <div id="open-menu-button" ng-click="toggleMenu()" class="margin-left--8-px cursor-pointer outline-none">
+            <div id="open-menu-button" ng-click="toggleMenu()" class="margin-left-8-px cursor-pointer outline-none">
                 <img id="open-menu-icon" src="app/img/menu-arrow.png" alt="Open Menu" title="Open Menu" />
             </div>
             <section id="menu-section" layout="row" class="parent-size min-width-250-px max-width-500-px">
@@ -23,16 +23,27 @@
                         </civ>
                         <div
                             class="filters-container margin-lr-auto font-size-small color-lightgray clear-float border-radius-10px overflow-auto max-height-150-px">
-                            <div id="sources-tooltip" class="display-none width-100">
+                            <div id="sources-tooltip" class="hide width-100">
                                 Sources
-                                <md-chips ng-model="selectedSources" readonly="false" md-removable="false"
-                                    md-on-select="remove($chip, true)">
+                                <md-chips ng-model="selectedCountries.source" readonly="false" md-removable="false"
+                                    md-on-select="removeChips($chip, true)">
+                                    <md-chip-template>
+                                        <span>
+                                          <strong>{{$chip.visName}}</strong>
+                                        </span>
+                                    </md-chip-template>
                                 </md-chips>
                             </div>
-                            <div id="destinations-tooltip" class="display-none margin-top-5-px">
+                            <div id="destinations-tooltip" class="hide margin-top-5-px">
                                 Destinations
-                                <md-chips ng-model="selectedDestinations" md-removable="false"
-                                    md-on-select="remove($chip, false)"></md-chips>
+                                <md-chips ng-model="selectedCountries.destination" md-removable="false"
+                                    md-on-select="removeChips($chip, false)">
+                                    <md-chip-template>
+                                        <span>
+                                            <strong>{{$chip.visName}}</strong>
+                                        </span>
+                                    </md-chip-template>
+                                </md-chips>
                             </div>
 
                             <div id="text-no-filters">No active filters.<br>Please select a filter from the
@@ -48,7 +59,7 @@
                             </radio-button-group>
                         </div>
 
-                        <!-- Future work - insert filter by region -->
+                        <!-- Future work - Insert filter by region -->
                         <!-- <hr class="menu-divider width-100" />
                         <div class="width-90 margin-auto">
                             <radio-button-group selected-button="regionFilterValue"
@@ -68,7 +79,7 @@
                                         ng-keydown="updateSearch($event)" />
                                 </md-select-header>
                                 <md-option ng-value="country" ng-repeat="country in countries | filter: searchSource"
-                                    ng-class="{'margin-top-50-px' : $first}">
+                                    ng-class="{'margin-top-50-px' : $first,'margin-bottom-50-px': $last}">
                                     {{country.visName}}</md-option>
 
                                 <div class="position-fixed padding-10-px bottom-0 background-white color-gray">
@@ -89,7 +100,7 @@
                                 </md-select-header>
                                 <md-option ng-value="country"
                                     ng-repeat="country in countries | filter: searchDestination"
-                                    ng-class="{'margin-top-50-px' : $first}">
+                                    ng-class="{'margin-top-50-px' : $first,'margin-bottom-50-px': $last}">
                                     {{country.visName}}</md-option>
                                 <div class="position-fixed padding-10-px bottom-0 background-white color-gray">
                                     Close this panel

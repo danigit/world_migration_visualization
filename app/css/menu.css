@@ -95,6 +95,10 @@ md-select-value {
     border-bottom: 1px solid #0093c4 !important;
 }
 
+md-chips input {
+    display: none !important;
+}
+
 md-select ._md-select-placeholder {
     color: red !important;
 }

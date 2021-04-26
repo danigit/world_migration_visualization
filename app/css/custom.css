@@ -827,6 +827,7 @@ md-chip {
 
 md-chip:hover {
     background-color: #fa606b;
+    color: white !important;
 }
 
 md-chip.md-focused {

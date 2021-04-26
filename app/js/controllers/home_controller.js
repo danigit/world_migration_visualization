@@ -24,6 +24,13 @@
             destination: [],
         };
 
+        dataService.countries.then((data) => {
+            $scope.countries = data;
+        });
+
+        $scope.genderButtons = dataService.genderButtons;
+        $scope.isSideMenuOpened = true;
+
         const ARCS_DURATION = 3 * TRANSITION_DURATION;
         let localDashArray = d3.local();
         let svgMapWidth;
@@ -37,10 +44,13 @@
         let selectionChanged = false;
         let revertedSelection = false;
         let textNoFilters = null;
-        let selectorSources = null;
-        let selectorDestinations = null;
+        // let selectorSources = null;
+        // let selectorDestinations = null;
         let yearsData = [];
         let yearsData_origDest = [];
+
+        let tooltipSources = null;
+        let tooltipDest = null;
 
         let areaChartObject = null;
 
@@ -123,7 +133,7 @@
                         homeInfoBox.innerHTML = "Information on hover will be shown here";
                         homeInfoBox.classList.remove("color-orange");
                         homeInfoBox.classList.add("color-lightgray");
-                    }, 5000);
+                    }, 3000);
 
                     revertSelection();
                     return;
@@ -135,7 +145,7 @@
 
                     setTimeout(function () {
                         homeInfoBox.innerHTML = "Information on hover will be shown here";
-                    }, 5000);
+                    }, 3000);
 
                     return;
                 }
@@ -143,15 +153,7 @@
                 validCountries.source = [...$scope.selectedCountries.source];
                 validCountries.destination = [...$scope.selectedCountries.destination];
 
-                if (!isPaused) pauseArcs();
-
-                initArcs($scope.geoObject.element, false);
-
-                // drawAreaChart(areaChartObject, yearsData_origDest);
-
-                if (isPaused) {
-                    $scope.playPauseBtn = IC_PAUSE;
-                }
+                resetArcs();
             }
         };
 
@@ -168,11 +170,24 @@
                 let selectedOrig = $scope.selectedCountries.source;
                 let selectedDest = $scope.selectedCountries.destination;
 
+                // if (newVal.length == 0) {
+                //     selectorSources.classed("hide", true);
+                // } else {
+                //     selectedOrig.sort(Country.sort);
+                //     selectorSources.classed("hide", false);
+                // }
+
                 if (newVal.length == 0) {
-                    selectorSources.classed("hide", true);
+                    tooltipSources.classed("hide", true);
+
+                    if (selectedDest.length == 0) {
+                        textNoFilters.classed("hide", false);
+                    }
                 } else {
+                    if (selectedDest.length == 0) textNoFilters.classed("hide", true);
+
                     selectedOrig.sort(Country.sort);
-                    selectorSources.classed("hide", false);
+                    tooltipSources.classed("hide", false);
                 }
             } else {
                 selectionChanged = false;
@@ -193,7 +208,7 @@
                 let selectedDest = $scope.selectedCountries.destination;
 
                 if (newVal.length == 0) {
-                    selectorDestinations.classed("hide", true);
+                    tooltipDest.classed("hide", true);
 
                     if (selectedOrig.length == 0) {
                         textNoFilters.classed("hide", false);
@@ -202,7 +217,7 @@
                     if (selectedOrig.length == 0) textNoFilters.classed("hide", true);
 
                     selectedDest.sort(Country.sort);
-                    selectorDestinations.classed("hide", false);
+                    tooltipDest.classed("hide", false);
                 }
             } else {
                 selectionChanged = false;
@@ -425,8 +440,11 @@
         dataService.loadWorldMap().then((_worldJson) => {
             textNoFilters = d3.select("#text-no-filters");
 
-            selectorSources = d3.select("#select-sources");
-            selectorDestinations = d3.select("#select-destinations");
+            // selectorSources = d3.select("#select-sources");
+            // selectorDestinations = d3.select("#select-destinations");
+
+            tooltipSources = d3.select("#sources-tooltip");
+            tooltipDest    = d3.select("#destinations-tooltip");
 
             worldJson = _worldJson;
 
@@ -495,15 +513,7 @@
 
                 weightElems.select("text").attr("stroke", (d) => strokeColor(d));
 
-                if (!isPaused) pauseArcs();
-
-                initArcs($scope.geoObject.element, false);
-
-                // drawAreaChart(areaChartObject, yearsData_origDest);
-
-                if (isPaused) {
-                    $scope.playPauseBtn = IC_PAUSE;
-                }
+                resetArcs();
             });
 
             homeInfoBox = document.querySelector("#home-info-div");
@@ -1238,15 +1248,25 @@
         // handling the gender filter changes
         $scope.$watch("genderFilterValue", (newVal, oldVal) => {
             if (newVal !== oldVal) {
-                if (!isPaused) pauseArcs();
-
-                initArcs($scope.geoObject.element);
-
-                if (isPaused) {
-                    $scope.playPauseBtn = IC_PAUSE;
-                }
+                resetArcs();
             }
         });
+
+        let resetArcs = () => {
+            if (!isPaused) pauseArcs();
+
+            $scope.geoObject.element
+                .select(".arch-container")
+                .selectAll(".arch-path")
+                    .on("mouseover", null)
+                    .on("mouseout", null);
+
+            initArcs($scope.geoObject.element);
+
+            if (isPaused) {
+                $scope.playPauseBtn = IC_PAUSE;
+            }
+        }
 
         // TODO: Get feed data for relevant year
         /**
@@ -1274,23 +1294,23 @@
          * Function that apply the filters when the selection popup is closed
          */
         $scope.selectionClosed = () => {
-            let sourcesDiv = document.querySelector("#sources-tooltip");
-            let destinationsDiv = document.querySelector("#destinations-tooltip");
-            let textNoFilters = d3.select("#text-no-filters");
+            // let sourcesDiv = document.querySelector("#sources-tooltip");
+            // let destinationsDiv = document.querySelector("#destinations-tooltip");
+            // let textNoFilters = d3.select("#text-no-filters");
 
             $scope.clearSearch();
 
-            $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
-            $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
+            // $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
+            // $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
 
-            if ($scope.selectedSources.length != 0) {
-                sourcesDiv.classList.remove("display-none");
-                textNoFilters.classed("hide", true);
-            }
-            if ($scope.selectedDestinations.length != 0) {
-                destinationsDiv.classList.remove("display-none");
-                textNoFilters.classed("hide", true);
-            }
+            // if ($scope.selectedSources.length != 0) {
+            //     sourcesDiv.classList.remove("display-none");
+            //     textNoFilters.classed("hide", true);
+            // }
+            // if ($scope.selectedDestinations.length != 0) {
+            //     destinationsDiv.classList.remove("display-none");
+            //     textNoFilters.classed("hide", true);
+            // }
 
             _handleOnSelectionChanged();
         };
@@ -1300,30 +1320,29 @@
          * @param {object} chip
          * @param {object} source
          */
-        $scope.remove = function (chip, source) {
-            _handleOnSelectionChanged();
-            let textNoFilters = d3.select("#text-no-filters");
+        $scope.removeChips = function (chip, source) {
             if (source) {
-                let sourcesDiv = document.querySelector("#sources-tooltip");
-                $scope.selectedSources = $scope.selectedSources.filter((c) => c !== chip);
-                $scope.selectedCountries.source = $scope.selectedCountries.source.filter((c) => c.name !== chip);
-                if ($scope.selectedSources.length == 0) {
-                    sourcesDiv.classList.add("display-none");
+                $scope.selectedCountries.source = $scope.selectedCountries.source
+                        .filter(c => c.name !== chip.name);
+
+                if ($scope.selectedCountries.source.length == 0) {
+                    tooltipSources.classed("hide", true);
                 }
             } else {
-                let destinationsDiv = document.querySelector("#destinations-tooltip");
-                $scope.selectedDestinations = $scope.selectedDestinations.filter((c) => c !== chip);
-                $scope.selectedCountries.destination = $scope.selectedCountries.destination.filter(
-                    (c) => c.name !== chip
-                );
-                if ($scope.selectedDestinations.length == 0) {
-                    destinationsDiv.classList.add("display-none");
+                $scope.selectedCountries.destination = $scope.selectedCountries.destination
+                        .filter(c => c.name !== chip.name);
+
+                if ($scope.selectedCountries.destination.length == 0) {
+                    tooltipDest.classed("hide", true);
                 }
             }
 
-            if ($scope.selectedSources.length == 0 && $scope.selectedDestinations.length == 0) {
+            if ($scope.selectedCountries.source.length == 0
+                    && $scope.selectedCountries.destination.length == 0) {
                 textNoFilters.classed("hide", false);
             }
+
+            _handleOnSelectionChanged();
         };
 
         /**
