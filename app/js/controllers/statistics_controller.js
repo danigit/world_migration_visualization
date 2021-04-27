@@ -19,7 +19,7 @@
         $scope.selectedTopFlag = "";
         $scope.countriesData = null;
         $scope.globalStatisticsVisName = "Global statistics";
-        $scope.selectedMetric = "immigrants_avg_age";
+        $scope.selectedMetric = "total_immigration";
         $scope.barChartInitialized = false;
         $scope.geoObject = null;
         $scope.activeYears = dataService.getActiveYears();
@@ -34,6 +34,9 @@
         let barChartSvgElement;
         let svgMapWidth;
         let svgMapHeight;
+
+        let _totImmigration_colorTicks = [10000, 50000, 100000, 1000000, 5000000, 10000000, 30000000, 100000000];
+        let _totPopulation_colorTicks  = [100000, 1000000, 10000000, 30000000, 50000000, 100000000, 500000000, 1000000000];
 
         /**
          * Function that updates the year visualization
@@ -184,7 +187,17 @@
                     statistics_avgValues = Object.values(statistics_all_avgByCountry);
                 }
 
-                colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
+                if ($scope.selectedMetric === 'total_immigration') {
+                    colorScale = d3.scaleThreshold()
+                        .domain(_totImmigration_colorTicks)
+                        .range(colorScheme);
+                } else if ($scope.selectedMetric === 'total_population') {
+                    colorScale = d3.scaleThreshold()
+                        .domain(_totPopulation_colorTicks)
+                        .range(colorScheme);
+                } else {
+                    colorScale = d3_scaleLogMinMax(statistics_avgValues, [colorScheme[0], colorScheme[8]]);
+                }
             }
 
             /**
@@ -321,8 +334,14 @@
                 );
 
             // Create color legend
-            colorTicks = colorScale.ticks(9);
-
+            if ($scope.selectedMetric === 'total_immigration') {
+                colorTicks = _totImmigration_colorTicks;
+            } else if ($scope.selectedMetric === 'total_population') {
+                colorTicks = _totPopulation_colorTicks;
+            } else {
+                colorTicks = colorScale.ticks(9);
+            }
+            
             const rectWidth = 35;
             const rectMargin = 25;
 

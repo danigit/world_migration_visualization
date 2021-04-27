@@ -39,15 +39,14 @@ function transformNumberFormat(number, order = false, decimals = 2, selectedMetr
         ];
 
         let regularExpression = /\.0+$|(\.[0-9]*[1-9])0+$/;
+
         let i;
         for (i = steps.length - 1; i > 0; i--) {
-            if (number >= steps[i].value) {
+            if (Math.abs(number) >= steps[i].value) {
                 break;
             }
         }
-        /* if (number <= 1 && number >=0) {
-            decimals=1;
-        }  */
+   
         return (number / steps[i].value).toFixed(decimals).replace(regularExpression, "$1") + " " + steps[i].symbol;
     } else {
         /*

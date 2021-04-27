@@ -8,9 +8,9 @@
      * Function that handlle the user login
      */
 
-    homeController.$inject = ["$scope", "dataService"];
+    homeController.$inject = ["$scope", "dataService", "$timeout"];
 
-    function homeController($scope, dataService) {
+    function homeController($scope, dataService, $timeout) {
         $scope.yearFeeds = [];
         $scope.playPauseBtn = null;
         $scope.isRunning = true;
@@ -90,7 +90,9 @@
             );
             let leastNumArcs = d3.least(numArcs);
 
-            return !(leastNumArcs === undefined || leastNumArcs[1] == 0);
+            return !(leastNumArcs === undefined
+                        || numArcs.size != yearsInterval.length
+                        || leastNumArcs[1] == 0);
         };
 
         let checkChanged = () => {
@@ -331,7 +333,7 @@
                         <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Destination:</div><div class="text-right width-100"> ${
                             destination.properties.visName
                         }</div></div>
-                        <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Migration:</div><div class="text-right width-100"> ${transformNumberFormat(
+                        <div class="display-flex padding-3-px"><div class="width-200-px color-darkcyan">Migration flow:</div><div class="text-right width-100"> ${transformNumberFormat(
                             d.weight
                         )}</div></div>
                         <div class="display-flex padding-3-px"><div class="width-100-px color-darkcyan">Years:</div><div class="text-right width-100"> ${
@@ -426,7 +428,7 @@
                     _handleArcsRepetition(map, arcElems);
                 },
                 (e) => {
-                    console.log(e);
+                    // console.log(e);
                 }
             );
         };
@@ -495,6 +497,7 @@
                 if (!checkValidSelection()) {
                     homeInfoBox.classList.add("color-orange");
                     homeInfoBox.classList.remove("color-lightgray");
+
                     homeInfoBox.innerHTML = "Invalid selection.\n" + "Reverting to previous state...";
 
                     $scope.weightThresh = _oldThresh;
@@ -584,7 +587,11 @@
                 .attr("fill", "none")
                 .attr("d", (d) => defineArc(d.sourceCentroid, d.destinationCentroid))
                 .attr("stroke-dashoffset", null)
-                .attr("stroke-dasharray", null);
+                .attr("stroke-dasharray", null);                    
+
+            arcElems
+                .on("mouseover", null)
+                .on("mouseout", null);
 
             updateArcs(map, arcElems);
         };
@@ -891,17 +898,17 @@
                     <div class="margin-left-20px">
                         <div class="display-flex">
                             <img width="40" height="30" src="${d.properties.flagPath}">
-                            <div class="margin-left-20px color-white font-size-x-large margin-top-bottom-auto">${
+                            <div class="margin-left-20px color-white font-size-large margin-top-bottom-auto">${
                                 d.properties.visName
                             }</div>
                         </div>
-                        <div class="margin-top-20-px font-size-medium float-left width-100">
-                            <div class="margin-left-20-px float-left color-darkcyan">Number of total sources</div><div class="margin-right-20-px float-right">${
+                        <div class="margin-top-20-px font-size-small float-left width-100">
+                            <div class="margin-left-20-px float-left text-bold color-darkcyan">Total source countries</div><div class="margin-right-20-px float-right">${
                                 distinctSources.length
                             } countries</div>
                         </div>
-                        <div class="margin-top-10-px font-size-medium float-left width-100">
-                            <div class="margin-left-20-px float-left color-darkcyan">Total country immigrants</div><div class="margin-right-20-px float-right">${transformNumberFormat(
+                        <div class="margin-top-10-px font-size-small float-left width-100">
+                            <div class="margin-left-20-px float-left text-bold color-darkcyan">Immigration change 1990-2019</div><div class="margin-right-20-px float-right">${transformNumberFormat(
                                 totalCountryImmigrants,
                                 false,
                                 0
@@ -1262,6 +1269,13 @@
 
             if (isPaused) {
                 $scope.playPauseBtn = IC_PAUSE;
+
+                $timeout(function() {
+                    $scope.$apply();
+                });
+
+                // if (!$scope.$digest())
+                //     $scope.$apply();
             }
         }
 
@@ -1291,24 +1305,7 @@
          * Function that apply the filters when the selection popup is closed
          */
         $scope.selectionClosed = () => {
-            // let sourcesDiv = document.querySelector("#sources-tooltip");
-            // let destinationsDiv = document.querySelector("#destinations-tooltip");
-            // let textNoFilters = d3.select("#text-no-filters");
-
-            $scope.clearSearch();
-
-            // $scope.selectedSources = $scope.selectedCountries.source.map((c) => c.name);
-            // $scope.selectedDestinations = $scope.selectedCountries.destination.map((c) => c.name);
-
-            // if ($scope.selectedSources.length != 0) {
-            //     sourcesDiv.classList.remove("display-none");
-            //     textNoFilters.classed("hide", true);
-            // }
-            // if ($scope.selectedDestinations.length != 0) {
-            //     destinationsDiv.classList.remove("display-none");
-            //     textNoFilters.classed("hide", true);
-            // }
-
+            _clearSearch();
             _handleOnSelectionChanged();
         };
 
@@ -1345,7 +1342,7 @@
         /**
          * Function that clears the search box in the source select filter
          */
-        $scope.clearSearch = () => {
+        let _clearSearch = () => {
             $scope.searchSource = "";
             $scope.searchDestination = "";
         };
@@ -1355,7 +1352,6 @@
          * @param {event} event
          */
         $scope.updateSearch = (event) => {
-            console.log("source", $scope.searchSource, "final");
             event.stopPropagation();
         };
 

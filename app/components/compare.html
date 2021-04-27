@@ -72,7 +72,7 @@
                         </div>
                         <div
                             class="width-50 color-white text-bold margin-top-10-px text-center font-size-xx-large margin-lr-auto text-glow-white">
-                            1990-2010</div>
+                            1990-2019</div>
                     </div>
                     <!-- Right country selection container -->
                     <div class="compare-search-container width-25">
@@ -107,13 +107,14 @@
                             <div class="float-left box-shadow-dark-gray margin-right-25-px"><img
                                     class="country-image-thumbnail" src="{{selectedCountry.left.flagPath}}">
                             </div>
+
                             <radio-button-group id="compare-info-group" selected-button="countryInfoValue"
                                 handle-button="handleCountryInfoClick(buttonValue)" ng-model="countryInfoValue"
-                                buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'">
+                                buttons="countryInfoTypeButtons" radio-buttons-class="'md-button border-1'"></radio-button-group>
 
-                                <div class="float-right box-shadow-dark-gray margin-left-25-px"><img
-                                        class="country-image-thumbnail" src="{{selectedCountry.right.flagPath}}">
-                                </div>
+                            <div class="float-right box-shadow-dark-gray margin-left-25-px"><img
+                                class="country-image-thumbnail" src="{{selectedCountry.right.flagPath}}">
+                            </div>
                         </div>
                     </div>
                     <div layout="row" class="margin-auto">
@@ -127,7 +128,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('totalImmigrations', true, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryLeftStatisticsValues.totalImmigrations}}
+                                            {{countryLeftStatisticsValues.totalImmigrations[0]}}
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -137,7 +138,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('totalPopulation', true, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryLeftStatisticsValues.totalPopulation}}
+                                            {{countryLeftStatisticsValues.totalPopulation[0]}}
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -147,7 +148,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('immigrationVsPopulation', true, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryLeftStatisticsValues.immigrationVsPopulation}} %
+                                            {{countryLeftStatisticsValues.immigrationVsPopulation[0]}} %
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -157,7 +158,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('immigrationAverageAge', true, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryLeftStatisticsValues.immigrationAverageAge}} years
+                                            {{countryLeftStatisticsValues.immigrationAverageAge[0]}} years
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -167,7 +168,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('refugeeVsImmigration', true, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryLeftStatisticsValues.refugeeVsImmigration}} %
+                                            {{countryLeftStatisticsValues.refugeeVsImmigration[0]}} %
                                         </span>
                                     </div>
                                 </div>
@@ -201,7 +202,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('totalImmigrations', false, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryRightStatisticsValues.totalImmigrations}}
+                                            {{countryRightStatisticsValues.totalImmigrations[0]}}
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -211,7 +212,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('totalPopulation', false, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryRightStatisticsValues.totalPopulation}}
+                                            {{countryRightStatisticsValues.totalPopulation[0]}}
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -221,7 +222,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('immigrationVsPopulation', false, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryRightStatisticsValues.immigrationVsPopulation}} %
+                                            {{countryRightStatisticsValues.immigrationVsPopulation[0]}} %
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -231,7 +232,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('immigrationAverageAge', false, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryRightStatisticsValues.immigrationAverageAge}} years
+                                            {{countryRightStatisticsValues.immigrationAverageAge[0]}} years
                                         </span>
                                     </div>
                                     <div class="width-100 padding-bottom-5px">
@@ -241,7 +242,7 @@
                                         </span>
                                         <span ng-if="countryInfoValue === 'value'" class="font-size-small"
                                             ng-class="comparisonWinner('refugeeVsImmigration', false, 'value') ? 'color-green' : 'color-red'">
-                                            {{countryRightStatisticsValues.refugeeVsImmigration}} %
+                                            {{countryRightStatisticsValues.refugeeVsImmigration[0]}} %
                                         </span>
                                     </div>
                                 </div>
@@ -292,23 +293,23 @@
                 class="color-white display-inline-block margin-left-40-px border-radius-10px background-darkgray margin-left-20 width-40 font-size-small text-center padding-10-px margin-top-10-px">
                 <div layout="column">
                     <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
-                            ng-mouseover="showLabelDescription('children', $event)">Children &ensp;</span> migration is
+                            ng-mouseover="showLabelDescription('children', $event)">Children &ensp;</span> immigration is
                         <span class="color-darkcyan">&ensp;{{childLeftStatistics
                             }}&ensp;</span> from a total
                         of
                         <span class="color-darkcyan">&ensp;{{totalLeftMigrants}}&ensp;</span> and represent
                         <span class="color-darkcyan">&ensp;{{childrenLeftPercentage}}%&ensp;</span> of the country
-                        migration
+                        immigration
                     </div>
                     <hr class="menu-divider width-100 margin-top-10-px margin-bottom-10-px" />
                     <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
-                            ng-mouseover="showLabelDescription('brain', $event)">Brain drain &ensp;</span> migration is
+                            ng-mouseover="showLabelDescription('brain', $event)">Brain drain &ensp;</span> immigration is
                         <span class="color-darkcyan">&ensp;{{brainDrainLeftStatistics}}&ensp;</span> from a
                         total of
                         <span class="color-darkcyan">&ensp;{{totalLeftMigrants}}&ensp;</span>
                         and represent <span class="color-darkcyan">&ensp;{{drainBrainLeftPercentage}}%&ensp;</span> of
                         the
-                        country migration.
+                        country immigration
                     </div>
                 </div>
             </div>
@@ -319,24 +320,24 @@
                     <div layout="row">
                         <span class="color-green" ng-mouseout="hideLabelDescription()"
                             ng-mouseover="showLabelDescription('children', $event)">Children
-                            &ensp;</span> migration is <span class=" color-darkcyan">&ensp;{{childRightStatistics
+                            &ensp;</span> immigration is <span class=" color-darkcyan">&ensp;{{childRightStatistics
                             }}&ensp;</span> from a total of
                         <span class="color-darkcyan">&ensp;{{totalRightMigrants}}&ensp;</span> and represent
                         <span class="color-darkcyan">&ensp;{{childrenRightPercentage}}%&ensp;</span> of the country
-                        migration
+                        immigration
                     </div>
                     <hr class="menu-divider width-100 margin-top-10-px margin-bottom-10-px" />
                     <div layout="row"><span class="color-green" ng-mouseout="hideLabelDescription()"
                             ng-mouseover="showLabelDescription('brain', $event)">Brain
                             drain
-                            &ensp;</span> migration is <span
+                            &ensp;</span> immigration is <span
                             class="color-darkcyan">&ensp;{{brainDrainRightStatistics}}&ensp;</span> from a
                         total of
                         <span class="color-darkcyan">&ensp;{{totalRightMigrants}}&ensp;</span>
                         and represent <span class="color-darkcyan">&ensp;{{drainBrainRightPercentage}}%&ensp;</span> of
                         the
                         country
-                        migration.
+                        immigration
                     </div>
                 </div>
             </div>

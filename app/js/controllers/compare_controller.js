@@ -130,7 +130,7 @@
                     $scope.genderFilterValue
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.totalImmigrations = setNotAvailable(data, false);
+                    $scope.countryLeftStatisticsValues.totalImmigrations = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -143,7 +143,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.totalPopulation = setNotAvailable(data, false);
+                    $scope.countryLeftStatisticsValues.totalPopulation = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -156,7 +156,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.immigrationVsPopulation = setNotAvailable(data, false);
+                    $scope.countryLeftStatisticsValues.immigrationVsPopulation = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -169,7 +169,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.immigrationAverageAge = setNotAvailable(data, false);
+                    $scope.countryLeftStatisticsValues.immigrationAverageAge = [setNotAvailable(data, false), data];
                 });
 
             // getting the estimated refugees
@@ -180,7 +180,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "_pct")
                 )
                 .then((data) => {
-                    $scope.countryLeftStatisticsValues.refugeeVsImmigration = setNotAvailable(data, false);
+                    $scope.countryLeftStatisticsValues.refugeeVsImmigration = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -236,7 +236,6 @@
             dataService
                 .getEstimatedRefugeesByYear($scope.selectedCountry.left.name, $scope.selectedCountry.right.name)
                 .then((data) => {
-                    console.log($scope.selectedCountry.left.name);
                     if (firstRefugeesLineChartStructureCall) {
                         lineRefugeesStructure = initializeRefugeesLineChart(data, "refugees-container");
                         firstRefugeesLineChartStructureCall = false;
@@ -318,7 +317,7 @@
                     $scope.genderFilterValue
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.totalImmigrations = setNotAvailable(data, false);
+                    $scope.countryRightStatisticsValues.totalImmigrations = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -331,7 +330,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.totalPopulation = setNotAvailable(data, false);
+                    $scope.countryRightStatisticsValues.totalPopulation = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -344,7 +343,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "Total")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.immigrationVsPopulation = setNotAvailable(data, false);
+                    $scope.countryRightStatisticsValues.immigrationVsPopulation = [setNotAvailable(data, false),data];
                     $scope.$apply();
                 });
 
@@ -357,7 +356,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.immigrationAverageAge = setNotAvailable(data, false);
+                    $scope.countryRightStatisticsValues.immigrationAverageAge = [setNotAvailable(data, false), data];
                 });
 
             // getting the estimated refugees
@@ -368,7 +367,7 @@
                     dataService.getSelectedGenderColumn($scope.genderFilterValue, "_pct")
                 )
                 .then((data) => {
-                    $scope.countryRightStatisticsValues.refugeeVsImmigration = setNotAvailable(data, false);
+                    $scope.countryRightStatisticsValues.refugeeVsImmigration = [setNotAvailable(data, false), data];
                     $scope.$apply();
                 });
 
@@ -1060,8 +1059,8 @@
                     );
                 } else {
                     return (
-                        parseInt($scope.countryLeftStatisticsValues[field], 10) <
-                        parseInt($scope.countryRightStatisticsValues[field], 10)
+                        $scope.countryLeftStatisticsValues[field][1] >
+                        $scope.countryRightStatisticsValues[field][1]
                     );
                 }
             } else {
@@ -1072,8 +1071,8 @@
                     );
                 } else
                     return (
-                        parseInt($scope.countryRightStatisticsValues[field], 10) <
-                        parseInt($scope.countryLeftStatisticsValues[field], 10)
+                        $scope.countryRightStatisticsValues[field][1] >
+                        $scope.countryLeftStatisticsValues[field][1]
                     );
             }
         };

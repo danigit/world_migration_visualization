@@ -109,8 +109,8 @@
                         </md-input-container>
                         <hr class="menu-divider" />
                         <div layout="column">
-                            <div class="color-lightgray font-size-small margin-left-20px padding-10-px">Migration flow
-                                lowe bound</div>
+                            <div class="color-legend font-size-small margin-left-0px padding-10-px">Migration flow
+                                lower bound:</div>
                             <svg width="100%" height="50px">
                                 <g width="100%" id="container-weights">
                                 </g>
@@ -146,7 +146,7 @@
                 <div id="feeds" layout="row" class="margin-top-10-px height-20 position-relative">
                     <div label="row">
                         <div class="migration-flow-label background-gray">2019 Migrants Rank </div>
-                        <div id="triangle-right">
+                        <div id="triangle-right" class="hide">
                         </div>
                     </div>
                     <feed-chip ng-repeat="feedObject in yearFeeds" ng-model="feedModel" feed="feedObject"

@@ -81,7 +81,7 @@
             .loadCsv(total_migrants_by_origin_and_destination)
             .then((data_origDest) => {
                 removeOtherSouth_OtherNorth(data_origDest);
-
+                
                 return data_origDest;
             });
 
@@ -545,10 +545,10 @@
                 });
 
                 Object.values(filteredCategories).forEach((elem, i) => {
-                    finalData[ageGroups[0]] += +elem[ageGroups[0]];
-                    finalData[ageGroups[1]] += +elem[ageGroups[1]];
-                    finalData[ageGroups[2]] += +elem[ageGroups[2]];
-                    finalData[ageGroups[3]] += +elem[ageGroups[3]];
+                    finalData[ageGroups[0]] += (+elem[ageGroups[0]]/filteredCategories.length);
+                    finalData[ageGroups[1]] += (+elem[ageGroups[1]]/filteredCategories.length);
+                    finalData[ageGroups[2]] += (+elem[ageGroups[2]]/filteredCategories.length);
+                    finalData[ageGroups[3]] += (+elem[ageGroups[3]]/filteredCategories.length);
                 });
 
                 return finalData;

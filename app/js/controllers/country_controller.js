@@ -843,10 +843,11 @@
             // creating the text label group
             svg.append("g")
                 .append("text")
+                .classed("font-size-12px", true)
                 .classed("legend", true)
                 .attr("transform", `translate(${SVG_WIDTH - SVG_MARGINS.right}, ${SVG_HEIGHT - 5})`)
                 .style("text-anchor", "end")
-                .text("Time Span");
+                .text("Time span");
 
             // creating the y-axis group
             svg.append("g")
@@ -859,12 +860,12 @@
             // creating the text label group
             svg.append("g")
                 .append("text")
-                .attr("font-size", "10px")
+                .classed("font-size-12px", true)
                 .classed("legend", true)
-                .attr("transform", `rotate(-90) translate(-10, ${SVG_MARGINS.left})`)
+                .attr("transform", `rotate(-90) translate(-10, ${SVG_MARGINS.left - 10})`)
                 .style("text-anchor", "end")
                 .attr("stroke", "#FFFFFF!important")
-                .text("Rate Of Change");
+                .text("Rate of Change");
 
             return { lineChartStructure: svg };
         };

@@ -48,6 +48,11 @@
     fill:  white;
 }
 
+.font-size-12px {
+    font-size: 12px !important;
+    font-weight: bold;
+}
+
 .country-image-thumbnail {
     width: 45px;
     height: 25px;
