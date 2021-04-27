@@ -1025,14 +1025,14 @@
             $scope.sendReceiveTopCountries = type;
 
             let tooltip = document.getElementById("top-flags-tooltip");
-            let tooltip_text = document.getElementById("tooltip-text");
+            let tooltipText = document.getElementById("tooltip-text");
 
-            if (type == "Send") {
-                tooltip_text.classList.remove("color-red");
-                tooltip_text.classList.add("color-green");
+            if (type == "Sent") {
+                tooltipText.classList.remove("color-red");
+                tooltipText.classList.add("color-green");
             } else {
-                tooltip_text.classList.remove("color-green");
-                tooltip_text.classList.add("color-red");
+                tooltipText.classList.remove("color-green");
+                tooltipText.classList.add("color-red");
             }
 
             tooltip.classList.remove("display-none");
@@ -1069,7 +1069,9 @@
          */
         let updateTitle = () => {
             let yearText = null;
-            let activeLength = dataService.getActiveYears(sliderMin, sliderMax);
+
+            let _activeYears = dataService.getActiveYears(sliderMin, sliderMax);
+            let activeLength = _activeYears.length;
 
             if (activeLength == 1) {
                 yearText = sliderMin;
